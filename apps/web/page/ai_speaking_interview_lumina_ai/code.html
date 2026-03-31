@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lumina AI - Speaking Practice</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .ai-pulse {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.05); }
+        }
+        .waveform-bar {
+            transition: height 0.2s ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-secondary": "#ffffff",
+                "secondary-container": "#8455ef",
+                "on-tertiary-container": "#f3e2ff",
+                "on-background": "#131b2e",
+                "inverse-surface": "#283044",
+                "on-primary-container": "#e8e6ff",
+                "tertiary-fixed-dim": "#dbb8ff",
+                "surface-container": "#eaedff",
+                "surface-bright": "#faf8ff",
+                "on-tertiary-fixed-variant": "#573878",
+                "surface-tint": "#494bd6",
+                "surface": "#faf8ff",
+                "surface-container-high": "#e2e7ff",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "on-primary-fixed": "#07006c",
+                "surface-container-lowest": "#ffffff",
+                "primary-container": "#5356e1",
+                "on-primary": "#ffffff",
+                "inverse-on-surface": "#eef0ff",
+                "on-surface": "#131b2e",
+                "inverse-primary": "#c0c1ff",
+                "surface-dim": "#d2d9f4",
+                "surface-container-highest": "#dae2fd",
+                "on-secondary-fixed-variant": "#5516be",
+                "on-primary-fixed-variant": "#2f2ebe",
+                "tertiary-fixed": "#efdbff",
+                "surface-variant": "#dae2fd",
+                "secondary-fixed": "#e9ddff",
+                "primary": "#393ac8",
+                "on-secondary-fixed": "#23005c",
+                "error": "#ba1a1a",
+                "surface-container-low": "#f2f3ff",
+                "tertiary": "#614283",
+                "outline": "#777587",
+                "secondary": "#6b38d4",
+                "on-tertiary-fixed": "#29074a",
+                "secondary-fixed-dim": "#d0bcff",
+                "primary-fixed-dim": "#c0c1ff",
+                "primary-fixed": "#e1e0ff",
+                "on-surface-variant": "#464555",
+                "background": "#faf8ff",
+                "outline-variant": "#c7c4d8",
+                "on-error-container": "#93000a",
+                "tertiary-container": "#7a5a9d",
+                "on-secondary-container": "#fffbff",
+                "on-error": "#ffffff"
+              },
+              fontFamily: {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component Logic) -->
+<header class="fixed top-0 w-full z-40 bg-white/80 backdrop-blur-xl shadow-sm shadow-indigo-500/5 h-16 px-8 flex justify-between items-center">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">Lumina AI</span>
+<nav class="hidden md:flex items-center space-x-6">
+<a class="text-indigo-600 font-semibold border-b-2 border-indigo-600 py-1 font-['Inter'] tracking-tight antialiased" href="#">Practice</a>
+<a class="text-slate-500 hover:text-indigo-500 transition-colors font-['Inter'] tracking-tight antialiased" href="#">Insights</a>
+<a class="text-slate-500 hover:text-indigo-500 transition-colors font-['Inter'] tracking-tight antialiased" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 hover:bg-slate-100/50 rounded-lg transition-all active:scale-95 text-slate-500">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-100/50 rounded-lg transition-all active:scale-95 text-slate-500">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden ring-2 ring-surface-container ml-2">
+<img alt="User profile avatar" data-alt="Close up portrait of a professional student smiling with a soft natural lighting and blurred academic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUoC-RqyGD3wHnag7Ts49X5RWNcmlaGAnjJzBbbaPXUAh7Pbdavs2Hl3zYQMWuu9z5dCQUK7tl_CSM-wKjTcvyqckWFyzbZqDX4pel6BDBmqMN4D22DDJUYVu7liy9BBVxGSmdyC9AbNO-xrNq0Ve9qgIwZ0EV4lknDv9c-n1d0B1oQ-pc3C-IBNdwXDIP643fkYwB9VPSlQbZafWsEOrHDKtA5-m2xfM_WdRswUpEcOqMCvy7huu8ZPqPUgiTOUZ5EPFlFXeVYWKA"/>
+</div>
+</div>
+</header>
+<main class="flex flex-1 pt-16 h-screen overflow-hidden">
+<!-- SideNavBar (Shared Component Logic - Suppressed on Mobile) -->
+<aside class="hidden md:flex flex-col w-64 bg-slate-50 p-6 space-y-2 h-full">
+<div class="flex flex-col mb-8">
+<span class="text-2xl font-black text-slate-900">Lumina AI</span>
+<span class="text-xs text-on-surface-variant font-medium opacity-70">Premium IELTS Prep</span>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 hover:translate-x-1 rounded-xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 hover:translate-x-1 rounded-xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-medium text-sm">Reading</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 hover:translate-x-1 rounded-xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="headset">headset</span>
+<span class="font-medium text-sm">Listening</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 hover:translate-x-1 rounded-xl transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-medium text-sm">Writing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<span class="font-medium text-sm">Speaking</span>
+</a>
+</nav>
+<div class="pt-6 space-y-1 border-t border-slate-200/50">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-200/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-medium text-sm">Support</span>
+</a>
+<button class="w-full mt-4 py-3 px-4 bg-surface-container-high text-primary font-semibold rounded-xl text-sm active:scale-95 transition-all">
+                    Upgrade to Pro
+                </button>
+</div>
+</aside>
+<!-- Main Content Area: AI Interview Interface -->
+<section class="flex-1 flex flex-col relative bg-surface-container-low overflow-hidden">
+<!-- Question Banner -->
+<div class="p-8 pb-0">
+<div class="max-w-4xl mx-auto glass-panel rounded-lg p-6 shadow-sm ring-1 ring-primary/5 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<p class="text-label-md text-primary font-bold tracking-widest uppercase mb-1">Part 2: Individual Long Turn</p>
+<h2 class="text-xl md:text-2xl font-medium text-on-surface leading-tight">
+                        "Describe a place you have visited that has left a significant impression on you. Why did you go there and what made it memorable?"
+                    </h2>
+</div>
+</div>
+<!-- Central AI Area -->
+<div class="flex-1 flex flex-col items-center justify-center p-8">
+<div class="relative group">
+<!-- AI Glow Effect -->
+<div class="absolute -inset-8 rounded-full bg-surface-tint opacity-10 blur-3xl ai-pulse"></div>
+<!-- Avatar Container -->
+<div class="relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white shadow-2xl z-10">
+<img alt="AI Tutor Avatar" class="w-full h-full object-cover" data-alt="Photorealistic portrait of a professional female academic with glasses, neutral kind expression, soft studio lighting, ultra high definition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzhXrOU6Ix2sqp1nSXi1-6WEe5dWj-cqjkrzf1dzKsKQNnMARbgM2CrfwzdZAglFN4f54xTARi_-9-ENTiU9SUxsPDS0PlaMLSLgB_ZgA9WZ2nx6YVXjXXuyZAYipW5ZiOKKgTwjV72iSXKqXZHqbaqJyzs9Q8vXprHKsmKzDTsVNxp7TVOSdLpwo-beKrN9YVAxfuVhdBowiz9JCnIVbEX0uHwEY1Tn94L93b7SjQbsrOHOSXRqUKeSsUreg1UUobl09kKlHJxD0O"/>
+</div>
+<!-- Voice Indicator Overlay (Subtle) -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-end gap-1 px-4 py-3 rounded-full bg-black/30 backdrop-blur-md">
+<div class="waveform-bar w-1 bg-white rounded-full h-4 animate-[bounce_1.2s_infinite]"></div>
+<div class="waveform-bar w-1 bg-white rounded-full h-8 animate-[bounce_1.5s_infinite]"></div>
+<div class="waveform-bar w-1 bg-white rounded-full h-5 animate-[bounce_1s_infinite]"></div>
+<div class="waveform-bar w-1 bg-white rounded-full h-10 animate-[bounce_1.8s_infinite]"></div>
+<div class="waveform-bar w-1 bg-white rounded-full h-6 animate-[bounce_1.3s_infinite]"></div>
+<div class="waveform-bar w-1 bg-white rounded-full h-3 animate-[bounce_1.6s_infinite]"></div>
+</div>
+</div>
+<!-- Live Transcription -->
+<div class="mt-12 text-center max-w-2xl px-6">
+<p class="text-on-surface-variant text-lg leading-relaxed font-light italic">
+                        "I remember visiting the Swiss Alps last summer... <span class="text-primary font-normal">it was an incredibly picturesque landscape</span> that really took my breath away..."
+                    </p>
+</div>
+</div>
+<!-- Bottom Controls -->
+<div class="p-8">
+<div class="max-w-md mx-auto flex items-center justify-between gap-4">
+<button class="flex-1 h-14 bg-surface-container-high text-on-surface-variant font-semibold rounded-full flex items-center justify-center gap-2 hover:bg-surface-container-highest transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="mic_off">mic_off</span>
+<span>Mute</span>
+</button>
+<button class="flex-1 h-14 bg-error text-white font-semibold rounded-full flex items-center justify-center gap-2 hover:bg-error/90 transition-all active:scale-95 shadow-lg shadow-error/20">
+<span class="material-symbols-outlined" data-icon="call_end">call_end</span>
+<span>End Interview</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Right Panel: Vocabulary & Timer -->
+<aside class="hidden lg:flex flex-col w-80 bg-white p-8 space-y-8 h-full border-l border-slate-100">
+<!-- Timer Card -->
+<div class="bg-surface-container-low rounded-lg p-6 text-center">
+<span class="text-label-md text-on-surface-variant font-bold tracking-widest uppercase block mb-2">Interview Time</span>
+<div class="text-4xl font-black text-on-background font-mono tabular-nums">08:42</div>
+<div class="w-full bg-slate-200 h-1.5 rounded-full mt-4 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Vocabulary Suggestions -->
+<div class="flex-1">
+<h3 class="text-sm font-bold text-on-surface-variant tracking-widest uppercase mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="lightbulb">lightbulb</span>
+                    Key Vocabulary
+                </h3>
+<div class="space-y-4">
+<div class="group p-4 rounded-xl bg-surface hover:bg-surface-container transition-all cursor-default ring-1 ring-slate-100">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-primary">Breathtaking</span>
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">C1</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Extremely beautiful or amazing.</p>
+</div>
+<div class="group p-4 rounded-xl bg-surface hover:bg-surface-container transition-all cursor-default ring-1 ring-slate-100">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-primary">Nostalgic</span>
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">B2</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Feeling happy and also slightly sad when you think about things that happened in the past.</p>
+</div>
+<div class="group p-4 rounded-xl bg-surface hover:bg-surface-container transition-all cursor-default ring-1 ring-slate-100">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-primary">Vibrant</span>
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">B2</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Full of energy and enthusiasm; bright and striking.</p>
+</div>
+<div class="group p-4 rounded-xl bg-surface-container-high opacity-50 ring-1 ring-primary/20">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-primary italic">Picturesque</span>
+<span class="material-symbols-outlined text-sm text-green-500" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed italic">Used! Great job.</p>
+</div>
+</div>
+</div>
+<!-- Footer Stats -->
+<div class="p-4 bg-tertiary-fixed rounded-xl flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-tertiary-fixed-variant">AI Insights</p>
+<p class="text-[10px] text-tertiary-container leading-tight">Your fluency is improving. Keep the pace steady.</p>
+</div>
+</div>
+</aside>
+</main>
+<!-- Mobile Bottom Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 w-full bg-white/80 backdrop-blur-xl flex justify-around items-center h-20 px-4 z-40">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="record_voice_over" style="font-variation-settings: 'FILL' 1;">record_voice_over</span>
+<span class="text-[10px] font-bold">Practice</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="text-[10px] font-medium">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</nav>
+</body></html>

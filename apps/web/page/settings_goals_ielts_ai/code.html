@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings &amp; Goals | Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "background": "#faf8ff",
+                        "tertiary-container": "#7a5a9d",
+                        "tertiary": "#614283",
+                        "error-container": "#ffdad6",
+                        "secondary": "#6b38d4",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "on-primary-container": "#e8e6ff",
+                        "surface-container-low": "#f2f3ff",
+                        "primary": "#393ac8",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#777587",
+                        "surface-bright": "#faf8ff",
+                        "secondary-fixed": "#e9ddff",
+                        "on-tertiary-fixed": "#29074a",
+                        "on-error-container": "#93000a",
+                        "surface": "#faf8ff",
+                        "surface-variant": "#dae2fd",
+                        "surface-tint": "#494bd6",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary-fixed": "#07006c",
+                        "tertiary-fixed": "#efdbff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#573878",
+                        "on-surface-variant": "#464555",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary-container": "#8455ef",
+                        "on-tertiary-container": "#f3e2ff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary-container": "#fffbff",
+                        "on-surface": "#131b2e",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#283044",
+                        "on-primary": "#ffffff",
+                        "on-background": "#131b2e",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#eef0ff",
+                        "primary-container": "#5356e1",
+                        "surface-container-high": "#e2e7ff",
+                        "surface-container": "#eaedff",
+                        "outline-variant": "#c7c4d8",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-dim": "#d2d9f4"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ai-pulse {
+            position: relative;
+        }
+        .ai-pulse::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: #494bd6;
+            filter: blur(15px);
+            opacity: 0.1;
+            border-radius: inherit;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex overflow-hidden">
+<!-- SideNavBar (Predicted & Required Component) -->
+<aside class="hidden md:flex h-screen w-64 bg-slate-50 dark:bg-slate-950 flex-col gap-2 p-4 h-full rounded-r-3xl border-r-0 shrink-0 sticky top-0 z-50">
+<div class="px-4 py-6 mb-4">
+<span class="text-lg font-black bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">Cognitive Atelier</span>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">AI Learning Studio</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-sans text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-sans text-sm font-medium">Vocabulary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+<span class="font-sans text-sm font-medium">Speaking</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-sans text-sm font-medium">Writing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+<span class="font-sans text-sm font-medium">Practice</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-2xl duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="font-sans text-sm font-medium">Community</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 rounded-2xl shadow-sm duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-sans text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container rounded-2xl">
+<p class="text-xs font-bold text-primary mb-2">Upgrade to Pro</p>
+<p class="text-[11px] text-on-surface-variant mb-4">Unlock advanced AI analysis and unlimited speaking practice.</p>
+<button class="w-full py-2 px-4 bg-gradient-to-br from-primary to-secondary text-white rounded-full text-xs font-bold transition-transform active:scale-95">Upgrade</button>
+</div>
+</aside>
+<main class="flex-1 h-screen overflow-y-auto">
+<!-- TopNavBar (Predicted & Required Component) -->
+<header class="w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm flex items-center justify-between px-6 py-3">
+<div class="flex items-center gap-4">
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 rounded-full relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-surface-container-high active:scale-95 transition-transform cursor-pointer">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Portrait of a professional young man with glasses smiling softly, studio lighting with a neutral gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4Dq5240zrtTWix7fkjj4MP9TjBCZLZZjTuIlROhDta_AAwYO9bqMvlDdDK6uLyjPNQliSHK_6Kp4mdsUpxlU6hFOLEAlxwFi_ga4JaDUquUdBe4sKffu6sr1YVSs3ogpTN4AlFx3Yhhk--WNs9zsugfkvHLAGcBi4qCqSQJnCukLijKPxsSmpftl5aQXGH9gkIJ95k-xbLegTfKLWNgypfvQzmTZpdkFGk27dgGAaRhNFT17aE1LudnkNg01ihzCEhewgyBVefeiS"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area: Bento Layout -->
+<div class="max-w-6xl mx-auto p-6 md:p-10 space-y-8">
+<!-- Hero Profile Section -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div class="md:col-span-8 bg-surface-container-lowest p-8 rounded-lg flex flex-col md:flex-row items-center gap-8 shadow-sm">
+<div class="relative w-32 h-32 shrink-0">
+<img alt="Profile image" class="w-full h-full rounded-full object-cover" data-alt="Close up portrait of a student in a minimalist modern library setting, soft daylight, premium editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmt9oF5pPD1triW_-Hra7mVLkMGq7EA9vxsjHFkDzFzDkAnrv9VDrAKI4EAaE9htxCGLyWOOH0bRc_auqlMhZGearLeEins-gyYj0RyMu_4_KdlFwqKegDfOhMlp04O94tXx970Ma0JYSW8mubx77gbRQ479V1jS07uOcn1iWFafZxP7P7q-QCbG_MYzj9LZzQznxySwx0lgBw3p9M_6wqReGSb9BcWTxGUBX2CYhHSmzJmVxH4mBZc4rVkpwrnfRhfVz4W0lgQAaA"/>
+<button class="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full shadow-lg transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="text-center md:text-left space-y-2">
+<h2 class="text-3xl font-bold tracking-tight">Eleanor Vance</h2>
+<p class="text-on-surface-variant">Cognitive Learner since October 2023</p>
+<div class="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+<span class="px-4 py-1 bg-surface-container-low text-primary rounded-full text-xs font-semibold border border-outline-variant/10">B2 Upper Intermediate</span>
+<span class="px-4 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">Premium Member</span>
+</div>
+</div>
+</div>
+<div class="md:col-span-4 bg-gradient-to-br from-primary to-secondary p-8 rounded-lg text-white flex flex-col justify-center items-center text-center shadow-lg">
+<p class="text-xs font-bold uppercase tracking-widest opacity-80 mb-2">Target Band Score</p>
+<span class="text-7xl font-black mb-4">8.5</span>
+<p class="text-sm font-medium opacity-90">Advanced Mastery Goal</p>
+</div>
+</section>
+<!-- Goals Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Target Exam Date Countdown -->
+<div class="bg-surface-container-low p-6 rounded-lg space-y-4 border border-outline-variant/5">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-bold text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="event">event</span>
+                            Target Exam Date
+                        </h3>
+<button class="text-primary text-xs font-bold hover:underline">Edit</button>
+</div>
+<div class="text-center py-4">
+<div class="text-4xl font-black text-on-surface">42</div>
+<p class="text-xs text-on-surface-variant mt-1 font-medium">Days Remaining</p>
+</div>
+<div class="space-y-1">
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-2/3"></div>
+</div>
+<div class="flex justify-between text-[10px] text-on-surface-variant font-bold">
+<span>STARTED SEPT 01</span>
+<span>DEC 15, 2023</span>
+</div>
+</div>
+</div>
+<!-- Daily Study Goal -->
+<div class="bg-surface-container-low p-6 rounded-lg space-y-4 border border-outline-variant/5">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-bold text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="timer">timer</span>
+                            Daily Study Goal
+                        </h3>
+<span class="px-2 py-0.5 bg-secondary/10 text-secondary rounded-full text-[10px] font-bold">STREAK: 12</span>
+</div>
+<div class="text-center py-4">
+<div class="text-4xl font-black text-on-surface">45<span class="text-lg font-medium ml-1">mins</span></div>
+<p class="text-xs text-on-surface-variant mt-1 font-medium">Commitment Level: High</p>
+</div>
+<div class="flex gap-1 justify-center">
+<div class="w-8 h-1 rounded-full bg-secondary"></div>
+<div class="w-8 h-1 rounded-full bg-secondary"></div>
+<div class="w-8 h-1 rounded-full bg-secondary"></div>
+<div class="w-8 h-1 rounded-full bg-surface-container-high"></div>
+<div class="w-8 h-1 rounded-full bg-surface-container-high"></div>
+</div>
+</div>
+<!-- AI Insight Card -->
+<div class="bg-primary/5 p-6 rounded-lg space-y-4 border border-primary/10 ai-pulse overflow-hidden relative">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="text-sm font-bold text-primary">AI Insight</h3>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">
+                        "Based on your latest writing exercises, focusing on <span class="font-bold text-primary">Complex Conjunctions</span> will yield the highest band increase."
+                    </p>
+<button class="w-full mt-2 py-2 bg-white text-primary text-xs font-bold rounded-lg border border-primary/20 hover:bg-primary hover:text-white transition-colors duration-300">Start Practice</button>
+</div>
+</section>
+<!-- Focus Areas & Settings -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Left Column: Selection -->
+<div class="md:col-span-7 space-y-8">
+<div class="space-y-4">
+<h3 class="text-lg font-bold">Weak Area Focus</h3>
+<p class="text-sm text-on-surface-variant">The AI will prioritize these topics in your personalized sessions.</p>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/30 transition-all text-left">
+<span class="text-sm font-medium">IELTS Writing Task 2</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<button class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/30 transition-all text-left">
+<span class="text-sm font-medium">Fluency &amp; Coherence</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+<button class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-outline-variant transition-all text-left">
+<span class="text-sm font-medium">Lexical Resource</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</button>
+<button class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-outline-variant transition-all text-left">
+<span class="text-sm font-medium">Abstract Listening</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+</button>
+</div>
+</div>
+<div class="space-y-6">
+<h3 class="text-lg font-bold">Notification Preferences</h3>
+<div class="space-y-1">
+<div class="flex items-center justify-between py-4 border-b border-surface-container">
+<div>
+<p class="text-sm font-medium">Daily Study Reminders</p>
+<p class="text-xs text-on-surface-variant">Get notified to stay on track with your goals.</p>
+</div>
+<div class="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between py-4 border-b border-surface-container">
+<div>
+<p class="text-sm font-medium">AI Progress Reports</p>
+<p class="text-xs text-on-surface-variant">Weekly summaries of your performance and growth.</p>
+</div>
+<div class="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between py-4">
+<div>
+<p class="text-sm font-medium">Community Mentions</p>
+<p class="text-xs text-on-surface-variant">When someone replies to your study group post.</p>
+</div>
+<div class="w-12 h-6 bg-surface-container-high rounded-full relative cursor-pointer">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Subscription & Support -->
+<div class="md:col-span-5 space-y-6">
+<div class="bg-surface-container-highest p-8 rounded-lg border border-primary/20 space-y-6">
+<h3 class="text-xl font-black text-primary">Pro Plan Subscription</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                            Your next billing cycle is on <span class="font-bold text-on-surface">January 12, 2024</span>.
+                        </p>
+<div class="bg-white/50 p-4 rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="credit_card">credit_card</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant">VISA •••• 4242</p>
+<button class="text-xs text-primary font-bold">Update Payment Method</button>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 py-3 px-4 bg-white text-on-surface rounded-lg text-xs font-bold shadow-sm hover:bg-slate-50 transition-colors">Manage Plan</button>
+<button class="flex-1 py-3 px-4 bg-transparent text-error rounded-lg text-xs font-bold hover:bg-error/5 transition-colors">Cancel Subscription</button>
+</div>
+</div>
+<div class="bg-surface-container p-6 rounded-lg space-y-4">
+<h4 class="text-sm font-bold">Need Help?</h4>
+<div class="space-y-2">
+<a class="flex items-center gap-3 text-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help_outline">help_outline</span>
+                                FAQ &amp; Help Center
+                            </a>
+<a class="flex items-center gap-3 text-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="chat_bubble_outline">chat_bubble_outline</span>
+                                Message Support
+                            </a>
+</div>
+</div>
+</div>
+</section>
+<!-- Danger Zone -->
+<section class="pt-10 border-t border-surface-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 p-8 bg-error-container/20 rounded-lg border border-error/10">
+<div class="space-y-1">
+<h3 class="text-lg font-bold text-error">Danger Zone</h3>
+<p class="text-sm text-on-surface-variant">Permanently delete your account and all associated study progress.</p>
+</div>
+<button class="px-8 py-3 bg-error text-white rounded-lg text-sm font-bold active:scale-95 transition-transform">Delete Account</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Mobile Navigation (Visible only on mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl flex items-center justify-around p-4 shadow-2xl z-50 border-t border-surface-container">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-[10px] font-bold">Learn</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[10px] font-bold">Settings</span>
+</button>
+</nav>
+</body></html>

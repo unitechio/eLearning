@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Grammar Sprint | Lumina AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#8455ef",
+                        "on-tertiary-container": "#f3e2ff",
+                        "on-background": "#131b2e",
+                        "inverse-surface": "#283044",
+                        "on-primary-container": "#e8e6ff",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "surface-container": "#eaedff",
+                        "surface-bright": "#faf8ff",
+                        "on-tertiary-fixed-variant": "#573878",
+                        "surface-tint": "#494bd6",
+                        "surface": "#faf8ff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#07006c",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#5356e1",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eef0ff",
+                        "on-surface": "#131b2e",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-dim": "#d2d9f4",
+                        "surface-container-highest": "#dae2fd",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary-fixed": "#efdbff",
+                        "surface-variant": "#dae2fd",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#393ac8",
+                        "on-secondary-fixed": "#23005c",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f2f3ff",
+                        "tertiary": "#614283",
+                        "outline": "#777587",
+                        "secondary": "#6b38d4",
+                        "on-tertiary-fixed": "#29074a",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "primary-fixed": "#e1e0ff",
+                        "on-surface-variant": "#464555",
+                        "background": "#faf8ff",
+                        "outline-variant": "#c7c4d8",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#7a5a9d",
+                        "on-secondary-container": "#fffbff",
+                        "on-error": "#ffffff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .ai-pulse-glow {
+            box-shadow: 0 0 40px rgba(73, 75, 214, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-background min-h-screen flex">
+<!-- Sidebar Navigation (Mandatory Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 bg-slate-50 dark:bg-slate-900 flex flex-col p-6 space-y-2 font-['Inter'] text-sm font-medium">
+<div class="mb-8">
+<h1 class="text-2xl font-black text-slate-900 dark:text-white">Lumina AI</h1>
+<p class="text-xs text-on-surface-variant font-normal">Premium IELTS Prep</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">menu_book</span> Reading
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">headset</span> Listening
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">edit_note</span> Writing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">record_voice_over</span> Speaking
+            </a>
+</nav>
+<div class="mt-auto pt-6 space-y-2">
+<div class="p-4 bg-surface-container-high rounded-xl mb-4">
+<p class="text-xs font-bold text-primary mb-1">PRO PLAN ACTIVE</p>
+<p class="text-[10px] text-on-surface-variant">Unlimited Grammar Sprints</p>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl" href="#">
+<span class="material-symbols-outlined">help_outline</span> Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 relative overflow-hidden flex flex-col">
+<!-- Top Navigation (Mandatory Shared Component) -->
+<header class="fixed top-0 right-0 left-64 z-40 bg-white/80 backdrop-blur-xl flex justify-between items-center h-16 px-8 shadow-sm shadow-indigo-500/5">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">Lumina AI</span>
+<nav class="hidden md:flex gap-6 ml-8">
+<a class="text-slate-500 hover:text-indigo-500 transition-colors font-['Inter'] tracking-tight antialiased" href="#">Practice</a>
+<a class="text-indigo-600 font-semibold border-b-2 border-indigo-600 font-['Inter'] tracking-tight antialiased" href="#">Insights</a>
+<a class="text-slate-500 hover:text-indigo-500 transition-colors font-['Inter'] tracking-tight antialiased" href="#">Community</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-2 mr-4">
+<button class="p-2 hover:bg-slate-100/50 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined text-slate-500">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-100/50 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined text-slate-500">settings</span>
+</button>
+</div>
+<img alt="User avatar" class="w-10 h-10 rounded-full border-2 border-surface-container-high object-cover" data-alt="Close-up portrait of a professional man with a friendly expression in a brightly lit studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6_wYwGWjGBb7h76kzwGSfRpb27RStZT32eLudtgFVreVttGffkjPeMmhuR3pNz-V9by7474b0-3Oo4TlrcTd1cMvRCUsao-4YZi7-iPrAwbWIPf7K0llajFJwLN-_m87Al4MIeRA7zjt_3hGKgTpaHgchguFWDoynn0czuH7RtR0roe6JiELeNt5HHA5wlGjPqa-H0nIJ_n8LfA5_MokU5l_6hKR4FMlB4H0O90IYxe4Es70o_hTe8JG-HO2LJTaFxQEHgDVldO6s"/>
+</div>
+</header>
+<!-- Sprint Workspace -->
+<section class="mt-16 flex-1 p-12 flex flex-col max-w-6xl mx-auto w-full relative">
+<!-- Gamification HUD -->
+<div class="grid grid-cols-12 gap-8 mb-12 items-end">
+<div class="col-span-4">
+<div class="inline-flex items-center gap-3 bg-surface-container-low px-6 py-3 rounded-full mb-4">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-bold tracking-tight text-on-surface">GRAMMAR SPRINT #42</span>
+</div>
+<h2 class="text-4xl font-bold tracking-tight text-on-background leading-tight">Complex Sentence Structures</h2>
+</div>
+<div class="col-span-8 flex justify-end items-center gap-10">
+<!-- Progress Ring (Simulated with SVG) -->
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-secondary transition-all duration-500" cx="48" cy="48" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="60" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-xl font-black text-on-background">14/20</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant">Items</span>
+</div>
+</div>
+<!-- Streak Tracker -->
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-orange-500" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-3xl font-black text-on-background tracking-tighter">12</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Daily Streak</span>
+</div>
+<!-- Multiplier Glassmorphism -->
+<div class="glass-panel p-5 rounded-2xl border border-white/40 ai-pulse-glow flex flex-col items-center">
+<span class="text-sm font-bold text-secondary mb-1">COMBO</span>
+<span class="text-4xl font-black bg-gradient-to-br from-primary to-secondary bg-clip-text text-transparent italic tracking-tighter">x2.5</span>
+</div>
+</div>
+</div>
+<!-- Central Drill Card (Bento Layout) -->
+<div class="grid grid-cols-12 gap-6 flex-1">
+<!-- Main Drill Area -->
+<div class="col-span-8 bg-surface-container-lowest rounded-lg p-12 relative flex flex-col justify-center border border-white shadow-xl shadow-primary/5">
+<div class="absolute top-8 left-8 flex items-center gap-2">
+<span class="px-3 py-1 bg-tertiary-container/10 text-tertiary text-[10px] font-bold rounded-full tracking-widest uppercase">Level: Advanced</span>
+<span class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[10px] font-bold rounded-full tracking-widest uppercase">Task: Error Identification</span>
+</div>
+<div class="max-w-2xl mx-auto text-center space-y-12">
+<p class="text-2xl font-medium leading-relaxed text-on-surface">
+                            "Despite the heavy rain, the team <span class="px-4 py-1 bg-error-container/40 text-error rounded-lg border-b-4 border-error/20 inline-flex items-center cursor-pointer">continued</span> their journey across the valley, <span class="px-4 py-1 bg-surface-container-low text-on-surface-variant rounded-lg border-b-4 border-outline-variant inline-flex items-center italic">whilst</span> they knew the risks involved."
+                        </p>
+<div class="grid grid-cols-2 gap-4">
+<button class="group p-6 bg-surface-container-low hover:bg-primary hover:text-white rounded-xl transition-all duration-300 text-left flex items-center gap-4 active:scale-95">
+<span class="w-10 h-10 flex items-center justify-center rounded-lg bg-white group-hover:bg-white/20 text-on-surface-variant group-hover:text-white font-bold transition-all">A</span>
+<span class="font-medium">Change "continued" to "continues"</span>
+</button>
+<button class="group p-6 bg-surface-container-low hover:bg-primary hover:text-white rounded-xl transition-all duration-300 text-left flex items-center gap-4 active:scale-95">
+<span class="w-10 h-10 flex items-center justify-center rounded-lg bg-white group-hover:bg-white/20 text-on-surface-variant group-hover:text-white font-bold transition-all">B</span>
+<span class="font-medium">Replace "whilst" with "although"</span>
+</button>
+<button class="group p-6 bg-surface-container-low hover:bg-primary hover:text-white rounded-xl transition-all duration-300 text-left flex items-center gap-4 active:scale-95 border-2 border-primary/20">
+<span class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold transition-all">C</span>
+<span class="font-medium">Insert "having" after "valley"</span>
+</button>
+<button class="group p-6 bg-surface-container-low hover:bg-primary hover:text-white rounded-xl transition-all duration-300 text-left flex items-center gap-4 active:scale-95">
+<span class="w-10 h-10 flex items-center justify-center rounded-lg bg-white group-hover:bg-white/20 text-on-surface-variant group-hover:text-white font-bold transition-all">D</span>
+<span class="font-medium">No error identified</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Side Insights / AI Guidance -->
+<div class="col-span-4 flex flex-col gap-6">
+<!-- AI Insight Card -->
+<div class="bg-gradient-to-br from-indigo-900 to-slate-900 p-8 rounded-lg text-white flex flex-col h-1/2 relative overflow-hidden">
+<div class="absolute -right-10 -bottom-10 opacity-10 rotate-12">
+<span class="material-symbols-outlined text-[12rem]">auto_awesome</span>
+</div>
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-indigo-500/20 rounded-lg">
+<span class="material-symbols-outlined text-indigo-300">smart_toy</span>
+</div>
+<span class="text-xs font-black tracking-widest uppercase text-indigo-300">Lumina Intelligence</span>
+</div>
+<h4 class="text-xl font-bold mb-4">Focus on Conjunctions</h4>
+<p class="text-sm text-slate-300 leading-relaxed mb-6">
+                            "Whilst" is technically correct but often sounds archaic in modern formal writing. "Although" creates a stronger contrast for the 'concessive' nature of this sentence.
+                        </p>
+<div class="mt-auto">
+<div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full w-2/3 bg-indigo-400"></div>
+</div>
+<p class="text-[10px] mt-2 text-indigo-400 font-bold uppercase tracking-wider">Concept Mastery: 68%</p>
+</div>
+</div>
+<!-- Quick Stats Bento -->
+<div class="grid grid-cols-2 gap-4 flex-1">
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col justify-between">
+<span class="material-symbols-outlined text-secondary">timer</span>
+<div>
+<span class="block text-2xl font-black text-on-background">1.2s</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Avg Response</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col justify-between">
+<span class="material-symbols-outlined text-green-500">verified</span>
+<div>
+<span class="block text-2xl font-black text-on-background">94%</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Accuracy</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="mt-12 flex justify-between items-center">
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm">
+<span class="material-symbols-outlined">flag</span> Report Issue
+                    </button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-bold text-sm">
+<span class="material-symbols-outlined">skip_next</span> Skip Drill
+                    </button>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right mr-4">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Current Multiplier</p>
+<p class="text-lg font-black text-secondary">MAX STREAK REACHED</p>
+</div>
+<button class="px-12 py-5 bg-gradient-to-r from-primary to-secondary text-white rounded-full font-bold text-lg shadow-lg shadow-primary/20 hover:translate-y-[-2px] active:scale-95 transition-all flex items-center gap-3">
+                        SUBMIT ANSWER <span class="material-symbols-outlined">trending_flat</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Dynamic Background Elements -->
+<div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10 -mr-48 -mt-48"></div>
+<div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] -z-10 -ml-24 -mb-24"></div>
+</main>
+<!-- Rapid Fire Feedback Overlay (Hidden by Default/Simulated for visual) -->
+<div class="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center opacity-0 group-active/submit:opacity-100 transition-opacity">
+<div class="text-[12rem] font-black text-green-500/20 italic transform -rotate-12">PERFECT!</div>
+</div>
+</body></html>

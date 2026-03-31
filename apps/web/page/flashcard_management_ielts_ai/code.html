@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vocabulary Decks | Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#29074a",
+                        "inverse-on-surface": "#eef0ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary-container": "#7a5a9d",
+                        "background": "#faf8ff",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "secondary": "#6b38d4",
+                        "surface-container-low": "#f2f3ff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "primary-fixed": "#e1e0ff",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#131b2e",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "secondary-container": "#8455ef",
+                        "on-secondary-fixed": "#23005c",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#e8e6ff",
+                        "inverse-primary": "#c0c1ff",
+                        "on-primary-fixed": "#07006c",
+                        "tertiary": "#614283",
+                        "tertiary-fixed": "#efdbff",
+                        "on-surface-variant": "#464555",
+                        "on-tertiary-container": "#f3e2ff",
+                        "surface-variant": "#dae2fd",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#fffbff",
+                        "primary": "#393ac8",
+                        "surface-tint": "#494bd6",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "surface-dim": "#d2d9f4",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#dae2fd",
+                        "outline": "#777587",
+                        "surface": "#faf8ff",
+                        "secondary-fixed": "#e9ddff",
+                        "surface-container": "#eaedff",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#283044",
+                        "outline-variant": "#c7c4d8",
+                        "primary-container": "#5356e1",
+                        "on-surface": "#131b2e",
+                        "surface-container-high": "#e2e7ff",
+                        "on-tertiary-fixed-variant": "#573878"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { backdrop-filter: blur(20px); }
+        .deck-gradient { background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%); }
+    </style>
+</head>
+<body class="text-on-background antialiased">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 bg-zinc-50 dark:bg-zinc-900 flex flex-col p-4 space-y-2">
+<div class="flex flex-col px-4 py-6 mb-4">
+<span class="text-lg font-bold text-zinc-900 dark:text-zinc-100">Cognitive Atelier</span>
+<span class="text-xs font-medium text-on-surface-variant opacity-70">AI Learning Studio</span>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="text-sm font-semibold">Vocabulary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<span class="text-sm font-medium">Speaking</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="text-sm font-medium">Writing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="quiz">quiz</span>
+<span class="text-sm font-medium">Practice</span>
+</a>
+</nav>
+<div class="mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-1">
+<div class="px-4 py-4 mb-2">
+<button class="w-full deck-gradient text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/20 active:scale-95 transition-transform">
+                    Upgrade to Pro
+                </button>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm font-medium">Log out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen bg-surface">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 right-0 left-64 h-16 glass-nav bg-white/80 dark:bg-zinc-950/80 z-40 flex items-center justify-between px-8">
+<div class="flex items-center bg-surface-container-low px-4 py-2 rounded-full w-96">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant/60" placeholder="Search decks..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="sparkles">colors_spark</span>
+</button>
+<button class="p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-zinc-200 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Professional portrait of a young woman with a neutral background, high-end photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr6fD3mc12niHJwl48GrUV7RJQwiqmQdZgTuNsgC8Jmnpy5R5UMc0s7a6e-O9Idwk-oSt4-X2HGYkGlQjZsJJSmcv5vpx4Bk4SKcUDO_nm4Kg25kC5U8s75ydNh_nJ-0tniTk8215hM7qEB8fjElw5dV3yB8D06AAtpZa48mnFM2EcBIN-D1IF3zx5t1oFpFlBUGXN7m4KBgxkBJyIRKGKQlq-Xnf3-J8lcKYiDmZHLXY8uBSC70MDBsx5QHLYSqNCMgF7sANMOveh"/>
+</div>
+</div>
+</header>
+<div class="pt-24 pb-12 px-12">
+<!-- Header Section -->
+<div class="flex items-end justify-between mb-12">
+<div>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-background mb-2">Vocabulary Decks</h1>
+<p class="text-on-surface-variant text-lg">Master your language journey with AI-curated vocabulary sets.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-3 bg-surface-container-high text-primary font-semibold rounded-lg hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+                        Sort by Progress
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Filters Sidebar (Asymmetric Layout) -->
+<div class="col-span-3 space-y-8">
+<section class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-6">Create New</h3>
+<button class="w-full aspect-video border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:text-primary transition-all group">
+<span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform" data-icon="add_circle">add_circle</span>
+<span class="font-medium">New Deck</span>
+</button>
+</section>
+<section class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-6">Difficulty</h3>
+<div class="space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border-2 border-outline-variant group-hover:border-primary transition-colors"></div>
+<span class="text-sm font-medium">Beginner (A1-A2)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border-2 border-primary bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[16px]" data-icon="check">check</span>
+</div>
+<span class="text-sm font-semibold text-primary">Intermediate (B1-B2)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-5 h-5 rounded border-2 border-outline-variant group-hover:border-primary transition-colors"></div>
+<span class="text-sm font-medium">Advanced (C1-C2)</span>
+</label>
+</div>
+</section>
+<section class="bg-surface-container-low p-6 rounded-lg">
+<h3 class="font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-6">Smart Insights</h3>
+<div class="p-4 bg-tertiary-container/10 rounded-lg border border-tertiary/20">
+<div class="flex items-center gap-2 text-tertiary mb-2">
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xs font-bold uppercase tracking-tight">AI Recommendation</span>
+</div>
+<p class="text-xs text-on-tertiary-fixed-variant leading-relaxed">Based on your recent writing exercise, you should focus on the <b>Environment</b> deck to bridge your vocabulary gaps.</p>
+</div>
+</section>
+</div>
+<!-- Deck Grid -->
+<div class="col-span-9 grid grid-cols-2 gap-6">
+<!-- Deck Card 1 -->
+<div class="group bg-surface-container-lowest p-8 rounded-lg hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden flex flex-col">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div class="w-12 h-12 deck-gradient rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="eco">eco</span>
+</div>
+<span class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Intermediate</span>
+</div>
+<div class="relative z-10 mb-8">
+<h2 class="text-2xl font-bold mb-1">Environment</h2>
+<p class="text-on-surface-variant text-sm mb-6">Sustainability, climate change, and ecology terms.</p>
+<div class="flex items-center justify-between text-sm mb-2">
+<span class="font-medium text-on-surface-variant">Mastery</span>
+<span class="font-bold text-primary">68%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 68%"></div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-low flex items-center justify-between relative z-10">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Last Studied</span>
+<span class="text-sm font-semibold">2 days ago</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Cards</span>
+<span class="text-sm font-semibold">124</span>
+</div>
+</div>
+</div>
+<!-- Deck Card 2 -->
+<div class="group bg-surface-container-lowest p-8 rounded-lg hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden flex flex-col">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div class="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="memory">memory</span>
+</div>
+<span class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Intermediate</span>
+</div>
+<div class="relative z-10 mb-8">
+<h2 class="text-2xl font-bold mb-1">Technology</h2>
+<p class="text-on-surface-variant text-sm mb-6">AI, blockchain, and digital transformation jargon.</p>
+<div class="flex items-center justify-between text-sm mb-2">
+<span class="font-medium text-on-surface-variant">Mastery</span>
+<span class="font-bold text-primary">42%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 42%"></div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-low flex items-center justify-between relative z-10">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Last Studied</span>
+<span class="text-sm font-semibold">Today</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Cards</span>
+<span class="text-sm font-semibold">210</span>
+</div>
+</div>
+</div>
+<!-- Deck Card 3 -->
+<div class="group bg-surface-container-lowest p-8 rounded-lg hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden flex flex-col">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div class="w-12 h-12 bg-tertiary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+</div>
+<span class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Intermediate</span>
+</div>
+<div class="relative z-10 mb-8">
+<h2 class="text-2xl font-bold mb-1">Education</h2>
+<p class="text-on-surface-variant text-sm mb-6">Academic systems, pedagogy, and lifelong learning.</p>
+<div class="flex items-center justify-between text-sm mb-2">
+<span class="font-medium text-on-surface-variant">Mastery</span>
+<span class="font-bold text-primary">89%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 89%"></div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-low flex items-center justify-between relative z-10">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Last Studied</span>
+<span class="text-sm font-semibold">1 week ago</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Cards</span>
+<span class="text-sm font-semibold">95</span>
+</div>
+</div>
+</div>
+<!-- Deck Card 4 -->
+<div class="group bg-surface-container-lowest p-8 rounded-lg hover:bg-white hover:shadow-2xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden flex flex-col">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
+<div class="flex justify-between items-start mb-8 relative z-10">
+<div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="balance">balance</span>
+</div>
+<span class="px-3 py-1 bg-surface-container-low text-on-surface-variant text-[10px] font-bold uppercase tracking-widest rounded-full">Intermediate</span>
+</div>
+<div class="relative z-10 mb-8">
+<h2 class="text-2xl font-bold mb-1">Society &amp; Politics</h2>
+<p class="text-on-surface-variant text-sm mb-6">Civic engagement, government types, and social justice.</p>
+<div class="flex items-center justify-between text-sm mb-2">
+<span class="font-medium text-on-surface-variant">Mastery</span>
+<span class="font-bold text-primary">15%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 15%"></div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-surface-container-low flex items-center justify-between relative z-10">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Last Studied</span>
+<span class="text-sm font-semibold">Not started</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-[10px] uppercase font-bold text-on-surface-variant/50">Cards</span>
+<span class="text-sm font-semibold">158</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Suppressing as per mandate since we have a dedicated sidebar action) -->
+</body></html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cognitive Atelier | IELTS Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#e9ddff",
+              "on-error-container": "#93000a",
+              "on-tertiary-fixed": "#29074a",
+              "tertiary-fixed": "#efdbff",
+              "on-surface": "#131b2e",
+              "surface-bright": "#faf8ff",
+              "primary-fixed": "#e1e0ff",
+              "primary": "#393ac8",
+              "on-secondary-fixed-variant": "#5516be",
+              "inverse-surface": "#283044",
+              "on-primary-fixed": "#07006c",
+              "secondary-container": "#8455ef",
+              "tertiary-fixed-dim": "#dbb8ff",
+              "surface-container-high": "#e2e7ff",
+              "tertiary": "#614283",
+              "secondary-fixed-dim": "#d0bcff",
+              "primary-container": "#5356e1",
+              "on-primary-container": "#e8e6ff",
+              "background": "#faf8ff",
+              "on-error": "#ffffff",
+              "surface-dim": "#d2d9f4",
+              "on-tertiary-container": "#f3e2ff",
+              "on-secondary": "#ffffff",
+              "on-background": "#131b2e",
+              "surface-tint": "#494bd6",
+              "on-tertiary": "#ffffff",
+              "inverse-on-surface": "#eef0ff",
+              "surface-container-highest": "#dae2fd",
+              "surface-container-lowest": "#ffffff",
+              "error-container": "#ffdad6",
+              "surface-variant": "#dae2fd",
+              "on-secondary-fixed": "#23005c",
+              "on-secondary-container": "#fffbff",
+              "surface": "#faf8ff",
+              "error": "#ba1a1a",
+              "outline-variant": "#c7c4d8",
+              "outline": "#777587",
+              "secondary": "#6b38d4",
+              "surface-container-low": "#f2f3ff",
+              "on-tertiary-fixed-variant": "#573878",
+              "on-surface-variant": "#464555",
+              "inverse-primary": "#c0c1ff",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-primary": "#ffffff",
+              "tertiary-container": "#7a5a9d",
+              "surface-container": "#eaedff",
+              "on-primary-fixed-variant": "#2f2ebe"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { backdrop-filter: blur(20px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl h-screen w-64 border-r-0 font-inter antialiased text-sm font-medium z-50">
+<div class="flex items-center gap-3 px-2 mb-10">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Cognitive Atelier</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-70">AI Learning Partner</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-2 bg-slate-200/50 dark:bg-slate-800/50 text-indigo-700 dark:text-indigo-300 rounded-xl transition-colors hover:bg-slate-200/30" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                Vocabulary
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+                Speaking
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+                Writing
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/10">
+<div class="flex items-center gap-3 px-2 mb-4">
+<img alt="User Profile Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="Close-up portrait of a professional young man with a friendly expression in a modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd9Ay7JVByvZYIe4mdhlMaP9t57XZlGs6-hy00uPNCM9gVhwbmbE5oN1KhtqEkYqcLBUQtK4TB4_-qiiUFPlZOIUsnPBFpKuSFmgPhzrjELoTrimWXB949ARfGjsCceJufRTX7Nv5G8KbPOzoIArsvgIactdUPWmQsWjAXorXYE-_GnkTeRhm1apLbY8q38iT7crtPZvkneezrwdj__KTiru09bQm9uMsO_zk6dNpGo_GQZeIfRC9cEQDuV9lBtetZwyiObiT_1fXc"/>
+<div class="overflow-hidden">
+<p class="font-semibold text-on-surface truncate">Alex Chen</p>
+<p class="text-xs text-on-surface-variant truncate">Target: Band 8.5</p>
+</div>
+</div>
+<button class="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm active:scale-95 duration-150 shadow-lg shadow-primary/20">
+                Start Practice
+            </button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl font-inter text-sm shadow-sm dark:shadow-none">
+<div class="flex items-center bg-surface-container-low px-4 py-2 rounded-full w-96">
+<span class="material-symbols-outlined text-on-surface-variant mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full p-0" placeholder="Search lessons or analysis..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant/30 mx-2"></div>
+<div class="flex items-center gap-2">
+<span class="font-medium">Trial Period</span>
+<div class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-md text-[10px] font-bold uppercase tracking-wider">Premium</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-8 max-w-7xl mx-auto space-y-8">
+<!-- Hero / Welcome Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="md:col-span-2 space-y-2">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface">Good morning, Alex.</h2>
+<p class="text-on-surface-variant text-lg">Your AI tutor has prepared a 45-minute focus session for your Writing Task 2.</p>
+</div>
+<div class="flex justify-end items-center gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg flex items-center gap-3">
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Current Streak</p>
+<p class="text-2xl font-black text-secondary">14 Days</p>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Daily Roadmap (6 cols) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container-lowest rounded-lg p-8 shadow-sm">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="text-xl font-bold">Daily Learning Plan</h3>
+<p class="text-sm text-on-surface-variant">Recommended steps for June 24th</p>
+</div>
+<span class="text-xs font-bold text-primary bg-primary-fixed px-3 py-1 rounded-full">40% Complete</span>
+</div>
+<div class="space-y-6">
+<!-- Step 1 (Completed) -->
+<div class="flex gap-4 group">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white ring-4 ring-primary-fixed">
+<span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+</div>
+<div class="w-[2px] h-full bg-primary/20 mt-2"></div>
+</div>
+<div class="pb-6">
+<h4 class="font-semibold text-on-surface leading-tight">Advanced Collocations for 'Environment'</h4>
+<p class="text-sm text-on-surface-variant mt-1">Review 15 high-level phrases and synonyms.</p>
+<div class="mt-2 flex gap-2">
+<span class="text-[10px] px-2 py-0.5 bg-surface-container rounded font-medium text-on-surface-variant">VOCABULARY</span>
+<span class="text-[10px] px-2 py-0.5 bg-surface-container rounded font-medium text-on-surface-variant">10 MINS</span>
+</div>
+</div>
+</div>
+<!-- Step 2 (Current) -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-primary bg-surface-container-lowest flex items-center justify-center text-primary animate-pulse">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+</div>
+<div class="w-[2px] h-full bg-surface-container mt-2"></div>
+</div>
+<div class="pb-6">
+<h4 class="font-semibold text-on-surface leading-tight">Critical Analysis: Argumentative Essays</h4>
+<p class="text-sm text-on-surface-variant mt-1">AI-guided breakdown of a Band 9 response.</p>
+<button class="mt-3 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold hover:opacity-90 transition-opacity">
+                                    Start Now
+                                </button>
+</div>
+</div>
+<!-- Step 3 (Upcoming) -->
+<div class="flex gap-4">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-surface-container bg-surface-container-lowest flex items-center justify-center text-on-surface-variant">
+<span class="text-xs font-bold">3</span>
+</div>
+</div>
+<div>
+<h4 class="font-semibold text-on-surface-variant/70 leading-tight">Mock Speaking: Part 2 Simulation</h4>
+<p class="text-sm text-on-surface-variant/50 mt-1">Practice cue cards with real-time feedback.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions & Stats (5 cols) -->
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<!-- Quick Actions Grid -->
+<div class="grid grid-cols-2 gap-4">
+<button class="p-6 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-all text-left group">
+<div class="w-10 h-10 rounded-xl bg-white mb-4 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</div>
+<p class="font-bold">Speak</p>
+<p class="text-xs text-on-surface-variant">Practice Part 1-3</p>
+</button>
+<button class="p-6 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-all text-left group">
+<div class="w-10 h-10 rounded-xl bg-white mb-4 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</div>
+<p class="font-bold">Write</p>
+<p class="text-xs text-on-surface-variant">Essay Correction</p>
+</button>
+</div>
+<!-- Progress Chart Placeholder -->
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h3 class="font-bold">Score Progression</h3>
+<p class="text-xs text-on-surface-variant">Last 30 days</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold text-primary">+0.5 Band</p>
+<p class="text-[10px] text-on-surface-variant">Estimated</p>
+</div>
+</div>
+<!-- Visual "Chart" using Flex and rounded bars for a clean look -->
+<div class="h-32 flex items-end justify-between gap-2 px-2">
+<div class="w-full bg-primary-fixed rounded-t-full h-[40%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary-fixed rounded-t-full h-[55%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary-fixed rounded-t-full h-[45%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary-fixed rounded-t-full h-[70%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary-fixed rounded-t-full h-[65%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary-fixed rounded-t-full h-[85%] transition-all hover:bg-primary"></div>
+<div class="w-full bg-primary rounded-t-full h-[95%] transition-all shadow-[0_0_15px_rgba(57,58,200,0.3)]"></div>
+</div>
+<div class="flex justify-between mt-3 px-1">
+<span class="text-[10px] text-on-surface-variant">Week 1</span>
+<span class="text-[10px] text-on-surface-variant">Week 2</span>
+<span class="text-[10px] text-on-surface-variant">Week 3</span>
+<span class="text-[10px] font-bold text-on-surface">Now</span>
+</div>
+</div>
+<!-- AI Insights Card -->
+<div class="bg-gradient-to-br from-primary to-secondary p-6 rounded-lg text-white relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span>
+<p class="text-[10px] font-bold uppercase tracking-widest opacity-80">AI Analysis</p>
+</div>
+<p class="text-sm font-medium leading-relaxed">"Your coherence and cohesion scores are peaking. Focus on lexical resource—specifically topic-specific vocabulary—to break the Band 8 barrier."</p>
+</div>
+<!-- Background Glow Effect -->
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+<div class="absolute -left-2 -top-2 w-16 h-16 bg-white/5 rounded-full blur-xl"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Section: Recent Performance -->
+<section class="space-y-4">
+<h3 class="text-xl font-bold">Recent Assessments</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Task 1 -->
+<div class="bg-white p-4 rounded-lg flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant">WRITING TASK 1</p>
+<p class="font-semibold">Graph Description</p>
+<p class="text-sm font-bold text-secondary">Band 7.5</p>
+</div>
+</div>
+<!-- Task 2 -->
+<div class="bg-white p-4 rounded-lg flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant">SPEAKING PART 3</p>
+<p class="font-semibold">Urbanization Trends</p>
+<p class="text-sm font-bold text-secondary">Band 8.0</p>
+</div>
+</div>
+<!-- Task 3 -->
+<div class="bg-white p-4 rounded-lg flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="library_books">library_books</span>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface-variant">READING MOCK</p>
+<p class="font-semibold">Academic Passage 2</p>
+<p class="text-sm font-bold text-secondary">Band 9.0</p>
+</div>
+</div>
+<!-- Task 4 (Empty/Action) -->
+<div class="border-2 border-dashed border-outline-variant/30 rounded-lg flex items-center justify-center p-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="add">add</span>
+<span class="text-xs font-bold text-on-surface-variant">START NEW TASK</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>

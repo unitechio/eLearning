@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reading Practice | Lumina AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#8455ef",
+                        "on-tertiary-container": "#f3e2ff",
+                        "on-background": "#131b2e",
+                        "inverse-surface": "#283044",
+                        "on-primary-container": "#e8e6ff",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "surface-container": "#eaedff",
+                        "surface-bright": "#faf8ff",
+                        "on-tertiary-fixed-variant": "#573878",
+                        "surface-tint": "#494bd6",
+                        "surface": "#faf8ff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#07006c",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#5356e1",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eef0ff",
+                        "on-surface": "#131b2e",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-dim": "#d2d9f4",
+                        "surface-container-highest": "#dae2fd",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary-fixed": "#efdbff",
+                        "surface-variant": "#dae2fd",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#393ac8",
+                        "on-secondary-fixed": "#23005c",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f2f3ff",
+                        "tertiary": "#614283",
+                        "outline": "#777587",
+                        "secondary": "#6b38d4",
+                        "on-tertiary-fixed": "#29074a",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "primary-fixed": "#e1e0ff",
+                        "on-surface-variant": "#464555",
+                        "background": "#faf8ff",
+                        "outline-variant": "#c7c4d8",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#7a5a9d",
+                        "on-secondary-container": "#fffbff",
+                        "on-error": "#ffffff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .reading-text p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: #131b2e;
+        }
+        .highlight-active {
+            background-color: #e2e7ff;
+            border-bottom: 2px solid #393ac8;
+            cursor: pointer;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dae2fd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopNavBar Implementation from JSON -->
+<header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl no-border bg-slate-50/50 dark:bg-slate-900/50 shadow-sm shadow-indigo-500/5">
+<div class="flex justify-between items-center h-16 px-8 w-full font-['Inter'] tracking-tight antialiased">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">Lumina AI</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-indigo-600 dark:text-indigo-400 font-semibold border-b-2 border-indigo-600" href="#">Practice</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors" href="#">Insights</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors" href="#">Community</a>
+</nav>
+</div>
+<!-- Progress Tracker -->
+<div class="flex-1 max-w-md mx-8">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Passage Progress</span>
+<span class="text-[10px] font-bold text-primary">65%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[65%] rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-lg transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined text-slate-500">notifications</span>
+</button>
+<button class="p-2 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-lg transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined text-slate-500">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img alt="User profile avatar" data-alt="Professional portrait of a young man with a slight smile in a modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBErCloJqEeNoNyi0E-xcZZB266MZx9OUoWkeWsn8798XF-U4Se8XgfqG4IiH_02hP7nd9sjiQPjT2HeGcVA3-LicbFt5QUtZs4hV6z3NqcRGRDckLntZltBszQ0Aog0b1ObHUYUgC-_k6FMYZ1OCxNq8QQqP0Skfo7JznkzCvsoEWw7SuwwiLLQOXRwy2MAlECskiRkvhTDkVnDELtioq3m2WN9a3B44vx6EBGgN-o4CsnmNbmtB0EO1nQt-fKpJaT9jEZWgMT8oAf"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar Implementation from JSON (Hidden on tablet/mobile) -->
+<aside class="h-screen w-64 fixed left-0 top-0 z-50 hidden lg:flex flex-col p-6 space-y-2 bg-slate-50 dark:bg-slate-900 no-border bg-slate-100 dark:bg-slate-800/50 font-['Inter'] text-sm font-medium">
+<div class="text-2xl font-black text-slate-900 dark:text-white mb-8">Lumina AI</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl shadow-lg shadow-indigo-500/20" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                Reading
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">headset</span>
+                Listening
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+                Writing
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl hover:translate-x-1 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+                Speaking
+            </a>
+</nav>
+<div class="pt-6 border-t border-slate-200/50 dark:border-slate-700/50 space-y-1">
+<div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl mb-4">
+<p class="text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-widest mb-1">Premium</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">Access all 500+ premium IELTS mock tests.</p>
+<button class="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-md shadow-primary/20">Upgrade to Pro</button>
+</div>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl" href="#">
+<span class="material-symbols-outlined text-error">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="mt-16 lg:ml-64 flex-1 flex overflow-hidden">
+<!-- Left: Reading Passage (The Content) -->
+<section class="flex-1 overflow-y-auto px-8 md:px-16 py-12 bg-surface-container-lowest">
+<div class="max-w-3xl mx-auto">
+<div class="flex items-center gap-2 mb-4 text-primary font-bold text-sm">
+<span class="material-symbols-outlined text-sm">alarm</span>
+<span>14:20 Remaining</span>
+</div>
+<h1 class="text-4xl font-black text-on-background leading-tight mb-8 tracking-tight">The Neural Architecture of Deep Learning</h1>
+<div class="reading-text text-lg text-on-surface-variant font-light selection:bg-primary-container selection:text-white">
+<p>
+                        The development of artificial neural networks has fundamentally altered our approach to computational linguistics. At the core of these systems lies a hierarchical structure designed to <span class="highlight-active px-1 rounded">emulate</span> the synaptic connections found within the human brain. This biological mimicry, however, is often more metaphorical than literal, as the mathematical underpinnings rely on backpropagation and gradient descent—concepts foreign to biological evolution.
+                    </p>
+<!-- Interactive Tooltip Simulation -->
+<div class="relative inline-block my-4">
+<div class="absolute bottom-full left-0 mb-4 w-64 bg-inverse-surface text-on-primary-container p-4 rounded-xl shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary-fixed-dim">AI Insight</span>
+</div>
+<p class="text-sm font-medium mb-2">Definition: To match or surpass a person or achievement, typically by imitation.</p>
+<button class="w-full py-1.5 bg-primary text-xs font-bold rounded-lg hover:bg-primary-container transition-colors">Simplify Sentence</button>
+<div class="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-inverse-surface"></div>
+</div>
+</div>
+<p>
+                        Early iterations of language models were strictly probabilistic, relying on n-gram sequences to predict the next token. Modern architectures, particularly transformers, utilize a <span class="highlight-active px-1 rounded">self-attention mechanism</span>. This allows the model to weigh the significance of different parts of the input data relative to one another, effectively creating a contextual map of the entire sentence before producing an output.
+                    </p>
+<div class="w-full aspect-video rounded-xl overflow-hidden my-12 group cursor-pointer relative">
+<img alt="Neural Network Illustration" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Abstract artistic representation of a neural network with glowing nodes and intricate interconnected fiber-optic lines in deep blue and purple" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCi26fsHQZiJh3EKx1_RvSKin-OGTSf5I1z47Y5sKEn2dP0pUxVo-TSZWabpoWuESoOixIteoVXUtCUjkyqJm3FvPatE0Yy6erOdQRqXW5tntWyIK7mjejD4Ck1y6naggqY4H2h5oVb25ZUw8Nl5A7M1FgsVUEv9i_6pKnEWJCQPkRivTcldVvqhieXVa0kmeALQzPWBO5pS31x4Q9D70ef7JxlOWKj75BtibR2FdtsLm7C6w58V9EspKiNILpqrwecx-DAL2UZn9Oa"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+<p class="text-white font-medium italic">Fig 1.1: A visualization of weighted synaptic pathways in a large-scale transformer model.</p>
+</div>
+</div>
+<p>
+                        One of the primary challenges remains the "black box" nature of these systems. While we can observe the outputs and adjust the weights, the precise <span class="highlight-active px-1 rounded">heuristics</span> the model develops during training are not always transparent. This leads to concerns regarding bias and the hallucination of facts, which researchers are actively working to mitigate through reinforced learning from human feedback (RLHF).
+                    </p>
+<p>
+                        As we move towards more efficient architectures, the focus has shifted from simple scale to architectural elegance. Distillation techniques allow smaller models to inherit the reasoning capabilities of their larger counterparts without the massive computational overhead. This democratization of AI ensures that high-level linguistic tools are accessible beyond just the largest technology conglomerates.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Right: Interactive Sidebar -->
+<aside class="w-[420px] bg-surface-container-low overflow-y-auto px-6 py-12 flex flex-col gap-8">
+<!-- AI Reading Assistant Panel -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/10 relative overflow-hidden">
+<!-- AI Pulse Background -->
+<div class="absolute inset-0 bg-surface-tint/5 animate-pulse"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+<div>
+<h3 class="font-bold text-sm text-on-surface">Reading Assistant</h3>
+<span class="text-[10px] text-primary font-bold uppercase tracking-wider">AI Analysis Active</span>
+</div>
+</div>
+<div class="bg-surface-container-low/50 p-4 rounded-lg border-l-4 border-secondary">
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                            "The passage focuses on the structural differences between biological and artificial networks. Look for terms like <span class="text-secondary font-bold">'probabilistic'</span> versus <span class="text-secondary font-bold">'contextual'</span> to answer Question 2."
+                        </p>
+</div>
+</div>
+</div>
+<!-- Question Set -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-lg font-black text-on-background">Section 1: Analysis</h2>
+<span class="text-xs font-bold text-on-surface-variant">Question 3 of 12</span>
+</div>
+<!-- Multiple Choice -->
+<div class="space-y-4">
+<div class="p-5 bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary/20 transition-all">
+<p class="text-sm font-semibold text-on-surface mb-4">What distinguishes the self-attention mechanism from earlier probabilisitic models?</p>
+<div class="space-y-2">
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low cursor-pointer group">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="q3" type="radio"/>
+<span class="text-sm text-on-surface-variant group-hover:text-on-surface">It uses biological evolution as a blueprint.</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-high/40 border border-primary/20 cursor-pointer group">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary" name="q3" type="radio"/>
+<span class="text-sm text-primary font-medium">It evaluates parts of input data relative to each other.</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low cursor-pointer group">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="q3" type="radio"/>
+<span class="text-sm text-on-surface-variant group-hover:text-on-surface">It eliminates the need for gradient descent.</span>
+</label>
+<label class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low cursor-pointer group">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="q3" type="radio"/>
+<span class="text-sm text-on-surface-variant group-hover:text-on-surface">It relies on n-gram sequences for prediction.</span>
+</label>
+</div>
+</div>
+<!-- Matching Task -->
+<div class="p-5 bg-surface-container-lowest rounded-xl border border-transparent">
+<p class="text-sm font-semibold text-on-surface mb-4">Match the term to its definition:</p>
+<div class="space-y-3">
+<div class="flex items-center gap-2">
+<div class="flex-1 p-3 bg-surface-container-low rounded-lg text-xs font-bold text-on-surface-variant">Backpropagation</div>
+<span class="material-symbols-outlined text-outline-variant">drag_indicator</span>
+<div class="flex-1 p-3 border-2 border-dashed border-outline-variant rounded-lg text-xs italic text-outline text-center">Drop definition here</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex-1 p-3 bg-surface-container-low rounded-lg text-xs font-bold text-on-surface-variant">Heuristics</div>
+<span class="material-symbols-outlined text-outline-variant">drag_indicator</span>
+<div class="flex-1 p-3 bg-surface-container-low rounded-lg text-xs text-on-surface shadow-sm">Problem-solving mental shortcuts</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="flex gap-4 pt-4">
+<button class="flex-1 py-3 px-4 bg-surface-container-high text-primary font-bold rounded-xl hover:bg-surface-container transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                        Previous
+                    </button>
+<button class="flex-[1.5] py-3 px-4 bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+                        Next Question
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</aside>
+</main>
+<!-- Floating Action Button (Only relevant for top level but shown here for UI completeness) -->
+<button class="fixed bottom-8 right-[450px] w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-50">
+<span class="material-symbols-outlined">stylus_note</span>
+</button>
+</body></html>

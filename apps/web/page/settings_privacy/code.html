@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings | The Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-fixed-variant": "#5516be",
+              "surface": "#faf8ff",
+              "on-primary-container": "#e8e6ff",
+              "surface-container-highest": "#dae2fd",
+              "secondary": "#6b38d4",
+              "secondary-fixed-dim": "#d0bcff",
+              "on-surface-variant": "#464555",
+              "inverse-primary": "#c0c1ff",
+              "tertiary-container": "#7a5a9d",
+              "surface-bright": "#faf8ff",
+              "surface-dim": "#d2d9f4",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-container": "#f3e2ff",
+              "on-primary": "#ffffff",
+              "on-background": "#131b2e",
+              "tertiary": "#614283",
+              "surface-container-high": "#e2e7ff",
+              "inverse-surface": "#283044",
+              "primary": "#393ac8",
+              "on-secondary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "secondary-container": "#8455ef",
+              "tertiary-fixed-dim": "#dbb8ff",
+              "surface-tint": "#494bd6",
+              "surface-container-lowest": "#ffffff",
+              "inverse-on-surface": "#eef0ff",
+              "secondary-fixed": "#e9ddff",
+              "on-primary-fixed": "#07006c",
+              "tertiary-fixed": "#efdbff",
+              "background": "#faf8ff",
+              "on-secondary-container": "#fffbff",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "surface-container-low": "#f2f3ff",
+              "on-error-container": "#93000a",
+              "surface-container": "#eaedff",
+              "on-surface": "#131b2e",
+              "on-secondary-fixed": "#23005c",
+              "surface-variant": "#dae2fd",
+              "on-tertiary-fixed-variant": "#573878",
+              "primary-fixed": "#e1e0ff",
+              "primary-container": "#5356e1",
+              "primary-fixed-dim": "#c0c1ff",
+              "outline": "#777587",
+              "outline-variant": "#c7c4d8",
+              "on-tertiary-fixed": "#29074a",
+              "error": "#ba1a1a"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .bg-primary-gradient {
+        background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #faf8ff;
+      }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #dae2fd; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-on-surface antialiased overflow-x-hidden">
+<!-- Layout Container -->
+<div class="flex min-h-screen">
+<!-- SideNavBar (Full Height Shell) -->
+<aside class="hidden md:flex flex-col h-screen w-64 border-none bg-[#f2f3ff] dark:bg-slate-900 py-8 px-4 fixed left-0 top-0 overflow-y-auto">
+<div class="mb-10 px-4">
+<span class="text-xl font-bold tracking-tighter text-[#131b2e] dark:text-white">Cognitive Atelier</span>
+<p class="text-xs text-on-surface-variant font-medium mt-1">IELTS Mastery</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 hover:bg-[#e2e7ff]/50 dark:hover:bg-slate-800 rounded-xl group" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-medium">Learning Path</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 hover:bg-[#e2e7ff]/50 dark:hover:bg-slate-800 rounded-xl" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-medium">Practice Tests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 hover:bg-[#e2e7ff]/50 dark:hover:bg-slate-800 rounded-xl" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-medium">AI Tutor</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 hover:bg-[#e2e7ff]/50 dark:hover:bg-slate-800 rounded-xl" href="#">
+<span class="material-symbols-outlined">format_list_bulleted</span>
+<span class="font-medium">Task Manager</span>
+</a>
+<!-- Active Profile Tab -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#5850EC] font-semibold bg-[#e2e7ff] dark:bg-[#5850EC]/10 rounded-xl scale-[0.98] transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<span class="font-medium">Profile</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 border-none space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464555] dark:text-slate-400 hover:text-[#131b2e] dark:hover:text-white transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-medium">Support</span>
+</a>
+<div class="mt-6 px-4 py-4 bg-primary-gradient rounded-xl text-white">
+<p class="text-xs font-bold uppercase tracking-wider opacity-80 mb-1">Weekly Goal</p>
+<p class="text-lg font-semibold leading-tight mb-3">Start Daily Drill</p>
+<div class="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-white w-3/4"></div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 bg-surface min-h-screen">
+<!-- TopNavBar (Editorial Shell) -->
+<header class="w-full h-16 sticky top-0 z-50 bg-[#faf8ff]/80 dark:bg-slate-950/80 backdrop-blur-xl transition-all duration-300">
+<div class="flex justify-between items-center px-8 w-full max-w-7xl mx-auto h-full">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="text-on-surface font-headline headline-md font-medium tracking-tight">Notification &amp; Security</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-low rounded-full px-4 py-1.5 border-none">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none text-sm focus:ring-0 w-48 placeholder-on-surface-variant/60" placeholder="Search settings..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-[#5850EC] transition-all duration-300">
+<span class="material-symbols-outlined">notifications_none</span>
+</button>
+<button class="p-2 text-[#5850EC] hover:opacity-80 transition-all duration-300">
+<span class="material-symbols-outlined">colors_spark</span>
+</button>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full border-2 border-primary-container object-cover" data-alt="Professional portrait of a young male with short hair, neutral studio background, high-end photography, soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjzNS9N5tiD3MFtalKCbHVByZ6JsXdfilWGXT2QEl2o7BUY4XTPWAcrErf2xAgOjj5-r_aZem1SiswjOJsEvmtlegf2BYlYMqNk3GYqOZvlWQ6hu3SkrC2HEh66bDn6euoRolkWg1OIhKw98MI3U85roctZ7NMf3CB1l7EQZPF3n052yRPyXm-Xmwj0ko9wCdstL-Q9E9Dbzz94q1QL6KkWGTpA0gcKKjLiWhv3w3diQO035ExSUYxa1ZuZCWIL7DFjNTUOaQTYsJe"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="max-w-7xl mx-auto p-8 lg:p-12">
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Internal Sub-Navigation -->
+<aside class="lg:w-1/4 space-y-1">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest px-4 mb-4">Settings Menu</p>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container-high text-primary font-semibold group transition-all duration-200" href="#">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">tune</span>
+                                Preferences
+                            </span>
+<span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200 group" href="#">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined">verified_user</span>
+                                Security
+                            </span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200" href="#">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined">notifications</span>
+                                Notifications
+                            </span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200" href="#">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined">lock</span>
+                                Privacy
+                            </span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all duration-200" href="#">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined">credit_card</span>
+                                Billing
+                            </span>
+</a>
+</aside>
+<!-- Settings Content Canvas -->
+<div class="flex-1 space-y-12">
+<!-- Notification Settings Section -->
+<section class="space-y-6">
+<div class="flex flex-col gap-1">
+<h2 class="text-xl font-semibold font-headline">Notification Preferences</h2>
+<p class="text-on-surface-variant body-lg opacity-80">Choose how you receive updates about your learning journey.</p>
+</div>
+<!-- Bento Table Style for Notifications -->
+<div class="bg-surface-container-lowest rounded-lg border-none overflow-hidden ring-1 ring-on-surface/5">
+<div class="grid grid-cols-12 bg-surface-container-low px-6 py-4 border-none text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+<div class="col-span-6 md:col-span-8">Activity</div>
+<div class="col-span-2 md:col-span-1 text-center">Email</div>
+<div class="col-span-2 md:col-span-1 text-center">Push</div>
+<div class="col-span-2 md:col-span-2 text-center hidden md:block">SMS</div>
+</div>
+<div class="divide-y-0">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 px-6 py-5 items-center hover:bg-surface-container-low/30 transition-colors">
+<div class="col-span-6 md:col-span-8">
+<p class="font-medium text-on-surface">Daily Drills &amp; Reminders</p>
+<p class="text-xs text-on-surface-variant mt-0.5">Stay on track with your study schedule</p>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input checked="" class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input checked="" class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-2 flex justify-center hidden md:flex">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 px-6 py-5 items-center hover:bg-surface-container-low/30 transition-colors">
+<div class="col-span-6 md:col-span-8">
+<p class="font-medium text-on-surface">Progress Reports</p>
+<p class="text-xs text-on-surface-variant mt-0.5">Weekly summaries of your score improvements</p>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input checked="" class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-2 flex justify-center hidden md:flex">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-12 px-6 py-5 items-center hover:bg-surface-container-low/30 transition-colors">
+<div class="col-span-6 md:col-span-8">
+<p class="font-medium text-on-surface">Community Updates</p>
+<p class="text-xs text-on-surface-variant mt-0.5">Discussion threads and mentor advice</p>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-1 flex justify-center">
+<input checked="" class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+<div class="col-span-2 md:col-span-2 flex justify-center hidden md:flex">
+<input class="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Security Section -->
+<section class="space-y-6">
+<div class="flex flex-col gap-1">
+<h2 class="text-xl font-semibold font-headline">Security &amp; Access</h2>
+<p class="text-on-surface-variant body-lg opacity-80">Manage your password and account protection.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Password Change Card -->
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-sm ring-1 ring-on-surface/5 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-6 text-primary">
+<span class="material-symbols-outlined">key</span>
+</div>
+<h3 class="font-semibold text-lg mb-2">Change Password</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Regularly updating your password keeps your progress safe.</p>
+</div>
+<button class="w-full py-3 px-4 border border-outline-variant rounded-full text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
+                                        Update Password
+                                    </button>
+</div>
+<!-- 2FA Card -->
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-sm ring-1 ring-on-surface/5 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">vibration</span>
+</div>
+<span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-widest">Active</span>
+</div>
+<h3 class="font-semibold text-lg mb-2">Two-Factor Auth</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed mb-6">Adds an extra layer of security by requiring a code from your phone.</p>
+</div>
+<button class="w-full py-3 px-4 border border-outline-variant rounded-full text-sm font-semibold text-on-surface hover:bg-surface-container-low transition-colors">
+                                        Manage 2FA
+                                    </button>
+</div>
+</div>
+<!-- Active Sessions List -->
+<div class="bg-surface-container-low rounded-lg p-6 space-y-4">
+<h3 class="font-semibold text-sm uppercase tracking-widest text-on-surface-variant mb-2">Active Sessions</h3>
+<div class="flex items-center justify-between bg-surface-container-lowest p-4 rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">laptop_mac</span>
+<div>
+<p class="font-medium text-sm">MacBook Pro • San Francisco, USA</p>
+<p class="text-xs text-on-surface-variant">Chrome • Active now</p>
+</div>
+</div>
+<span class="text-xs font-bold text-primary">Current Device</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-4 rounded-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">smartphone</span>
+<div>
+<p class="font-medium text-sm">iPhone 15 • London, UK</p>
+<p class="text-xs text-on-surface-variant">Mobile App • 2 hours ago</p>
+</div>
+</div>
+<button class="text-xs font-bold text-error hover:underline">Log out</button>
+</div>
+</div>
+</section>
+<!-- Privacy Settings Section -->
+<section class="space-y-6">
+<div class="flex flex-col gap-1">
+<h2 class="text-xl font-semibold font-headline">Privacy &amp; Visibility</h2>
+<p class="text-on-surface-variant body-lg opacity-80">Control how other learners see your profile and activity.</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest rounded-lg ring-1 ring-on-surface/5">
+<div class="flex-1 pr-8">
+<h4 class="font-medium mb-1">Public Profile</h4>
+<p class="text-sm text-on-surface-variant">Allow your name and IELTS target scores to be visible to others.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest rounded-lg ring-1 ring-on-surface/5">
+<div class="flex-1 pr-8">
+<h4 class="font-medium mb-1">Leaderboard Participation</h4>
+<p class="text-sm text-on-surface-variant">Show your weekly practice points on the global leaderboard.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Final Actions -->
+<div class="pt-8 border-t border-outline-variant/20 flex flex-col sm:flex-row gap-4 justify-end">
+<button class="px-8 py-3 rounded-full font-semibold text-on-surface-variant hover:bg-surface-container-low transition-all">
+                                Discard Changes
+                            </button>
+<button class="px-10 py-3 rounded-full font-semibold text-white bg-primary-gradient shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all">
+                                Save Settings
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Content -->
+<footer class="mt-20 py-12 px-8 border-t border-outline-variant/10 text-center">
+<p class="text-on-surface-variant text-sm opacity-60">© 2024 The Cognitive Atelier. All security standards compliant with GDPR and SOC2.</p>
+</footer>
+</main>
+</div>
+<!-- Floating Action Button (FAB) - Contextual for Help -->
+<button class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-primary-gradient text-white flex items-center justify-center shadow-2xl hover:scale-110 transition-transform z-50">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</body></html>

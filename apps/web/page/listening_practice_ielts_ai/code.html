@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Listening Practice - Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-low": "#f2f3ff",
+              "secondary-container": "#8455ef",
+              "secondary": "#6b38d4",
+              "surface-bright": "#faf8ff",
+              "on-primary": "#ffffff",
+              "primary-fixed-dim": "#c0c1ff",
+              "primary": "#393ac8",
+              "on-tertiary-fixed": "#29074a",
+              "on-error": "#ffffff",
+              "inverse-primary": "#c0c1ff",
+              "surface-container-highest": "#dae2fd",
+              "outline-variant": "#c7c4d8",
+              "inverse-on-surface": "#eef0ff",
+              "surface-dim": "#d2d9f4",
+              "inverse-surface": "#283044",
+              "surface-container-high": "#e2e7ff",
+              "on-secondary-fixed-variant": "#5516be",
+              "surface-container": "#eaedff",
+              "surface-tint": "#494bd6",
+              "tertiary-fixed-dim": "#dbb8ff",
+              "secondary-fixed": "#e9ddff",
+              "tertiary-fixed": "#efdbff",
+              "tertiary-container": "#7a5a9d",
+              "primary-container": "#5356e1",
+              "outline": "#777587",
+              "tertiary": "#614283",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed": "#23005c",
+              "error": "#ba1a1a",
+              "on-secondary-container": "#fffbff",
+              "on-tertiary-container": "#f3e2ff",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "background": "#faf8ff",
+              "surface": "#faf8ff",
+              "secondary-fixed-dim": "#d0bcff",
+              "on-tertiary-fixed-variant": "#573878",
+              "on-error-container": "#93000a",
+              "on-background": "#131b2e",
+              "error-container": "#ffdad6",
+              "on-tertiary": "#ffffff",
+              "on-surface": "#131b2e",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed": "#07006c",
+              "surface-variant": "#dae2fd",
+              "on-surface-variant": "#464555",
+              "primary-fixed": "#e1e0ff",
+              "on-primary-container": "#e8e6ff"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .ai-pulse {
+        box-shadow: 0 0 0 0 rgba(73, 75, 214, 0.4);
+        animation: pulse-ring 2s infinite;
+      }
+      @keyframes pulse-ring {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(73, 75, 214, 0.4); }
+        70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(73, 75, 214, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(73, 75, 214, 0); }
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container/30">
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full flex flex-col p-4 h-screen w-64 border-r-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-50">
+<div class="mb-10 px-4">
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Cognitive Atelier</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant/60 font-bold">AI Learning Partner</p>
+</div>
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-inter antialiased text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-inter antialiased text-sm font-medium">Vocabulary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<span class="font-inter antialiased text-sm font-medium">Speaking</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-inter antialiased text-sm font-medium">Writing</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-inter antialiased text-sm font-medium">Practice</span>
+</a>
+</div>
+<div class="mt-auto p-4 rounded-lg bg-surface-container-low">
+<button class="w-full py-3 bg-gradient-to-br from-primary to-secondary text-white rounded-full font-semibold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                Start Practice
+            </button>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50 text-xl">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-500 hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-500 hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="portrait of a professional young man with a slight smile in a clean bright studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-wi7sGHdJxfI3tSdz5691cwU58M9A-jEk0iWiqdefgY8XglF8OxFoL5UuI1ixq8NFQ_OKSKPBY1X0bNIXWZeUH4RtB48lLWikJFtGyP_UQmHXUUkxucObe4bPUYB2sAU4suWyDKglDj11aq912ZdnGE-lTHOwYiAk3WUUoFmVv2ocxJzLfxcl-3EoIQUs8rON04-mQVWP1mYE-Squzk8OVnmnTKLKoG-YIayjyrW5AhubbuaMz7D49hrwiCVIDoUzrHfsSO5cflto"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-8 max-w-6xl mx-auto w-full grid grid-cols-12 gap-8">
+<!-- Header Section -->
+<div class="col-span-12 mb-4">
+<div class="flex items-center gap-3 text-primary font-semibold mb-2">
+<span class="material-symbols-outlined text-sm">headphones</span>
+<span class="text-xs uppercase tracking-widest font-bold">IELTS Listening Section 3</span>
+</div>
+<h2 class="text-3xl font-headline font-medium text-on-surface leading-tight">University Campus Orientation &amp; Facilities</h2>
+<p class="text-on-surface-variant mt-2 text-lg">Listen to the conversation between two students and answer questions 21-30.</p>
+</div>
+<!-- Central Glassmorphic Audio Player -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<div class="glass-card rounded-lg p-8 border border-white/20 shadow-2xl shadow-indigo-500/5">
+<div class="flex items-center justify-between mb-8">
+<div>
+<span class="label-md text-on-surface-variant font-medium">AUDIO STREAM</span>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary ai-pulse"></div>
+<span class="text-sm font-semibold text-secondary">Active Learning Mode</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-sm font-mono text-on-surface-variant">04:22 / 12:45</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">volume_up</span>
+</button>
+</div>
+</div>
+<!-- Waveform Visualizer Placeholder -->
+<div class="h-24 w-full flex items-end gap-[3px] mb-8 overflow-hidden px-2">
+<!-- Simulated Bars with varied heights -->
+<div class="flex-1 bg-surface-container-highest rounded-full h-8"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-12"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-16"></div>
+<div class="flex-1 bg-primary/40 rounded-full h-20"></div>
+<div class="flex-1 bg-primary rounded-full h-24"></div>
+<div class="flex-1 bg-primary rounded-full h-20"></div>
+<div class="flex-1 bg-primary/60 rounded-full h-14"></div>
+<div class="flex-1 bg-primary rounded-full h-18"></div>
+<div class="flex-1 bg-secondary/80 rounded-full h-22"></div>
+<div class="flex-1 bg-secondary rounded-full h-24"></div>
+<div class="flex-1 bg-primary rounded-full h-16"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-12"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-14"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-10"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-18"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-22"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-14"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-8"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-12"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-16"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-10"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-12"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-6"></div>
+<div class="flex-1 bg-surface-container-highest rounded-full h-10"></div>
+</div>
+<!-- Controls -->
+<div class="flex items-center justify-center gap-10">
+<button class="w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-3xl">replay_10</span>
+</button>
+<button class="w-20 h-20 flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-all">
+<span class="material-symbols-outlined text-3xl">forward_10</span>
+</button>
+</div>
+</div>
+<!-- Live Notes / Task Description -->
+<div class="bg-surface-container-low rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4 text-tertiary">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-semibold text-sm">AI Note Assistant</span>
+</div>
+<textarea class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 min-h-[160px]" placeholder="Jot down keywords or key dates here while listening..."></textarea>
+<div class="mt-4 flex justify-between items-center">
+<span class="text-xs text-on-surface-variant">Press <kbd class="px-1.5 py-0.5 rounded border border-outline-variant bg-white">Cmd</kbd> + <kbd class="px-1.5 py-0.5 rounded border border-outline-variant bg-white">S</kbd> to save snippet</span>
+<button class="text-primary text-sm font-semibold hover:underline">Clear Notes</button>
+</div>
+</div>
+</div>
+<!-- Question Area -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-surface-container">
+<h3 class="headline-md text-xl font-medium mb-6">Questions 21–25</h3>
+<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Complete the notes below. Write <span class="font-bold text-on-surface">NO MORE THAN TWO WORDS</span> for each answer.</p>
+<div class="space-y-8">
+<div class="space-y-3">
+<label class="block text-sm font-semibold text-on-surface">21. The main library is located next to the ______.</label>
+<input class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter your answer" type="text"/>
+</div>
+<div class="space-y-3">
+<label class="block text-sm font-semibold text-on-surface">22. Students need a ______ to access the 24-hour lab.</label>
+<input class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter your answer" type="text"/>
+</div>
+<div class="space-y-3">
+<label class="block text-sm font-semibold text-on-surface">23. The gym membership costs £______ per semester.</label>
+<input class="w-full bg-surface-container-low border-none rounded-md px-4 py-3 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter your answer" type="text"/>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-high/50 border border-primary/10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">The next segment will discuss the new student union building. Stay focused on mentioned dates.</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-10 py-4 bg-surface-container-high text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300">
+                        Submit Section
+                    </button>
+</div>
+<!-- Session Stats -->
+<div class="bg-surface-container-low rounded-lg p-6">
+<h4 class="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-4">Practice Analytics</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm">Accuracy Rate</span>
+<span class="text-sm font-bold text-secondary">88%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="h-full bg-secondary w-[88%] rounded-full"></div>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="text-sm">Confidence Level</span>
+<div class="flex gap-1">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

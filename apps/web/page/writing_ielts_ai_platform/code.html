@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Writing Practice | The Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#e9ddff",
+              "on-error-container": "#93000a",
+              "on-tertiary-fixed": "#29074a",
+              "tertiary-fixed": "#efdbff",
+              "on-surface": "#131b2e",
+              "surface-bright": "#faf8ff",
+              "primary-fixed": "#e1e0ff",
+              "primary": "#393ac8",
+              "on-secondary-fixed-variant": "#5516be",
+              "inverse-surface": "#283044",
+              "on-primary-fixed": "#07006c",
+              "secondary-container": "#8455ef",
+              "tertiary-fixed-dim": "#dbb8ff",
+              "surface-container-high": "#e2e7ff",
+              "tertiary": "#614283",
+              "secondary-fixed-dim": "#d0bcff",
+              "primary-container": "#5356e1",
+              "on-primary-container": "#e8e6ff",
+              "background": "#faf8ff",
+              "on-error": "#ffffff",
+              "surface-dim": "#d2d9f4",
+              "on-tertiary-container": "#f3e2ff",
+              "on-secondary": "#ffffff",
+              "on-background": "#131b2e",
+              "surface-tint": "#494bd6",
+              "on-tertiary": "#ffffff",
+              "inverse-on-surface": "#eef0ff",
+              "surface-container-highest": "#dae2fd",
+              "surface-container-lowest": "#ffffff",
+              "error-container": "#ffdad6",
+              "surface-variant": "#dae2fd",
+              "on-secondary-fixed": "#23005c",
+              "on-secondary-container": "#fffbff",
+              "surface": "#faf8ff",
+              "error": "#ba1a1a",
+              "outline-variant": "#c7c4d8",
+              "outline": "#777587",
+              "secondary": "#6b38d4",
+              "surface-container-low": "#f2f3ff",
+              "on-tertiary-fixed-variant": "#573878",
+              "on-surface-variant": "#464555",
+              "inverse-primary": "#c0c1ff",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-primary": "#ffffff",
+              "tertiary-container": "#7a5a9d",
+              "surface-container": "#eaedff",
+              "on-primary-fixed-variant": "#2f2ebe"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .notion-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 
+            from, to { opacity: 1; } 
+            50% { opacity: 0; } 
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<!-- Top Navigation Bar -->
+<nav class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex items-center gap-6">
+<span class="text-xl font-extrabold tracking-tighter text-on-background">The Cognitive Atelier</span>
+<div class="h-4 w-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-2 text-sm font-medium text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">edit_note</span>
+                Writing Practice: IELTS Task 2
+            </div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-[18px]">timer</span>
+<span class="text-sm font-mono font-semibold">34:12</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20 ml-2">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a young professional woman with a calm expression in a bright modern studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaBblVyoYrgwHNQ81Np9g-RuG9ujgERE8qKONHSsHMcxXi9q9W11PduWdlu0d91WMVRbQ7d4Ke_lZzINRFNyZPfAqUBTbXR1jJYADQptnGGMn4_drGozsL3IKJ4CzQoPzv_W-KgTgnVpcEK66xMcSyTXHBXSWyckZPhp1BkHb_E31OwRWHT3eJDLOzEaAxbBgLD0jC-kLrLGj3gro3iieZK2vRY8Sk6U41Vgo2A6MTel6srUAgdQsTBpMxHrlVI7hPPVj57EivLOr0"/>
+</div>
+</div>
+</div>
+</nav>
+<div class="flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Left Sidebar Navigation (SideNavBar) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 h-screen w-64 border-r-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-50 pt-20">
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-medium text-sm">Vocabulary</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined">record_voice_over</span>
+<span class="font-medium text-sm">Speaking</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 bg-slate-200/50 dark:bg-slate-800/50 text-indigo-700 dark:text-indigo-300 rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-medium text-sm">Writing</span>
+</a>
+</div>
+<div class="mt-auto p-4 bg-surface-container-low rounded-lg mb-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-bold tracking-wider uppercase text-on-surface-variant">Daily Goal</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 65%;"></div>
+</div>
+<p class="text-[11px] text-on-surface-variant mt-2 font-medium">650 / 1000 words today</p>
+</div>
+</aside>
+<!-- Main Content Area (Central Focus Editor) -->
+<main class="flex-1 ml-64 overflow-y-auto bg-surface-container-lowest flex flex-col items-center">
+<div class="max-w-4xl w-full px-12 py-16">
+<!-- Prompt Section -->
+<header class="mb-12">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-low text-primary text-xs font-bold rounded-full mb-4">
+                        ACADEMIC WRITING • TASK 2
+                    </div>
+<h1 class="text-[2.5rem] font-bold leading-tight tracking-tight text-on-surface mb-6">
+                        The influence of social media on young people's communication skills.
+                    </h1>
+<p class="text-lg leading-relaxed text-on-surface-variant font-medium">
+                        Some people believe that social media has a negative impact on the communication skills of young people. To what extent do you agree or disagree?
+                    </p>
+</header>
+<!-- Notion-style Minimalist Editor -->
+<div class="relative min-h-[600px] group">
+<div class="absolute left-[-40px] top-1 opacity-0 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab">drag_indicator</span>
+</div>
+<div class="space-y-6 text-xl leading-[1.8] text-on-surface font-normal">
+<p class="focus:outline-none">
+                            In the contemporary digital era, the pervasive nature of social networking platforms has ignited a fierce debate regarding their effects on the interpersonal abilities of the younger generation. 
+                            <span class="bg-error-container/40 border-b-2 border-error cursor-pointer relative group/error">
+                                While some argue that these platforms hinder face-to-face interaction
+                                <span class="absolute bottom-full left-0 mb-2 hidden group-hover/error:block w-64 p-3 bg-inverse-surface text-inverse-on-surface text-sm rounded-lg shadow-xl z-50">
+<span class="font-bold block mb-1">Clarity Suggestion:</span>
+                                    Consider specifying which "platforms" for better lexical resource scores.
+                                </span>
+</span>, 
+                            I contend that they actually serve as a catalyst for broadening communication horizons if used judiciously.
+                        </p>
+<p class="focus:outline-none">
+                            One primary reason for this perspective is the global connectivity afforded by platforms like Twitter and Instagram. Young individuals are no longer restricted by geographical boundaries; they can engage in cross-cultural dialogues that 
+                            <span class="bg-primary-container/20 border-b-2 border-primary-container cursor-pointer relative group/vocab">
+                                enhance their sociolinguistic competence
+                                <span class="absolute bottom-full left-0 mb-2 hidden group-hover/vocab:block w-64 p-3 bg-inverse-surface text-inverse-on-surface text-sm rounded-lg shadow-xl z-50">
+<span class="font-bold text-primary-fixed block mb-1">Advanced Vocabulary Detected</span>
+                                    Excellent use of "sociolinguistic competence". This increases your Lexical Resource score.
+                                </span>
+</span>. 
+                            For instance, a student in Tokyo can discuss environmental issues with peers in London, necessitating the use of precise and nuanced language.
+                        </p>
+<p class="focus:outline-none notion-cursor text-on-surface-variant/60">
+                            Furthermore, social media provides a low-pressure environment for individuals who might suffer from social anxiety. Through text-based communication...
+                        </p>
+</div>
+</div>
+</div>
+</main>
+<!-- AI Feedback Sidebar (Real-time Feedback) -->
+<aside class="w-96 bg-surface-container-low h-full flex flex-col p-6 overflow-y-auto">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-bold text-lg">AI Feedback</h3>
+<span class="px-2 py-1 bg-surface-container-highest text-secondary text-[10px] font-black uppercase rounded tracking-widest">Live Analysis</span>
+</div>
+<!-- Score Cards (Asymmetric Bento) -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Current Band</span>
+<div class="text-3xl font-black gradient-text">7.5</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">Word Count</span>
+<div class="text-3xl font-black text-on-surface">142</div>
+</div>
+</div>
+<!-- Analysis Categories -->
+<div class="space-y-4">
+<!-- Task Achievement -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">verified</span>
+<span class="font-bold text-sm">Task Response</span>
+</div>
+<span class="text-sm font-bold text-primary">8.0</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-4">Your introduction clearly states your position and aligns perfectly with the prompt requirements.</p>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 80%;"></div>
+</div>
+</div>
+<!-- Coherence -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-xl">alt_route</span>
+<span class="font-bold text-sm">Coherence</span>
+</div>
+<span class="text-sm font-bold text-secondary">7.0</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed mb-4">Transitions between paragraphs are smooth. Consider using more varied linking words in paragraph two.</p>
+<div class="w-full bg-surface-container-low h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 70%;"></div>
+</div>
+</div>
+<!-- Grammatical Range -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/10">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-xl">spellcheck</span>
+<span class="font-bold text-sm">Grammar</span>
+</div>
+<span class="text-sm font-bold text-tertiary">7.5</span>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-error text-[18px] mt-0.5">error_outline</span>
+<div>
+<p class="text-[11px] font-bold text-on-surface">Subject-Verb Agreement</p>
+<p class="text-[10px] text-on-surface-variant italic">"...platforms hinder..."</p>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Insight (Floating Style) -->
+<div class="mt-8 relative p-6 rounded-2xl overflow-hidden group">
+<div class="absolute inset-0 gradient-bg opacity-10"></div>
+<div class="absolute -right-4 -top-4 opacity-10">
+<span class="material-symbols-outlined text-[80px] text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="relative">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-xs font-black uppercase text-secondary tracking-widest">AI Insight</span>
+</div>
+<p class="text-xs font-medium text-on-surface leading-relaxed">
+                        "Your use of the word <span class="font-bold underline decoration-secondary">catalyst</span> is excellent. To reach Band 8.5, try incorporating a 'reduced relative clause' in your next sentence."
+                    </p>
+</div>
+</div>
+<!-- Submit Action -->
+<button class="mt-auto w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span>Finish &amp; Submit</span>
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</aside>
+</div>
+<!-- Floating AI Toolbar (Selection-based) -->
+<div class="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-1 p-2 bg-inverse-surface rounded-full shadow-2xl glass-panel z-50">
+<button class="p-3 text-white/70 hover:text-white transition-colors rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined">auto_fix</span>
+</button>
+<div class="w-[1px] h-6 bg-white/20 mx-1"></div>
+<button class="px-4 py-2 text-white text-sm font-bold rounded-full hover:bg-white/10 transition-colors">
+            Explain
+        </button>
+<button class="px-4 py-2 text-white text-sm font-bold rounded-full hover:bg-white/10 transition-colors">
+            Rewrite
+        </button>
+<button class="px-4 py-2 text-white text-sm font-bold rounded-full hover:bg-white/10 transition-colors">
+            Synonyms
+        </button>
+<div class="w-[1px] h-6 bg-white/20 mx-1"></div>
+<button class="p-3 text-white/70 hover:text-white transition-colors rounded-full hover:bg-white/10">
+<span class="material-symbols-outlined">mic</span>
+</button>
+</div>
+</body></html>

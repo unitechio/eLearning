@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reading Practice - Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-low": "#f2f3ff",
+                        "secondary-container": "#8455ef",
+                        "secondary": "#6b38d4",
+                        "surface-bright": "#faf8ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "primary": "#393ac8",
+                        "on-tertiary-fixed": "#29074a",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#c0c1ff",
+                        "surface-container-highest": "#dae2fd",
+                        "outline-variant": "#c7c4d8",
+                        "inverse-on-surface": "#eef0ff",
+                        "surface-container-high": "#e2e7ff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "surface-container": "#eaedff",
+                        "surface-tint": "#494bd6",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "secondary-fixed": "#e9ddff",
+                        "tertiary-fixed": "#efdbff",
+                        "tertiary-container": "#7a5a9d",
+                        "primary-container": "#5356e1",
+                        "outline": "#777587",
+                        "tertiary": "#614283",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#23005c",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#fffbff",
+                        "on-tertiary-container": "#f3e2ff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "background": "#faf8ff",
+                        "surface": "#faf8ff",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "on-tertiary-fixed-variant": "#573878",
+                        "on-error-container": "#93000a",
+                        "on-background": "#131b2e",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#131b2e",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#07006c",
+                        "surface-variant": "#dae2fd",
+                        "on-surface-variant": "#464555",
+                        "primary-fixed": "#e1e0ff",
+                        "on-primary-container": "#e8e6ff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-passage::selection {
+            background-color: #e1e0ff;
+            color: #393ac8;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl h-screen w-64 border-r-0 z-50">
+<div class="flex items-center gap-3 px-4 py-6 mb-8">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50 leading-tight">Cognitive Atelier</h1>
+<p class="text-xs text-on-surface-variant font-medium">AI Learning Partner</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors rounded-xl font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-xl font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                Vocabulary
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors rounded-xl font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+                Speaking
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors rounded-xl font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+                Writing
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors rounded-xl font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+                Practice
+            </a>
+</nav>
+<div class="mt-auto pt-6">
+<button class="w-full py-3 px-4 bg-gradient-to-br from-primary to-secondary text-white rounded-xl font-semibold text-sm shadow-md hover:opacity-90 active:scale-95 transition-all duration-150">
+                Start Practice
+            </button>
+<div class="mt-6 flex items-center gap-3 px-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="professional headshot of a student in a minimalist studio with soft natural lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcH0B8W8ZLvFyvcP6BHPQNF1J5LzZ32AmVo690tbOyddTXNSi579BXpzCDOshpFVov2Z8dfjYZK-265P0i5m20n2B4BRG-ZOIt6vMcaUMza5Kj2PWPQNRd3VrYJVRWcmwwA4E188RLRx1Et8j4Uz31fyDZk0gvr84gP09cnIX2Byk8b7uASg0eDa-6Yn1neZt0uZ-wUAs7lkeLRbl8SyDKtQ-Sr__bc7IeJYZl0AA96CHitN8t3w5bpR5u5y0fux03V0238ZSxJgYG"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Alex Chen</span>
+<span class="text-xs text-on-surface-variant">IELTS Track: 8.5</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 bg-surface-container-low px-4 py-2 rounded-full w-80">
+<span class="material-symbols-outlined text-outline text-lg" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full p-0 placeholder:text-outline" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-2 text-sm font-medium px-3 py-1.5 bg-surface-container rounded-full text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span>Pro Account</span>
+</div>
+</div>
+</header>
+<!-- Exam Controls Area -->
+<div class="px-8 py-6 bg-surface-container-lowest">
+<div class="max-w-6xl mx-auto flex flex-col gap-6">
+<div class="flex justify-between items-end">
+<div>
+<nav class="flex items-center gap-2 text-xs text-on-surface-variant mb-2">
+<span>Practice</span>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span>Reading</span>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span class="text-primary font-medium">Academic Module #42</span>
+</nav>
+<h2 class="text-2xl font-bold tracking-tight">The Impact of AI on Urban Architecture</h2>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Time Remaining</p>
+<div class="flex items-center gap-2 font-mono text-2xl text-on-surface">
+<span class="material-symbols-outlined text-primary">timer</span>
+<span>18:42</span>
+</div>
+</div>
+<button class="px-6 py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-all">
+                            Submit Test
+                        </button>
+</div>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-2/3 transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Exam Workspace: Two Column Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left: Academic Passage -->
+<section class="flex-1 overflow-y-auto px-8 py-10 bg-white text-passage hide-scrollbar border-r border-transparent">
+<div class="max-w-2xl ml-auto mr-12">
+<div class="mb-10 text-on-surface-variant uppercase tracking-widest text-xs font-bold">Reading Passage 1</div>
+<article class="space-y-6 text-lg leading-relaxed text-on-surface/90">
+<p class="first-letter:text-5xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:text-primary">In the first half of the 21st century, the rapid integration of artificial intelligence into urban planning has begun to fundamentally reshape the architectural landscape of global metropolises. Beyond mere automation, AI systems are now acting as generative designers, processing vast datasets ranging from pedestrian traffic patterns to micro-climatic shifts.</p>
+<p>Architects and urbanists are increasingly turning to neural networks to optimize "smart skins"—building facades that adapt in real-time to solar orientation. This evolution represents a departure from the static structures of the past, moving towards a vision of the city as a living, breathing organism. The implications for energy efficiency are profound, with some estimates suggesting a 40% reduction in carbon footprints for high-rise developments utilizing these autonomous systems.</p>
+<div class="my-10 aspect-video w-full rounded-lg overflow-hidden relative group">
+<img alt="Modern sustainable architecture" class="w-full h-full object-cover" data-alt="futuristic skyscraper with glass facades and integrated greenery under a dramatic twilight sky reflecting city lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkCNptIETUpDNfkMp8zkC7hYrgHvbEJNoo1Tc59mTB_2qgzk4vbTL5h1lG9HbwMnKwKn4SEcsrlP_u4S3hkS9MJPTYi9Ay4mD_O3FTo04tPqp4Er2wDUWFU-KfLQHkx1N6Kg__d6DSH70PQhobTqm8rw0DsrN_Iknjuz9DZQCfUBKNxZ6tIO51qD5XQ2CynogFggfmJ9YsubmsfTLwg7GBJ3Ay5zeZFrCa4xLRS0ww1qlQDRYtSXa6u3J7SokW1-pkNQk3_U9d_oZt"/>
+<div class="absolute bottom-0 left-0 right-0 p-4 bg-black/40 backdrop-blur-sm text-white text-xs">
+                                Figure 1: The Helix Plaza, Seoul - An AI-optimized structure.
+                            </div>
+</div>
+<p>However, the shift is not without its critics. Skeptics argue that the algorithmic approach to design risks "dehumanizing" the urban environment, replacing cultural intuition with mathematical efficiency. There is a growing concern that the aesthetic variance traditionally provided by human architects might be lost in favor of a homogenized "optimal" style that prioritizes data points over historical context.</p>
+<p>Research conducted at the University of Zurich suggest that the transition is inevitable. The economic pressures of rising urbanization, coupled with the need for rapid housing solutions, make the speed and precision of AI-augmented construction irresistible to municipal governments. The challenge for the next decade will be maintaining the balance between technological supremacy and human-centric habitability.</p>
+<div class="h-24"></div> <!-- Padding for scroll bottom -->
+</article>
+</div>
+</section>
+<!-- Right: Questions Panel -->
+<section class="w-[500px] overflow-y-auto bg-surface-container-low px-8 py-10 hide-scrollbar">
+<div class="max-w-md">
+<div class="flex items-center gap-2 mb-8">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                            1
+                        </div>
+<h3 class="font-bold text-lg">Questions 1–5</h3>
+</div>
+<div class="mb-10 space-y-8">
+<p class="text-sm text-on-surface-variant italic border-l-4 border-primary-fixed-dim pl-4">
+                            Do the following statements agree with the information given in Reading Passage 1? In boxes 1–5, choose:
+                        </p>
+<!-- Question 1: True/False -->
+<div class="space-y-4">
+<p class="text-sm font-semibold leading-relaxed">1. AI is primarily used to automate existing manual design processes in urban architecture.</p>
+<div class="grid grid-cols-1 gap-2">
+<label class="flex items-center gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all group border border-transparent hover:border-primary/20">
+<input class="w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q1" type="radio"/>
+<span class="text-sm font-medium text-on-surface">TRUE</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all group border border-transparent hover:border-primary/20">
+<input class="w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q1" type="radio"/>
+<span class="text-sm font-medium text-on-surface">FALSE</span>
+</label>
+<label class="flex items-center gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all group border border-transparent hover:border-primary/20">
+<input class="w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q1" type="radio"/>
+<span class="text-sm font-medium text-on-surface">NOT GIVEN</span>
+</label>
+</div>
+</div>
+<!-- Question 2: Multiple Choice -->
+<div class="space-y-4 pt-4">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                                    2
+                                </div>
+<h3 class="font-bold text-lg">Question 6</h3>
+</div>
+<p class="text-sm font-semibold leading-relaxed">What is the main concern expressed by skeptics regarding AI design?</p>
+<div class="grid grid-cols-1 gap-3">
+<label class="flex items-start gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all border border-transparent hover:border-primary/20">
+<input class="mt-1 w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q6" type="radio"/>
+<span class="text-sm leading-tight text-on-surface">The high cost of maintaining smart facade systems.</span>
+</label>
+<label class="flex items-start gap-3 p-4 bg-surface-container-high border-primary/30 rounded-xl cursor-pointer transition-all border">
+<input checked="" class="mt-1 w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q6" type="radio"/>
+<span class="text-sm leading-tight text-on-surface">The loss of cultural intuition in the architectural process.</span>
+</label>
+<label class="flex items-start gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all border border-transparent hover:border-primary/20">
+<input class="mt-1 w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q6" type="radio"/>
+<span class="text-sm leading-tight text-on-surface">The inefficiency of neural networks in urban planning.</span>
+</label>
+<label class="flex items-start gap-3 p-4 bg-white hover:bg-surface-container-high rounded-xl cursor-pointer transition-all border border-transparent hover:border-primary/20">
+<input class="mt-1 w-4 h-4 text-primary focus:ring-primary border-outline-variant" name="q6" type="radio"/>
+<span class="text-sm leading-tight text-on-surface">The lack of interest from municipal governments.</span>
+</label>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center pt-10 border-t border-outline-variant/30">
+<button class="flex items-center gap-2 text-on-surface-variant font-bold hover:text-primary transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+<span>Previous</span>
+</button>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+<button class="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+<span>Next Passage</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<div class="h-24"></div>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating UI: Text Highlight Tool (Contextual simulation) -->
+<div class="fixed left-1/4 top-1/2 transform -translate-y-1/2 -translate-x-1/2 flex flex-col gap-2 p-2 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-surface-container-high z-50">
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-yellow-100 text-yellow-600 transition-colors" title="Highlight Yellow">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stylus</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-blue-100 text-blue-600 transition-colors" title="Highlight Blue">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stylus</span>
+</button>
+<div class="h-px w-6 bg-outline-variant/30 mx-auto"></div>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-container-highest text-on-surface transition-colors" title="Add Note">
+<span class="material-symbols-outlined">sticky_note_2</span>
+</button>
+</div>
+</body></html>

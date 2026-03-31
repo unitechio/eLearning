@@ -1,0 +1,286 @@
+# PostgreSQL Database Architecture: IELTS Learning Platform
+
+This document outlines the production-ready, scalable, multi-tenant database schema for the AI-powered IELTS learning SaaS platform.
+
+## 1. Multi-Tenant Strategy
+
+**Chosen Strategy: Shared Database, Shared Schema (Row-Level Multi-Tenancy)**
+To support millions of users while maintaining cost-efficiency and operational simplicity, we use a single database and schema where every tenant-scoped table includes a `tenant_id` column.
+
+**Why this approach?**
+- **Scalability**: Easier to pool connections and horizontally scale (e.g., using Citus or read replicas).
+- **Maintenance**: Schema migrations are run once, not per tenant.
+- **Security**: Data isolation is enforced using PostgreSQL **Row Level Security (RLS)**. By setting a local session variable for the `tenant_id`, Postgres automatically appends `AND tenant_id = current_tenant` to all queries, making data leaks practically impossible at the application layer.
+
+---
+
+## 2. ERD Description
+
+- **Core**: `tenants` (Root) 1:N with `users`, `roles`, and `learning content`.
+- **Users & Auth**: `users` 1:1 `user_profiles`, 1:N `auth_sessions`, 1:N `refresh_tokens`.
+- **Learning**: `courses` 1:N `units` 1:N `lessons`. Users relate to these via `user_progress`.
+- **Vocabulary**: Shared `vocabulary_words` and `word_examples`. Users map to words via `user_vocabulary_progress` (spaced repetition stats) and `review_history` (logs).
+- **Practice (IELTS)**: Users generate `speaking_attempts`, `writing_submissions`, etc.
+- **Gamification**: `users` 1:1 `streaks`, 1:N `xp_points_log`, 1:N `user_achievements`.
+
+---
+
+## 3. SQL Schema
+
+```sql
+-- Enables UUID generation
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- -----------------------------------------------------------------------------
+-- 1. TENANT & CONFIGURATION
+-- -----------------------------------------------------------------------------
+CREATE TABLE tenants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    domain VARCHAR(255) UNIQUE,
+    settings JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+-- -----------------------------------------------------------------------------
+-- 2. USERS & AUTHENTICATION
+-- -----------------------------------------------------------------------------
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    UNIQUE (tenant_id, email) -- Email uniqueness per organization
+);
+
+CREATE TABLE user_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    avatar_url TEXT,
+    target_band_score DECIMAL(3,1),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE roles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name VARCHAR(50) NOT NULL, -- e.g., 'student', 'teacher', 'admin'
+    permissions JSONB DEFAULT '[]'
+);
+
+CREATE TABLE refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL UNIQUE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- -----------------------------------------------------------------------------
+-- 3. LEARNING SYSTEM (Core Content)
+-- -----------------------------------------------------------------------------
+CREATE TABLE courses (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE units (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    title VARCHAR(255) NOT NULL,
+    order_index INTEGER NOT NULL
+);
+
+CREATE TABLE lessons (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    unit_id UUID NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    title VARCHAR(255) NOT NULL,
+    content_type VARCHAR(50) NOT NULL, -- 'video', 'reading', 'quiz'
+    content JSONB NOT NULL,
+    order_index INTEGER NOT NULL
+);
+
+CREATE TABLE user_progress (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    lesson_id UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'in_progress', -- 'completed'
+    score DECIMAL(5,2),
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (user_id, lesson_id)
+);
+
+-- -----------------------------------------------------------------------------
+-- 4. VOCABULARY SYSTEM (Spaced Repetition)
+-- -----------------------------------------------------------------------------
+CREATE TABLE vocabulary_words (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    word VARCHAR(100) NOT NULL,
+    part_of_speech VARCHAR(50),
+    definition TEXT NOT NULL,
+    phonetic VARCHAR(100),
+    level VARCHAR(20) -- e.g., 'B2', 'C1'
+);
+
+CREATE TABLE user_vocabulary_progress (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    word_id UUID NOT NULL REFERENCES vocabulary_words(id) ON DELETE CASCADE,
+    box_number INTEGER DEFAULT 1, -- Spaced repetition bucket
+    next_review_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    last_review_date TIMESTAMP WITH TIME ZONE,
+    consecutive_correct INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, word_id)
+);
+
+-- -----------------------------------------------------------------------------
+-- 5. PRACTICE SYSTEM & AI FEEDBACK (Partitioned Setup)
+-- -----------------------------------------------------------------------------
+-- Using partitioning to handle millions of attempts dynamically over time
+CREATE TABLE speaking_attempts (
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    lesson_id UUID REFERENCES lessons(id),
+    prompt_text TEXT,
+    audio_url TEXT NOT NULL,
+    transcript TEXT,
+    duration_seconds INTEGER,
+    -- AI Evaluation Stored as JSONB for ultimate flexibility
+    ai_score DECIMAL(3,1),
+    ai_feedback JSONB, 
+    -- JSONB Structure: { "fluency": 7.5, "grammar": 6.0, "corrections": [...] }
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (id, created_at) -- Required for time-based partitioning
+) PARTITION BY RANGE (created_at);
+
+-- Partition examples
+CREATE TABLE speaking_attempts_y2026m04 PARTITION OF speaking_attempts
+    FOR VALUES FROM ('2026-04-01') TO ('2026-05-01');
+
+CREATE TABLE writing_submissions (
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    prompt_text TEXT,
+    user_response TEXT NOT NULL,
+    word_count INTEGER,
+    ai_score DECIMAL(3,1),
+    ai_feedback JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (id, created_at)
+) PARTITION BY RANGE (created_at);
+
+-- -----------------------------------------------------------------------------
+-- 6. GAMIFICATION
+-- -----------------------------------------------------------------------------
+CREATE TABLE streaks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    current_streak INTEGER DEFAULT 0,
+    longest_streak INTEGER DEFAULT 0,
+    last_activity_date DATE,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE xp_points (
+    id UUID NOT NULL DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    amount INTEGER NOT NULL,
+    reason VARCHAR(255) NOT NULL, -- e.g., 'completed_lesson', 'perfect_vocabulary'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (id, created_at)
+) PARTITION BY RANGE (created_at);
+```
+
+---
+
+## 4. Indexing Strategy
+
+1. **Multi-Tenant Global Indexes**:
+   Every table that frequently filters by tenant and user gets a composite index. By placing `tenant_id` first, we optimize the RLS and standard tenant lookups.
+   ```sql
+   CREATE INDEX idx_users_tenant_email ON users(tenant_id, email);
+   CREATE INDEX idx_user_progress_tenant_user ON user_progress(tenant_id, user_id);
+   CREATE INDEX idx_vocabulary_progress_tenant_user_date ON user_vocabulary_progress(tenant_id, user_id, next_review_date);
+   ```
+2. **JSONB Indexing (GIN)**:
+   Indexing the AI feedback allows fast analytical queries (e.g., finding the most common grammar mistakes).
+   ```sql
+   CREATE INDEX idx_speaking_attempts_ai_feedback ON speaking_attempts USING GIN (ai_feedback);
+   CREATE INDEX idx_writing_submissions_ai_feedback ON writing_submissions USING GIN (ai_feedback);
+   ```
+3. **Partition Indexes**:
+   PostgreSQL automatically propagates indexes to partitions, but explicitly indexing the partition key (`created_at`) alongside `user_id` is critical for quick log lookups.
+   ```sql
+   CREATE INDEX idx_speaking_attempts_user_time ON speaking_attempts(tenant_id, user_id, created_at DESC);
+   ```
+
+---
+
+## 5. Example Queries
+
+### A. Fetching Daily Words Due for Review (Spaced Repetition)
+Optimized query using the composite index on `(tenant_id, user_id, next_review_date)`.
+```sql
+SELECT vw.word, vw.definition, uvp.box_number
+FROM user_vocabulary_progress uvp
+JOIN vocabulary_words vw ON uvp.word_id = vw.id
+WHERE uvp.tenant_id = 'tenant-uuid-123' 
+  AND uvp.user_id = 'user-uuid-456'
+  AND uvp.next_review_date <= NOW()
+ORDER BY uvp.next_review_date ASC
+LIMIT 50;
+```
+
+### B. Analytical Query: User AI Performance Average over the Last 30 Days
+Takes advantage of partition pruning (Postgres will only scan the recent partition tables).
+```sql
+SELECT 
+    AVG(ai_score) as average_band_score,
+    AVG((ai_feedback->>'fluency')::numeric) as average_fluency,
+    AVG((ai_feedback->>'grammar')::numeric) as average_grammar
+FROM speaking_attempts
+WHERE tenant_id = 'tenant-uuid-123' 
+  AND user_id = 'user-uuid-456'
+  AND created_at >= NOW() - INTERVAL '30 days';
+```
+
+### C. Calculating Total User XP
+Fast sum aggregation over the partitioned XP table.
+```sql
+SELECT 
+    SUM(amount) as total_xp,
+    COUNT(*) as total_actions
+FROM xp_points
+WHERE tenant_id = 'tenant-uuid-123'
+  AND user_id = 'user-uuid-456';
+```

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Explanation Deep-Dive | Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed": "#29074a",
+              "inverse-on-surface": "#eef0ff",
+              "on-primary-fixed-variant": "#2f2ebe",
+              "tertiary-container": "#7a5a9d",
+              "background": "#faf8ff",
+              "tertiary-fixed-dim": "#dbb8ff",
+              "secondary": "#6b38d4",
+              "surface-container-low": "#f2f3ff",
+              "primary-fixed-dim": "#c0c1ff",
+              "on-secondary": "#ffffff",
+              "on-error": "#ffffff",
+              "surface-bright": "#faf8ff",
+              "primary-fixed": "#e1e0ff",
+              "error": "#ba1a1a",
+              "surface-container-lowest": "#ffffff",
+              "on-background": "#131b2e",
+              "secondary-fixed-dim": "#d0bcff",
+              "secondary-container": "#8455ef",
+              "on-secondary-fixed": "#23005c",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#e8e6ff",
+              "inverse-primary": "#c0c1ff",
+              "on-primary-fixed": "#07006c",
+              "tertiary": "#614283",
+              "tertiary-fixed": "#efdbff",
+              "on-surface-variant": "#464555",
+              "on-tertiary-container": "#f3e2ff",
+              "surface-variant": "#dae2fd",
+              "on-tertiary": "#ffffff",
+              "on-secondary-container": "#fffbff",
+              "primary": "#393ac8",
+              "surface-tint": "#494bd6",
+              "on-secondary-fixed-variant": "#5516be",
+              "surface-dim": "#d2d9f4",
+              "on-error-container": "#93000a",
+              "surface-container-highest": "#dae2fd",
+              "outline": "#777587",
+              "surface": "#faf8ff",
+              "secondary-fixed": "#e9ddff",
+              "surface-container": "#eaedff",
+              "error-container": "#ffdad6",
+              "inverse-surface": "#283044",
+              "outline-variant": "#c7c4d8",
+              "primary-container": "#5356e1",
+              "on-surface": "#131b2e",
+              "surface-container-high": "#e2e7ff",
+              "on-tertiary-fixed-variant": "#573878"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-40 flex items-center justify-between px-6 h-16 w-full bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl no-border bg-zinc-50/50 dark:bg-zinc-900/50 shadow-sm shadow-indigo-500/5 font-sans antialiased tracking-tight">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent">Cognitive Atelier</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center space-y-0 space-x-8">
+<a class="text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 px-3 py-2 rounded-xl text-sm font-medium" href="#">Dashboard</a>
+<a class="text-indigo-600 dark:text-indigo-400 font-semibold px-3 py-2 rounded-xl text-sm" href="#">Practice</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-200 px-3 py-2 rounded-xl text-sm font-medium" href="#">Community</a>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-on-surface-variant hover:bg-zinc-100 rounded-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined">colors_spark</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-zinc-100 rounded-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-surface-container-high overflow-hidden border-2 border-primary/10">
+<img alt="User Profile" data-alt="close-up portrait of a professional man with friendly expression in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHhohC64xxKEtwsKvQY4OOsQFxyX0lj_OgfRgonq3NaWpxuSh3QwsEFaTXnglTcPVKCp1PitoQjZm8dwH1-0ZiqfYF35rtrO8OAZrB3NCCNnE7R-8sX5jWwG78nUhFDOqZgyLPzXEBzmmnw4yXyuNbBDBLMYwh5Eln1MdUlarhRmZw5irw47aTJaBx6MrAcEzU4IoYVx86DJGgFCPxFPbFv9nkyxMLs4LfLC6QWIi4A9euf691Tuh2o-vUKoYyBHQfHLw9q2BbXjVh"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-12 px-6 lg:px-12 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<nav class="flex items-center gap-2 text-on-surface-variant text-sm mb-4">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<a class="hover:text-primary transition-colors" href="#">Back to Reading Exercise</a>
+</nav>
+<h1 class="text-4xl md:text-5xl font-bold tracking-tight text-on-background leading-tight">Explanation Deep-Dive</h1>
+<p class="text-on-surface-variant mt-2 text-lg">Question 14 of 20 • Critical Analysis Module</p>
+</div>
+<div class="flex items-center gap-3">
+<span class="px-4 py-2 bg-error-container text-on-error-container rounded-full text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">close</span> Incorrect
+                </span>
+<span class="px-4 py-2 bg-surface-container-high text-primary rounded-full text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">timer</span> 1m 42s
+                </span>
+</div>
+</div>
+<!-- Main Interaction Area: Bento Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Side: Context & Reading Passage -->
+<div class="lg:col-span-5 space-y-6">
+<div class="bg-surface-container-lowest p-8 rounded-lg shadow-sm border border-outline-variant/10 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">menu_book</span>
+<h2 class="font-semibold text-primary uppercase tracking-widest text-xs">Passage Snippet</h2>
+</div>
+<div class="space-y-6 text-on-background leading-relaxed text-lg font-body">
+<p>The rise of architectural brutalism in the mid-20th century was not merely an aesthetic choice but a socio-political statement. By stripping structures of their ornamentation, designers sought to project transparency and <span class="bg-primary-fixed text-on-primary-fixed px-1 rounded font-semibold cursor-help" title="Defined as open honesty or directness">unfiltered candor</span>.</p>
+<div class="p-5 bg-surface-container-low rounded-DEFAULT border-l-4 border-primary">
+<p class="italic">"However, the movement's focus on raw materiality often came at the expense of human comfort, creating an environment that many perceived as <span class="bg-secondary-fixed text-on-secondary-fixed px-1 rounded font-bold underline decoration-secondary decoration-2 underline-offset-4">implicitly hostile</span> rather than egalitarian."</p>
+</div>
+<p>Critics argued that the sheer scale of these monolithic concrete forms overwhelmed the individual, effectively <span class="bg-tertiary-fixed text-on-tertiary-fixed px-1 rounded">negating</span> the democratic ideals they were intended to uphold.</p>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/20">
+<h3 class="text-sm font-bold text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">local_library</span> RELATED VOCABULARY
+                        </h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-surface-container-high hover:bg-primary text-on-surface hover:text-on-primary transition-all rounded-full text-xs font-medium flex items-center gap-2 group">
+                                candor
+                                <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</button>
+<button class="px-4 py-2 bg-surface-container-high hover:bg-primary text-on-surface hover:text-on-primary transition-all rounded-full text-xs font-medium flex items-center gap-2 group">
+                                raw materiality
+                                <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</button>
+<button class="px-4 py-2 bg-surface-container-high hover:bg-primary text-on-surface hover:text-on-primary transition-all rounded-full text-xs font-medium flex items-center gap-2 group">
+                                egalitarian
+                                <span class="material-symbols-outlined text-sm opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Deep-Dive Analysis -->
+<div class="lg:col-span-7 space-y-6">
+<!-- Question & Your Answer -->
+<div class="bg-white p-8 rounded-lg shadow-sm border border-outline-variant/10">
+<h3 class="text-xl font-medium mb-6 leading-snug">What does the author suggest about the relationship between Brutalist architecture and its intended democratic ideals?</h3>
+<div class="space-y-4">
+<div class="p-5 rounded-DEFAULT border border-error/20 bg-error/5 flex items-start gap-4">
+<div class="mt-1 flex-shrink-0">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">cancel</span>
+</div>
+<div>
+<p class="text-sm font-bold text-error uppercase tracking-wider mb-1">Your Answer</p>
+<p class="text-on-background">It successfully showcased democratic transparency through the use of raw, unornamented materials.</p>
+</div>
+</div>
+<div class="p-5 rounded-DEFAULT border border-primary/20 bg-primary/5 flex items-start gap-4">
+<div class="mt-1 flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="text-sm font-bold text-primary uppercase tracking-wider mb-1">Correct Answer</p>
+<p class="text-on-background">The physical manifestation of the style contradicted its underlying social philosophy.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Deep-Dive Explanation -->
+<div class="relative group">
+<!-- AI Glow Background -->
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+<div class="relative bg-surface-container-lowest p-8 rounded-lg shadow-xl border border-outline-variant/5">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+</div>
+<div>
+<h2 class="font-bold text-lg">AI Deep Analysis</h2>
+<p class="text-xs text-on-surface-variant font-medium">COGNITIVE-V4 CORE ENGINE</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">thumb_up</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">thumb_down</span>
+</button>
+</div>
+</div>
+<div class="space-y-8">
+<!-- Section: Why this is correct -->
+<section>
+<div class="flex items-center gap-2 mb-3">
+<span class="text-secondary font-bold text-xs uppercase tracking-tighter">Phase 1: Logic Breakdown</span>
+<div class="h-px flex-1 bg-secondary/10"></div>
+</div>
+<h3 class="text-xl font-bold mb-3 flex items-center gap-2 text-on-background">
+                                    Why this is correct
+                                </h3>
+<div class="text-on-surface-variant leading-relaxed space-y-3">
+<p>The passage presents a <span class="font-semibold text-on-background">paradox</span>. While designers intended to project "egalitarian" values, the author notes that the result was perceived as "implicitly hostile."</p>
+<p>The key phrase <span class="italic text-on-background">"negating the democratic ideals"</span> indicates a direct contradiction. Therefore, the "physical manifestation" (the buildings) worked against the "social philosophy" (the ideals).</p>
+</div>
+</section>
+<!-- Section: Common trap avoided -->
+<section class="bg-surface-container-low/50 p-6 rounded-xl border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-tertiary font-bold text-xs uppercase tracking-tighter">Phase 2: The Trap</span>
+<div class="h-px flex-1 bg-tertiary/10"></div>
+</div>
+<h3 class="text-lg font-bold mb-2 flex items-center gap-2 text-on-background">
+                                    Common Trap: The Literal Echo
+                                </h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                                    Your choice was a <span class="font-bold text-on-background italic">Literal Trap</span>. It repeated keywords found in the first paragraph ("transparency", "raw materials") but ignored the "However" pivot in the second paragraph. In high-level reading comprehension, the correct answer usually synthesizes the <span class="underline decoration-primary/30">entire shift</span> in tone rather than just repeating vocabulary from the text.
+                                </p>
+</section>
+<!-- Section: Strategy Tip -->
+<div class="bg-primary text-on-primary p-6 rounded-xl flex items-center gap-6 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl opacity-80" style="font-variation-settings: 'FILL' 1;">tips_and_updates</span>
+<div>
+<h4 class="font-bold text-sm uppercase tracking-widest mb-1">Expert Strategy</h4>
+<p class="text-sm text-primary-fixed leading-snug">When you see pivot words like "However" or "Conversely," focus on the text that follows. The question almost always tests your understanding of the contrast, not the initial claim.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex flex-wrap items-center justify-between gap-6 pt-6">
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-6 py-3 border border-outline-variant/30 rounded-full hover:bg-surface-container-low transition-all font-semibold text-sm">
+<span class="material-symbols-outlined">bookmark</span> Save to Notebook
+                        </button>
+<button class="flex items-center gap-2 px-6 py-3 border border-outline-variant/30 rounded-full hover:bg-surface-container-low transition-all font-semibold text-sm">
+<span class="material-symbols-outlined">share</span> Discuss
+                        </button>
+</div>
+<button class="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-full hover:scale-105 active:scale-95 transition-all font-bold shadow-xl shadow-primary/20 group">
+                        Next Question
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- SideNavBar (Mobile Toggle Hidden for focused experience) -->
+<aside class="hidden xl:flex h-screen w-16 fixed left-0 top-0 z-50 flex flex-col items-center py-8 bg-zinc-50 dark:bg-zinc-900 space-y-8">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<nav class="flex flex-col space-y-6">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-600 hover:bg-white hover:text-primary transition-all shadow-sm">
+<span class="material-symbols-outlined">dashboard</span>
+</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center bg-white text-primary shadow-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-600 hover:bg-white hover:text-primary transition-all">
+<span class="material-symbols-outlined">record_voice_over</span>
+</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-600 hover:bg-white hover:text-primary transition-all">
+<span class="material-symbols-outlined">quiz</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col space-y-6">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-600 hover:bg-white hover:text-primary transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center text-error">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</aside>
+</body></html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Speaking Practice - Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#e9ddff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#29074a",
+                        "tertiary-fixed": "#efdbff",
+                        "on-surface": "#131b2e",
+                        "surface-bright": "#faf8ff",
+                        "primary-fixed": "#e1e0ff",
+                        "primary": "#393ac8",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "inverse-surface": "#283044",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-container": "#8455ef",
+                        "tertiary-fixed-dim": "#dbb8ff",
+                        "surface-container-high": "#e2e7ff",
+                        "tertiary": "#614283",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "primary-container": "#5356e1",
+                        "on-primary-container": "#e8e6ff",
+                        "background": "#faf8ff",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d2d9f4",
+                        "on-tertiary-container": "#f3e2ff",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#131b2e",
+                        "surface-tint": "#494bd6",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#eef0ff",
+                        "surface-container-highest": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dae2fd",
+                        "on-secondary-fixed": "#23005c",
+                        "on-secondary-container": "#fffbff",
+                        "surface": "#faf8ff",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#c7c4d8",
+                        "outline": "#777587",
+                        "secondary": "#6b38d4",
+                        "surface-container-low": "#f2f3ff",
+                        "on-tertiary-fixed-variant": "#573878",
+                        "on-surface-variant": "#464555",
+                        "inverse-primary": "#c0c1ff",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#7a5a9d",
+                        "surface-container": "#eaedff",
+                        "on-primary-fixed-variant": "#2f2ebe"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+        }
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf8ff;
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased overflow-hidden">
+<!-- Side Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 h-screen w-64 border-r-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-50">
+<div class="mb-8 px-4">
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Cognitive Atelier</h1>
+<p class="text-xs text-on-surface-variant">AI Learning Partner</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors font-inter antialiased text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors font-inter antialiased text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                Vocabulary
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 bg-slate-200/50 dark:bg-slate-800/50 text-indigo-700 dark:text-indigo-300 rounded-xl font-inter antialiased text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over" style="font-variation-settings: 'FILL' 1;">record_voice_over</span>
+                Speaking
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors font-inter antialiased text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+                Writing
+            </a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3 mb-3">
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full bg-surface-container-high" data-alt="professional portrait of a young student with a friendly expression in a modern study environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAL4wJRPUney62e5m3Xx1L9UUiwZbORHvn9Klk00zeYmRvdH8r2WMuVFslvxLRj_KfzUCj37-6qSnmzzipaUwLHvu3eECnUxiFKaVIQ8f2YiV5CLQlW2eJ3laU4yrncMIPAquntnI5RbblBx4rYme-hUxDpmp1NRVLU1L1vDwV3q58ZCYkzRXklWxr3Laov4nTpdmB0H-PFJBXjuYGJtME19EWwH0Q2rXAO5yFKW-RViKynESMV_VeT2NfpvkzaQpQMIHZfkxzKXm0y"/>
+<div>
+<p class="text-xs font-bold">Alex Chen</p>
+<p class="text-[10px] text-on-surface-variant italic">IELTS Target: 8.5</p>
+</div>
+</div>
+<button class="w-full py-2 bg-gradient-primary text-white rounded-lg text-xs font-semibold shadow-md active:scale-95 duration-150">
+                Start Practice
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen bg-surface flex flex-col">
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none font-inter text-sm">
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-lg" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border-none rounded-full w-64 focus:ring-2 focus:ring-primary/20 text-xs" placeholder="Search lessons..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="minimalist abstract profile placeholder with geometric patterns in blue and lavender" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCO1SDpi1Krj1Z3MFFA-3jsBxJA4OW6G4OFCF8fYaA0_NxEuO-xYBN3boFGpc8n7YoKKvcYtFv5hXhSpQW9nW9H2TF1E3hIsZjsbnjLCX3_vV_kJZfLhKcFTMFDxBAg3IVXA9srO7nBiEhnMJAkG47_BHSwb7LWtS6KG3zm1zuN091UytXRl4F4Fdj2bcxi2VToz-gk6Z4NHDQNIs5UntyKoswGrksYyNVGsQtK7ARYlS549Fzfw5_q8ZJz4tPLLmJMliqEYJvWfeu"/>
+</div>
+</div>
+</header>
+<!-- Speaking Workspace -->
+<div class="flex-1 p-10 overflow-y-auto">
+<div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Practice Context (Left Side) -->
+<div class="lg:col-span-7 space-y-8">
+<div class="space-y-2">
+<span class="px-3 py-1 bg-secondary-container/10 text-secondary text-[10px] font-bold tracking-widest uppercase rounded-full">IELTS Speaking Part 2</span>
+<h2 class="text-3xl font-headline font-semibold text-on-surface tracking-tight leading-tight">Describe a technology you find difficult to use.</h2>
+<p class="text-on-surface-variant body-lg leading-relaxed max-w-xl">
+                            You should say: what it is, when you first used it, what it is used for, and explain why you find it difficult to use.
+                        </p>
+</div>
+<!-- Recording Visualizer Module -->
+<div class="bg-surface-container-low p-10 rounded-lg flex flex-col items-center justify-center relative overflow-hidden min-h-[400px]">
+<!-- Decorative Glass Background Elements -->
+<div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
+<!-- Pulse Animation (AI Thinking Placeholder) -->
+<div class="absolute inset-0 bg-surface-tint/5 opacity-0 pointer-events-none"></div>
+<!-- Waveform Visualization -->
+<div class="flex items-end justify-center gap-1.5 h-32 mb-12">
+<div class="w-1.5 h-4 bg-primary/20 rounded-full"></div>
+<div class="w-1.5 h-12 bg-primary/30 rounded-full"></div>
+<div class="w-1.5 h-20 bg-primary/40 rounded-full"></div>
+<div class="w-1.5 h-28 bg-gradient-primary rounded-full"></div>
+<div class="w-1.5 h-16 bg-primary/60 rounded-full"></div>
+<div class="w-1.5 h-24 bg-primary/40 rounded-full"></div>
+<div class="w-1.5 h-8 bg-primary/20 rounded-full"></div>
+<div class="w-1.5 h-14 bg-primary/30 rounded-full"></div>
+<div class="w-1.5 h-22 bg-primary/50 rounded-full"></div>
+<div class="w-1.5 h-32 bg-gradient-primary rounded-full"></div>
+<div class="w-1.5 h-12 bg-primary/40 rounded-full"></div>
+<div class="w-1.5 h-6 bg-primary/20 rounded-full"></div>
+</div>
+<!-- Central Record Button -->
+<div class="relative">
+<!-- Outer Glow -->
+<div class="absolute inset-0 bg-primary/20 rounded-full blur-xl scale-125"></div>
+<button class="relative w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center shadow-lg transform transition-transform hover:scale-105 active:scale-95 group">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+<p class="mt-8 text-on-surface-variant font-medium tracking-wide animate-pulse">Recording... 01:24</p>
+</div>
+<!-- Footer Help -->
+<div class="flex items-center gap-4 text-on-surface-variant/60 text-sm">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<p>Aim for a 2-minute response to maximize your Lexical Resource score.</p>
+</div>
+</div>
+<!-- AI Feedback Panel (Right Side) -->
+<aside class="lg:col-span-5 space-y-6">
+<!-- Overall Score Badge -->
+<div class="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/15 flex items-center justify-between">
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Estimated Band Score</p>
+<h3 class="text-4xl font-extrabold text-on-surface tracking-tighter">7.5 <span class="text-lg font-medium text-outline">/ 9.0</span></h3>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-secondary/20 flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full border-4 border-secondary border-t-transparent -rotate-45"></div>
+<span class="text-secondary font-bold text-sm">Top 5%</span>
+</div>
+</div>
+<!-- Feedback Categories (Bento Style) -->
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-surface-container-low p-5 rounded-lg space-y-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="speed">speed</span>
+<h4 class="font-bold text-sm">Fluency &amp; Coherence</h4>
+</div>
+<span class="text-xs font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">8.0</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Excellent pacing. You used hesitation markers effectively, though you repeated "however" three times in Part 2.</p>
+</div>
+<div class="bg-surface-container-low p-5 rounded-lg space-y-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="translate">translate</span>
+<h4 class="font-bold text-sm">Lexical Resource</h4>
+</div>
+<span class="text-xs font-bold px-2 py-0.5 bg-secondary/10 text-secondary rounded-full">7.0</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Good range of vocabulary. Consider using more idiomatic expressions like "steep learning curve" when discussing difficulty.</p>
+</div>
+<!-- Interactive Transcript/Insight Card -->
+<div class="bg-surface-container-high/50 p-6 rounded-lg space-y-4 border border-outline-variant/10">
+<h4 class="font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="auto_awesome">auto_awesome</span>
+                                AI-Generated Insight
+                            </h4>
+<div class="body-lg text-on-surface leading-relaxed text-sm italic border-l-2 border-tertiary pl-4 py-1">
+                                "...the interface was quite <span class="text-error underline decoration-wavy underline-offset-4">complicated</span> to understand at first sight..."
+                            </div>
+<p class="text-[11px] text-on-surface-variant">
+<strong>Tip:</strong> Instead of <span class="font-bold">complicated</span>, try using <span class="text-indigo-600 font-bold italic">convoluted</span> or <span class="text-indigo-600 font-bold italic">counter-intuitive</span> to reach Band 8.0+.
+                            </p>
+</div>
+</div>
+<button class="w-full py-4 bg-surface-container-highest text-primary font-bold rounded-lg text-sm hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="replay">replay</span>
+                        Try Again to Improve
+                    </button>
+</aside>
+</div>
+</div>
+</main>
+</body></html>

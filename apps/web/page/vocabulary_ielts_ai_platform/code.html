@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vocabulary Practice - Cognitive Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "secondary-fixed": "#e9ddff",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed": "#29074a",
+                "tertiary-fixed": "#efdbff",
+                "on-surface": "#131b2e",
+                "surface-bright": "#faf8ff",
+                "primary-fixed": "#e1e0ff",
+                "primary": "#393ac8",
+                "on-secondary-fixed-variant": "#5516be",
+                "inverse-surface": "#283044",
+                "on-primary-fixed": "#07006c",
+                "secondary-container": "#8455ef",
+                "tertiary-fixed-dim": "#dbb8ff",
+                "surface-container-high": "#e2e7ff",
+                "tertiary": "#614283",
+                "secondary-fixed-dim": "#d0bcff",
+                "primary-container": "#5356e1",
+                "on-primary-container": "#e8e6ff",
+                "background": "#faf8ff",
+                "on-error": "#ffffff",
+                "surface-dim": "#d2d9f4",
+                "on-tertiary-container": "#f3e2ff",
+                "on-secondary": "#ffffff",
+                "on-background": "#131b2e",
+                "surface-tint": "#494bd6",
+                "on-tertiary": "#ffffff",
+                "inverse-on-surface": "#eef0ff",
+                "surface-container-highest": "#dae2fd",
+                "surface-container-lowest": "#ffffff",
+                "error-container": "#ffdad6",
+                "surface-variant": "#dae2fd",
+                "on-secondary-fixed": "#23005c",
+                "on-secondary-container": "#fffbff",
+                "surface": "#faf8ff",
+                "error": "#ba1a1a",
+                "outline-variant": "#c7c4d8",
+                "outline": "#777587",
+                "secondary": "#6b38d4",
+                "surface-container-low": "#f2f3ff",
+                "on-tertiary-fixed-variant": "#573878",
+                "on-surface-variant": "#464555",
+                "inverse-primary": "#c0c1ff",
+                "primary-fixed-dim": "#c0c1ff",
+                "on-primary": "#ffffff",
+                "tertiary-container": "#7a5a9d",
+                "surface-container": "#eaedff",
+                "on-primary-fixed-variant": "#2f2ebe"
+              },
+              fontFamily: {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #393ac8 0%, #6b38d4 100%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background selection:bg-primary/20">
+<!-- Side Navigation Bar (from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 h-screen w-64 border-r-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl z-50">
+<div class="flex items-center gap-3 px-2 mb-10">
+<div class="w-10 h-10 rounded-xl btn-gradient flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50">Cognitive Atelier</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold opacity-60">AI Learning Partner</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2 font-inter antialiased text-sm font-medium">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 bg-slate-200/50 dark:bg-slate-800/50 text-indigo-700 dark:text-indigo-300 rounded-xl transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+                Vocabulary
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+                Speaking
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200/30 dark:hover:bg-slate-800/30 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+                Writing
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200/50">
+<div class="bg-surface-container-low rounded-2xl p-4 mb-4">
+<p class="text-xs text-on-surface-variant mb-2">Daily Progress</p>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-2/3 rounded-full"></div>
+</div>
+<p class="text-[10px] mt-2 font-bold text-secondary">42/60 words mastered</p>
+</div>
+<button class="w-full py-3 px-4 btn-gradient text-white rounded-xl font-bold text-sm shadow-md hover:opacity-90 transition-opacity Active:scale-95 duration-150">
+                Start Practice
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen relative overflow-hidden">
+<!-- Top Navigation Bar (from JSON) -->
+<header class="flex justify-between items-center w-full h-16 px-8 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none font-inter text-sm">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/50 transition-all" placeholder="Search expressions..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:text-indigo-500 transition-all">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-slate-200/50">
+<div class="text-right">
+<p class="font-bold text-on-surface leading-none">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant font-medium">IELTS Candidate</p>
+</div>
+<img alt="User Profile" class="w-10 h-10 rounded-full bg-surface-container-high object-cover" data-alt="minimal illustrative avatar of a young professional with short hair and glasses on a soft purple background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdD9tILlMM9SUFcBeMAi1CEDxLNKalP-m1qoW4hoUe76S48K5L_9ImkOt3SEVC9NxTT13TtpCfZvwv0-S8b0Ic2b-ZfwxiZTpWsX4JdJUSn2u4SPPEfCmvE9SBXKoZxBYIjSaMKAfyw5RHMbPl6eeOcUyW8hVqpm_RrMAlh-S6kxfsz4oj9fOUadywKf97LwRHpjws-qly9-E9GO-8ZB8pILGzE_BidpogQHx6wsjFh6ca57rs44wlUOUM-4Z8EFSiDeeNMFjExd8v"/>
+</div>
+</div>
+</header>
+<!-- Flashcard Hero Section -->
+<section class="max-w-5xl mx-auto px-8 py-12">
+<div class="flex justify-between items-end mb-12">
+<div>
+<span class="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider mb-2">Active Session: Academic Vocabulary</span>
+<h2 class="text-4xl font-headline font-semibold text-on-surface tracking-tight">Expand your Lexis</h2>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant text-sm font-medium">
+<span>Card <span class="text-on-surface font-bold">14</span> of 50</span>
+<div class="flex gap-1">
+<div class="w-6 h-1 rounded-full bg-primary"></div>
+<div class="w-6 h-1 rounded-full bg-primary/20"></div>
+<div class="w-6 h-1 rounded-full bg-primary/20"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8 items-start">
+<!-- Main Flashcard Area -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- The Card -->
+<div class="relative group h-[500px] w-full perspective-1000">
+<div class="relative w-full h-full text-center transition-all duration-700 transform-style-3d cursor-pointer">
+<!-- Card Front -->
+<div class="absolute inset-0 w-full h-full glass-panel rounded-lg border border-white/40 shadow-xl flex flex-col items-center justify-center p-12 overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-2 btn-gradient opacity-80"></div>
+<span class="material-symbols-outlined text-primary/30 text-6xl mb-6" data-icon="stylus_note">stylus_note</span>
+<h3 class="text-6xl font-headline font-bold text-on-surface mb-4 tracking-tighter">ubiquitous</h3>
+<p class="text-on-surface-variant text-lg font-medium italic mb-8">/juːˈbɪk.wɪ.təs/</p>
+<div class="flex items-center gap-4 py-2 px-6 rounded-full bg-surface-container-low text-on-surface-variant text-sm border border-slate-200/50">
+<span class="material-symbols-outlined text-base" data-icon="ads_click">ads_click</span>
+<span>Tap or space to reveal definition</span>
+</div>
+<!-- Decorative AI Pulse Background -->
+<div class="absolute -bottom-24 -right-24 w-64 h-64 bg-surface-tint opacity-10 blur-[100px] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Post-Reveal Interaction (Example Context) -->
+<div class="bg-surface-container-lowest rounded-lg p-10 shadow-sm border border-slate-100 space-y-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="lightbulb" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h4 class="font-bold text-lg">Example Sentence</h4>
+</div>
+<p class="text-xl text-on-surface-variant leading-relaxed font-medium">
+                            "The influence of artificial intelligence is becoming <span class="text-primary font-bold underline decoration-primary/30 underline-offset-4">ubiquitous</span> in modern healthcare systems, assisting doctors with faster diagnosis."
+                        </p>
+<div class="flex gap-3">
+<span class="py-1 px-3 bg-secondary/10 text-secondary text-xs font-bold rounded-lg">IELTS Band 8.5+</span>
+<span class="py-1 px-3 bg-slate-100 text-slate-500 text-xs font-bold rounded-lg">Academic Context</span>
+</div>
+</div>
+</div>
+<!-- Interaction Sidebar -->
+<div class="col-span-12 lg:col-span-4 space-y-6 sticky top-24">
+<div class="bg-surface-container-low rounded-lg p-8 space-y-8">
+<div>
+<h4 class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-6">Learning Actions</h4>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-between p-4 bg-white hover:bg-white/50 transition-all rounded-2xl group shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-bold text-on-surface">Mark as Learned</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-white hover:bg-white/50 transition-all rounded-2xl group shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="bookmark" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+</div>
+<span class="font-bold text-on-surface">Save to Deck</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 bg-white hover:bg-white/50 transition-all rounded-2xl group shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="replay">replay</span>
+</div>
+<span class="font-bold text-on-surface">Review Later</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="pt-6 border-t border-slate-200">
+<h4 class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-4">AI Insight</h4>
+<div class="p-4 bg-tertiary/5 rounded-2xl border border-tertiary/10">
+<p class="text-xs text-tertiary font-medium leading-relaxed">
+                                    "Ubiquitous" is a high-frequency academic term. Use it in Writing Task 2 when discussing technology, urbanization, or media trends.
+                                </p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined mb-2" data-icon="keyboard_arrow_left">keyboard_arrow_left</span>
+<span class="text-[10px] font-bold uppercase">Previous</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-2xl btn-gradient text-white shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined mb-2" data-icon="keyboard_arrow_right">keyboard_arrow_right</span>
+<span class="text-[10px] font-bold uppercase">Next Card</span>
+</button>
+</div>
+</div>
+<!-- Contextual Stats -->
+<div class="flex gap-4">
+<div class="flex-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Session Streak</p>
+<p class="text-2xl font-bold text-primary">12</p>
+</div>
+<div class="flex-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Time Elapsed</p>
+<p class="text-2xl font-bold text-on-surface">08:42</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Aesthetic Backdrop Elements -->
+<div class="fixed -bottom-48 -left-48 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10"></div>
+<div class="fixed -top-48 -right-48 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[100px] -z-10"></div>
+</main>
+</body></html>
