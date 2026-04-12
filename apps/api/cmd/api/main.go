@@ -1,96 +1,163 @@
+// @title           eEnglish IELTS API
+// @version         1.0
+// @description     Production-ready REST API for the eEnglish IELTS AI platform.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   eEnglish Team
+// @contact.email  support@eenglish.io
+
+// @license.name  MIT
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in                          header
+// @name                        Authorization
+// @description                 Type "Bearer" followed by a space and JWT token.
+
 package main
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/owner/eenglish/api/internal/config"
-	"github.com/owner/eenglish/api/internal/db"
-	"github.com/owner/eenglish/api/internal/middleware"
-	"github.com/owner/eenglish/api/internal/module/auth"
-	"github.com/owner/eenglish/api/internal/module/speaking"
-	"github.com/owner/eenglish/api/internal/module/user"
-	"github.com/owner/eenglish/api/internal/pkg/ai"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/unitechio/eLearning/apps/api/docs"
+	"github.com/unitechio/eLearning/apps/api/internal/config"
+	"github.com/unitechio/eLearning/apps/api/internal/middleware"
+	"github.com/unitechio/eLearning/apps/api/internal/module/auth"
+	"github.com/unitechio/eLearning/apps/api/internal/module/speaking"
+	"github.com/unitechio/eLearning/apps/api/internal/module/user"
+	"github.com/unitechio/eLearning/apps/api/internal/module/vocabulary"
+	"github.com/unitechio/eLearning/apps/api/internal/module/writing"
+	"github.com/unitechio/eLearning/apps/api/pkg/ai"
+	pkglogger "github.com/unitechio/eLearning/apps/api/pkg/logger"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 func main() {
-	_ = godotenv.Load()
-	cfg := config.LoadConfig()
+	cfg := config.Load()
 
-	// Initialize DB
-	database, err := db.Initialize(cfg.DBString)
+	logger := pkglogger.New(pkglogger.Config{
+		Level: cfg.Log.Level,
+		JSON:  cfg.Log.Format == "json",
+	})
+	slog.SetDefault(logger)
+
+	database, err := db.Open(cfg.DB.DSN)
 	if err != nil {
-		log.Fatalf("Could not connect to database: %v", err)
+		logger.Error("failed to connect to database", slog.String("error", err.Error()))
+		panic(err)
 	}
-	
-	// auto migrate for demo
-	db.AutoMigrate(database)
+	if err := db.Migrate(database); err != nil {
+		logger.Error("failed to migrate database", slog.String("error", err.Error()))
+		panic(err)
+	}
+	logger.Info("database connected and migrated")
 
-	r := gin.Default()
-
-	// CORS
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // Configurable in prod
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
-
-	r.Use(middleware.ErrorHandler())
-	r.Use(middleware.Logger())
-
-	// Init Repos
+	// Repositories
 	userRepo := user.NewRepository(database)
-	
-	// Init Services
-	userService := user.NewService(userRepo)
-	authService := auth.NewService(userRepo, cfg.JWTSecret)
+	vocabRepo := vocabulary.NewRepository(database)
+	writingRepo := writing.NewRepository(database)
 
-	sttService := ai.NewSTTService()
-	llmService := ai.NewLLMService()
-	speakingService := speaking.NewService(sttService, llmService)
+	// Services
+	userSvc := user.NewService(userRepo)
+	authSvc := auth.NewService(userRepo, &cfg.JWT)
+	sttSvc := ai.NewSTTService()
+	llmSvc := ai.NewLLMService()
+	speakingSvc := speaking.NewService(sttSvc, llmSvc)
+	vocabSvc := vocabulary.NewService(vocabRepo)
+	writingSvc := writing.NewService(writingRepo, llmSvc)
 
-	// Init Handlers
-	userHandler := user.NewHandler(userService)
-	authHandler := auth.NewHandler(authService)
-	speakingHandler := speaking.NewHandler(speakingService)
+	// Handlers
+	userH := user.NewHandler(userSvc)
+	authH := auth.NewHandler(authSvc)
+	speakingH := speaking.NewHandler(speakingSvc)
+	vocabH := vocabulary.NewHandler(vocabSvc)
+	writingH := writing.NewHandler(writingSvc)
 
-	apiGroup := r.Group("/api/v1")
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+
+	// Global middleware
+	r.Use(middleware.RequestID())
+	r.Use(middleware.Logger(logger))
+	r.Use(middleware.ErrorHandler(logger))
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "X-Request-ID"},
+		ExposeHeaders:    []string{"X-Request-ID"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	r.Use(middleware.RateLimit(100))
+
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		response.OK(c, "healthy", gin.H{"time": time.Now().UTC()})
+	})
+
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	v1 := r.Group("/api/v1")
 	{
 		// Public
-		authRoutes := apiGroup.Group("/auth")
+		a := v1.Group("/auth")
 		{
-			authRoutes.POST("/register", authHandler.Register)
-			authRoutes.POST("/login", authHandler.Login)
+			a.POST("/register", authH.Register)
+			a.POST("/login", authH.Login)
 		}
 
 		// Protected
-		protected := apiGroup.Group("/")
-		protected.Use(middleware.JWTAuth(cfg.JWTSecret))
+		protected := v1.Group("/", middleware.JWTAuth(cfg.JWT.Secret))
 		{
-			userRoutes := protected.Group("/users")
+			u := protected.Group("/users")
 			{
-				userRoutes.GET("/me", userHandler.GetMe)
-				// other protected routes
+				u.GET("/me", userH.GetMe)
+				u.PUT("/me", userH.UpdateMe)
 			}
 
-			speakingRoutes := protected.Group("/speaking")
+			s := protected.Group("/speaking")
 			{
-				speakingRoutes.POST("/analyze", speakingHandler.Analyze)
+				s.POST("/analyze", speakingH.Analyze)
+			}
+
+			voc := protected.Group("/vocabulary")
+			{
+				voc.GET("/due", vocabH.GetDueWords)
+				voc.POST("/review", vocabH.SubmitReview)
+				voc.GET("/words", vocabH.GetAllWords)
+			}
+
+			w := protected.Group("/writing")
+			{
+				w.POST("/submit", writingH.Submit)
+				w.GET("/history", writingH.GetHistory)
 			}
 		}
 	}
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
-	})
+	addr := fmt.Sprintf(":%s", cfg.Server.Port)
+	logger.Info("server starting", slog.String("addr", addr))
 
-	log.Printf("Starting server on port %s", cfg.Port)
-	if err := r.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      r,
+		ReadTimeout:  cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+	}
+
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Error("server error", slog.String("error", err.Error()))
+		panic(err)
 	}
 }

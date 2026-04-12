@@ -1,34 +1,56 @@
 package user
 
 import (
-	"fmt"
-	"net/http"
-	
 	"github.com/gin-gonic/gin"
-	"github.com/owner/eenglish/api/internal/pkg/response"
+	"github.com/unitechio/eLearning/apps/api/internal/middleware"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-type Handler struct {
-	Service Service
-}
+type Handler struct{ svc Service }
 
-func NewHandler(s Service) *Handler {
-	return &Handler{Service: s}
-}
+func NewHandler(svc Service) *Handler { return &Handler{svc: svc} }
 
+// GetMe godoc
+// @Summary      Get current user profile
+// @Tags         users
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  response.Envelope{data=User}
+// @Failure      401  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /users/me [get]
 func (h *Handler) GetMe(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		response.Error(c, http.StatusUnauthorized, "User not authenticated")
-		return
-	}
-
-	idStr := fmt.Sprintf("%v", userID)
-	user, err := h.Service.GetUser(idStr)
+	uid := c.GetUint(middleware.ContextKeyUserID)
+	u, err := h.svc.GetByID(uid)
 	if err != nil {
-		response.Error(c, http.StatusNotFound, "User not found")
+		_ = c.Error(err)
 		return
 	}
+	response.OK(c, "profile fetched", u)
+}
 
-	response.Success(c, http.StatusOK, "User fetched successfully", user)
+// UpdateMe godoc
+// @Summary      Update current user profile
+// @Tags         users
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      UpdateProfileRequest  true  "Profile data"
+// @Success      200   {object}  response.Envelope{data=User}
+// @Failure      400   {object}  response.Envelope
+// @Failure      401   {object}  response.Envelope
+// @Router       /users/me [put]
+func (h *Handler) UpdateMe(c *gin.Context) {
+	var req UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	uid := c.GetUint(middleware.ContextKeyUserID)
+	u, err := h.svc.UpdateProfile(uid, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "profile updated", u)
 }

@@ -2,46 +2,50 @@ package speaking
 
 import (
 	"io"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/owner/eenglish/api/internal/pkg/response"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-type Handler struct {
-	Service Service
-}
+type Handler struct{ svc Service }
 
-func NewHandler(s Service) *Handler {
-	return &Handler{Service: s}
-}
+func NewHandler(svc Service) *Handler { return &Handler{svc: svc} }
 
-// POST /speaking/analyze
+// Analyze godoc
+// @Summary      Analyze speaking audio
+// @Tags         speaking
+// @Security     BearerAuth
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        audio  formData  file  true  "Audio file (webm/wav/mp3)"
+// @Success      200    {object}  response.Envelope{data=AnalyzeResult}
+// @Failure      400    {object}  response.Envelope
+// @Failure      401    {object}  response.Envelope
+// @Failure      500    {object}  response.Envelope
+// @Router       /speaking/analyze [post]
 func (h *Handler) Analyze(c *gin.Context) {
-	err := c.Request.ParseMultipartForm(10 << 20) // 10 MB limit
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Failed to parse multipart form")
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil {
+		response.Fail(c, 400, "failed to parse multipart form")
 		return
 	}
 
 	file, _, err := c.Request.FormFile("audio")
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Audio file is required")
+		response.Fail(c, 400, "audio field is required")
 		return
 	}
 	defer file.Close()
 
 	audioData, err := io.ReadAll(file)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Failed to read audio file")
+		response.Fail(c, 500, "failed to read audio file")
 		return
 	}
 
-	result, err := h.Service.AnalyzeAudio(audioData)
+	result, err := h.svc.AnalyzeAudio(audioData)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		_ = c.Error(err)
 		return
 	}
-
-	response.Success(c, http.StatusOK, "Analysis complete", result)
+	response.OK(c, "analysis complete", result)
 }

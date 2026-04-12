@@ -1,68 +1,96 @@
 package auth
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/owner/eenglish/api/internal/module/user"
+	"github.com/unitechio/eLearning/apps/api/internal/config"
+	"github.com/unitechio/eLearning/apps/api/internal/module/user"
+	"github.com/unitechio/eLearning/apps/api/pkg/apperr"
 	"golang.org/x/crypto/bcrypt"
 )
 
+type LoginRequest struct {
+	Email    string `json:"email"    binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type RegisterRequest struct {
+	Name     string `json:"name"     binding:"required,min=2,max=100"`
+	Email    string `json:"email"    binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type AuthResponse struct {
+	Token string     `json:"token"`
+	User  *user.User `json:"user"`
+}
+
 type Service interface {
-	Login(email, password string) (string, *user.User, error)
-	Register(name, email, password string) (*user.User, error)
+	Register(req RegisterRequest) (*AuthResponse, error)
+	Login(req LoginRequest) (*AuthResponse, error)
 }
 
 type service struct {
-	userRepo   user.Repository
-	jwtSecret  string
+	userRepo  user.Repository
+	jwtSecret string
+	jwtExpiry time.Duration
 }
 
-func NewService(repo user.Repository, jwtSecret string) Service {
-	return &service{userRepo: repo, jwtSecret: jwtSecret}
+func NewService(userRepo user.Repository, cfg *config.JWTConfig) Service {
+	return &service{
+		userRepo:  userRepo,
+		jwtSecret: cfg.Secret,
+		jwtExpiry: cfg.AccessExpiry,
+	}
 }
 
-func (s *service) Login(email, password string) (string, *user.User, error) {
-	u, err := s.userRepo.FindByEmail(email)
-	if err != nil {
-		return "", nil, errors.New("invalid credentials")
+func (s *service) Register(req RegisterRequest) (*AuthResponse, error) {
+	existing, _ := s.userRepo.FindByEmail(req.Email)
+	if existing != nil && existing.ID != 0 {
+		return nil, apperr.Conflict("email already registered")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(u.PasswordStr), []byte(password))
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", nil, errors.New("invalid credentials")
+		return nil, apperr.Internal(err)
 	}
 
-	// Generate JWT
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	u := &user.User{Name: req.Name, Email: req.Email, Password: string(hashed)}
+	if err := s.userRepo.Create(u); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	token, err := s.generateToken(u)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	return &AuthResponse{Token: token, User: u}, nil
+}
+
+func (s *service) Login(req LoginRequest) (*AuthResponse, error) {
+	u, err := s.userRepo.FindByEmail(req.Email)
+	if err != nil {
+		return nil, apperr.Unauthorized("invalid credentials")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(req.Password)); err != nil {
+		return nil, apperr.Unauthorized("invalid credentials")
+	}
+
+	token, err := s.generateToken(u)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	return &AuthResponse{Token: token, User: u}, nil
+}
+
+func (s *service) generateToken(u *user.User) (string, error) {
+	claims := jwt.MapClaims{
 		"user_id": u.ID,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(s.jwtSecret))
-	if err != nil {
-		return "", nil, err
+		"email":   u.Email,
+		"exp":     time.Now().Add(s.jwtExpiry).Unix(),
+		"iat":     time.Now().Unix(),
 	}
-
-	return tokenString, u, nil
-}
-
-func (s *service) Register(name, email, password string) (*user.User, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
-	u := &user.User{
-		Name:        name,
-		Email:       email,
-		PasswordStr: string(hashedPassword),
-	}
-
-	createdUser, err := s.userRepo.Create(u)
-	if err != nil {
-		return nil, err
-	}
-	return createdUser, nil
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.jwtSecret))
 }

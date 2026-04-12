@@ -3,7 +3,8 @@ package speaking
 import (
 	"fmt"
 
-	"github.com/owner/eenglish/api/internal/pkg/ai"
+	"github.com/unitechio/eLearning/apps/api/pkg/ai"
+	"github.com/unitechio/eLearning/apps/api/pkg/apperr"
 )
 
 type AnalyzeResult struct {
@@ -18,35 +19,33 @@ type Service interface {
 }
 
 type service struct {
-	sttService ai.SpeechToTextService
-	llmService ai.LLMService
+	stt ai.SpeechToTextService
+	llm ai.LLMService
 }
 
 func NewService(stt ai.SpeechToTextService, llm ai.LLMService) Service {
-	return &service{
-		sttService: stt,
-		llmService: llm,
-	}
+	return &service{stt: stt, llm: llm}
 }
 
 func (s *service) AnalyzeAudio(audioData []byte) (*AnalyzeResult, error) {
-	// 1. Transcribe Audio
-	transcript, err := s.sttService.Transcribe(audioData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to transcribe audio: %w", err)
+	if len(audioData) == 0 {
+		return nil, apperr.BadRequest("audio data is empty")
 	}
 
-	// 2. Evaluate Transcript with LLM
-	evaluation, err := s.llmService.EvaluateSpeaking(transcript)
+	transcript, err := s.stt.Transcribe(audioData)
 	if err != nil {
-		return nil, fmt.Errorf("failed to evaluate transcript: %w", err)
+		return nil, apperr.Internal(fmt.Errorf("stt: %w", err))
 	}
 
-	// 3. Construct Result
+	eval, err := s.llm.EvaluateSpeaking(transcript)
+	if err != nil {
+		return nil, apperr.Internal(fmt.Errorf("llm: %w", err))
+	}
+
 	return &AnalyzeResult{
 		Transcript:     transcript,
-		Score:          evaluation.Score,
-		Feedback:       evaluation.Feedback,
-		ImprovedAnswer: evaluation.ImprovedAnswer,
+		Score:          eval.Score,
+		Feedback:       eval.Feedback,
+		ImprovedAnswer: eval.ImprovedAnswer,
 	}, nil
 }

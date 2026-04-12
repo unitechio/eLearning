@@ -1,0 +1,573 @@
+basePath: /api/v1
+definitions:
+  github_com_unitechio_eLearning_apps_api_internal_module_user.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody'
+      message:
+        type: string
+      meta:
+        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta'
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody:
+    properties:
+      code:
+        type: integer
+      fields:
+        additionalProperties:
+          type: string
+        description: validation field errors
+        type: object
+      message:
+        type: string
+    type: object
+  github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_items:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  internal_module_auth.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_module_user.User'
+    type: object
+  internal_module_auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_module_auth.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  internal_module_speaking.AnalyzeResult:
+    properties:
+      feedback:
+        type: string
+      improved_answer:
+        type: string
+      score:
+        type: number
+      transcript:
+        type: string
+    type: object
+  internal_module_user.UpdateProfileRequest:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - name
+    type: object
+  internal_module_user.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  internal_module_vocabulary.ReviewRequest:
+    properties:
+      correct:
+        type: boolean
+      word_id:
+        type: integer
+    required:
+    - word_id
+    type: object
+  internal_module_vocabulary.UserWordProgress:
+    properties:
+      box_number:
+        type: integer
+      consecutive_correct:
+        type: integer
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      last_review_at:
+        type: string
+      next_review_at:
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        type: integer
+      word:
+        $ref: '#/definitions/internal_module_vocabulary.Word'
+      word_id:
+        type: integer
+    type: object
+  internal_module_vocabulary.Word:
+    properties:
+      createdAt:
+        type: string
+      definition:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      example:
+        type: string
+      id:
+        type: integer
+      level:
+        type: string
+      part_of_speech:
+        type: string
+      phonetic:
+        type: string
+      updatedAt:
+        type: string
+      word:
+        type: string
+    type: object
+  internal_module_writing.HistoryResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/internal_module_writing.Submission'
+        type: array
+      meta:
+        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta'
+    type: object
+  internal_module_writing.Submission:
+    properties:
+      ai_feedback:
+        type: string
+      ai_score:
+        type: number
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      prompt:
+        type: string
+      response:
+        type: string
+      updatedAt:
+        type: string
+      user_id:
+        type: integer
+      word_count:
+        type: integer
+    type: object
+  internal_module_writing.SubmitRequest:
+    properties:
+      prompt:
+        type: string
+      response:
+        minLength: 50
+        type: string
+    required:
+    - prompt
+    - response
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@eenglish.io
+    name: eEnglish Team
+  description: Production-ready REST API for the eEnglish IELTS AI platform.
+  license:
+    name: MIT
+  termsOfService: http://swagger.io/terms/
+  title: eEnglish IELTS API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_auth.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      summary: Login with email and password
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_auth.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      summary: Register a new user
+      tags:
+      - auth
+  /speaking/analyze:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Audio file (webm/wav/mp3)
+        in: formData
+        name: audio
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_speaking.AnalyzeResult'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Analyze speaking audio
+      tags:
+      - speaking
+  /users/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_user.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profile data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_user.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_user.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Update current user profile
+      tags:
+      - users
+  /vocabulary/due:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/internal_module_vocabulary.UserWordProgress'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get vocabulary cards due for review today
+      tags:
+      - vocabulary
+  /vocabulary/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Review result
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_vocabulary.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_vocabulary.UserWordProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Submit a vocabulary review result
+      tags:
+      - vocabulary
+  /vocabulary/words:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/internal_module_vocabulary.Word'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get all vocabulary words
+      tags:
+      - vocabulary
+  /writing/history:
+    get:
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 10, max: 50)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_writing.HistoryResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get user's writing submission history
+      tags:
+      - writing
+  /writing/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Writing submission
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_module_writing.SubmitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_module_writing.Submission'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Submit a writing response for AI evaluation
+      tags:
+      - writing
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

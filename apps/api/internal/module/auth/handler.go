@@ -1,62 +1,58 @@
 package auth
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/owner/eenglish/api/internal/pkg/response"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-type Handler struct {
-	Service Service
-}
+type Handler struct{ svc Service }
 
-func NewHandler(s Service) *Handler {
-	return &Handler{Service: s}
-}
+func NewHandler(svc Service) *Handler { return &Handler{svc: svc} }
 
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-type RegisterRequest struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-func (h *Handler) Login(c *gin.Context) {
-	var req LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request payload")
-		return
-	}
-
-	token, user, err := h.Service.Login(req.Email, req.Password)
-	if err != nil {
-		response.Error(c, http.StatusUnauthorized, "Invalid credentials")
-		return
-	}
-
-	response.Success(c, http.StatusOK, "Login successful", gin.H{
-		"token": token,
-		"user":  user,
-	})
-}
-
+// Register godoc
+// @Summary      Register a new user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      RegisterRequest  true  "Registration payload"
+// @Success      201   {object}  response.Envelope{data=AuthResponse}
+// @Failure      400   {object}  response.Envelope
+// @Failure      409   {object}  response.Envelope
+// @Router       /auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "Invalid request payload")
+		response.Fail(c, 400, err.Error())
 		return
 	}
-
-	user, err := h.Service.Register(req.Name, req.Email, req.Password)
+	res, err := h.svc.Register(req)
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not register user")
+		_ = c.Error(err)
 		return
 	}
+	response.Created(c, "registration successful", res)
+}
 
-	response.Success(c, http.StatusCreated, "User registered successfully", user)
+// Login godoc
+// @Summary      Login with email and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      LoginRequest  true  "Login credentials"
+// @Success      200   {object}  response.Envelope{data=AuthResponse}
+// @Failure      400   {object}  response.Envelope
+// @Failure      401   {object}  response.Envelope
+// @Router       /auth/login [post]
+func (h *Handler) Login(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	res, err := h.svc.Login(req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "login successful", res)
 }
