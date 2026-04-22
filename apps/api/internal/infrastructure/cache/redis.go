@@ -3,13 +3,12 @@ package cache
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/unitechio/eLearning/apps/api/internal/config"
-	"go.uber.org/zap"
-	"gorm.io/gorm/logger"
 )
 
 // Client is the global Redis client
@@ -17,8 +16,9 @@ var Client *redis.Client
 
 // Init initializes the Redis connection
 func Init(cfg *config.RedisConfig) error {
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	Client = redis.NewClient(&redis.Options{
-		Addr:     cfg.GetRedisAddr(),
+		Addr:     addr,
 		Password: cfg.Password,
 		DB:       cfg.DB,
 		PoolSize: cfg.PoolSize,
@@ -32,9 +32,9 @@ func Init(cfg *config.RedisConfig) error {
 		return fmt.Errorf("failed to connect to Redis: %w", err)
 	}
 
-	logger.Info("Redis connected successfully",
-		zap.String("addr", cfg.GetRedisAddr()),
-		zap.Int("db", cfg.DB),
+	slog.Info("Redis connected successfully",
+		slog.String("addr", addr),
+		slog.Int("db", cfg.DB),
 	)
 
 	return nil

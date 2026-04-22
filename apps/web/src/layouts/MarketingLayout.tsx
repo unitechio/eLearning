@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 
-export default function MarketingLayout() {
+export function MarketingLayout() {
   return (
     <div className="min-h-screen bg-background relative flex flex-col">
       {/* Root Nav for Marketing */}

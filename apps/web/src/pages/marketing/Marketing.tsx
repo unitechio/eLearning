@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Shield, Zap, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 
-export default function MarketingPage() {
+export function MarketingPage() {
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
@@ -12,22 +12,22 @@ export default function MarketingPage() {
           <Sparkles className="w-3 h-3" />
           The future of IELTS preparation
         </div>
-        
+
         <h1 className="text-6xl lg:text-[5rem] font-black leading-[1.1] tracking-tighter text-slate-900 mb-8 max-w-4xl">
            Experience an AI-Driven <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">IELTS Powerhouse</span>
         </h1>
-        
+
         <p className="text-xl lg:text-2xl text-slate-500 font-medium max-w-2xl mb-12 leading-relaxed">
           The ultimate companion for your English proficiency journey. Master speaking, writing, and vocabulary with personalized AI feedback.
         </p>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <Button asChild className="h-14 px-10 rounded-2xl bg-gradient-to-r from-primary to-secondary text-lg font-bold shadow-2xl shadow-primary/30">
             <Link to="/login" className="flex items-center gap-2">
               Start Your Free Trial <ArrowRight className="w-5 h-5 ml-1" />
             </Link>
           </Button>
-          
+
           <Button variant="outline" className="h-14 px-10 rounded-2xl bg-white/50 backdrop-blur-md text-lg font-bold border-slate-100 hover:bg-slate-50 transition-all">
             <Link to="/dashboard">View Live Demo</Link>
           </Button>

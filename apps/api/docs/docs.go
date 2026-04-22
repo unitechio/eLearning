@@ -9,19 +9,1319 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "eEnglish Team",
-            "email": "support@eenglish.io"
-        },
-        "license": {
-            "name": "MIT"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/activities": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "Create activity",
+                "parameters": [
+                    {
+                        "description": "Activity payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertActivityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Activity"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activities/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "Get activity by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Activity"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "Update activity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Activity payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertActivityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Activity"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "Delete activity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/activities/{id}/submissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "List submissions for activity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search answer or feedback",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by submission status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Submission"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activities/{id}/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activities"
+                ],
+                "summary": "Submit activity answer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Submission payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SubmitActivityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Submission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/daily": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity-tracking"
+                ],
+                "summary": "Get daily activity stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "7d, 30d, 3m",
+                        "name": "range",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.DailyActivityPoint"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/heatmap": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity-tracking"
+                ],
+                "summary": "Get activity heatmap",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "7d, 30d, 3m, 6m",
+                        "name": "range",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.HeatmapPoint"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/time-spent": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity-tracking"
+                ],
+                "summary": "Get time spent summary",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TimeSpentSnapshot"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/activity/xp": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity-tracking"
+                ],
+                "summary": "Get XP history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.XPHistoryItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/ai-usage": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get admin AI usage",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AIUsageSnapshot"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/analytics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get admin analytics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AnalyticsSnapshot"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "List admin courses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by title or description",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by domain",
+                        "name": "domain",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by level",
+                        "name": "level",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Course"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Create admin course",
+                "parameters": [
+                    {
+                        "description": "Course payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Course"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/courses/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Update admin course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Course"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Delete admin course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "List admin users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by email or name",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.AdminUser"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{id}/status": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Update user status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AdminUser"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/chat": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Chat with AI coach",
+                "parameters": [
+                    {
+                        "description": "AI chat payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/context-correction": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Get premium AI context correction",
+                "parameters": [
+                    {
+                        "description": "Context correction payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/evaluate-speaking": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Evaluate speaking with AI",
+                "parameters": [
+                    {
+                        "description": "AI speaking evaluation payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/evaluate-writing": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Evaluate writing with AI",
+                "parameters": [
+                    {
+                        "description": "AI writing evaluation payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.WritingEvaluationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/generate-question": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Generate question with AI",
+                "parameters": [
+                    {
+                        "description": "AI question payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIQuestionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/pronunciation-feedback": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Get premium AI pronunciation feedback",
+                "parameters": [
+                    {
+                        "description": "Pronunciation feedback payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/stream-response": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "summary": "Get premium AI stream response",
+                "parameters": [
+                    {
+                        "description": "AI stream payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIStreamRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/improvement": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "summary": "Get improvement analytics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ImprovementInsight"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/learning-pattern": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "summary": "Get learning pattern analytics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LearningPattern"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/analytics/weak-points": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "summary": "Get weak points analytics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.WeakPoint"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/forgot-password": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Request password reset",
+                "parameters": [
+                    {
+                        "description": "Forgot password payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "consumes": [
@@ -41,7 +1341,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_module_auth.LoginRequest"
+                            "$ref": "#/definitions/service.LoginRequest"
                         }
                     }
                 ],
@@ -51,13 +1351,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_auth.AuthResponse"
+                                            "$ref": "#/definitions/service.AuthResponse"
                                         }
                                     }
                                 }
@@ -67,13 +1367,82 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.TokenRefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -98,7 +1467,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_module_auth.RegisterRequest"
+                            "$ref": "#/definitions/service.RegisterRequest"
                         }
                     }
                 ],
@@ -108,13 +1477,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_auth.AuthResponse"
+                                            "$ref": "#/definitions/service.AuthResponse"
                                         }
                                     }
                                 }
@@ -124,13 +1493,2627 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset password",
+                "parameters": [
+                    {
+                        "description": "Reset password payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-email": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify email address",
+                "parameters": [
+                    {
+                        "description": "Verify email payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VerifyEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/billing/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "billing"
+                ],
+                "summary": "Get billing history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by plan name",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.BillingHistoryItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/billing/plans": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "billing"
+                ],
+                "summary": "List billing plans",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by plan name or description",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by currency",
+                        "name": "currency",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.BillingPlan"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/billing/subscribe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "billing"
+                ],
+                "summary": "Subscribe billing plan",
+                "parameters": [
+                    {
+                        "description": "Subscription payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SubscribeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "List courses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by title or description",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by domain",
+                        "name": "domain",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by level",
+                        "name": "level",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Course"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Create course",
+                "parameters": [
+                    {
+                        "description": "Course payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Course"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get course by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Course"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Update course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Course payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertCourseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Course"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Delete course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/courses/{id}/modules": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "List course modules",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search module title",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.CourseModule"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/dictionary/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dictionary"
+                ],
+                "summary": "Get dictionary history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by word or meaning",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by saved state",
+                        "name": "saved",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.DictionaryLookupResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/dictionary/lookup": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dictionary"
+                ],
+                "summary": "Lookup dictionary entry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Word to lookup",
+                        "name": "word",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DictionaryLookupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/dictionary/save": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dictionary"
+                ],
+                "summary": "Save dictionary word",
+                "parameters": [
+                    {
+                        "description": "Word payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.DictionarySaveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DictionaryLookupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gamification/achievements": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gamification"
+                ],
+                "summary": "Get achievements",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Achievement"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gamification/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gamification"
+                ],
+                "summary": "Get gamification profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GamificationProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gamification/streak": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gamification"
+                ],
+                "summary": "Get streak summary",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/gamification/xp": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gamification"
+                ],
+                "summary": "Add XP for current user",
+                "parameters": [
+                    {
+                        "description": "XP payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddXPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GamificationProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/gamification/xp/add": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "gamification"
+                ],
+                "summary": "Add XP for current user",
+                "parameters": [
+                    {
+                        "description": "XP payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddXPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GamificationProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/leaderboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "leaderboard"
+                ],
+                "summary": "Get leaderboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "weekly or monthly",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "xp or time",
+                        "name": "metric",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Result limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.LeaderboardEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/leaderboard/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "leaderboard"
+                ],
+                "summary": "Get my leaderboard standing",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "weekly or monthly",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "xp or time",
+                        "name": "metric",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LeaderboardEntry"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Create lesson",
+                "parameters": [
+                    {
+                        "description": "Lesson payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Lesson"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/lessons/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Update lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Lesson"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "lessons"
+                ],
+                "summary": "Delete lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/listening/lessons": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listening"
+                ],
+                "summary": "List listening lessons",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search title, description or transcript",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.ListeningLesson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/listening/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listening"
+                ],
+                "summary": "Get listening lesson by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Listening lesson ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ListeningLesson"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/listening/{id}/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listening"
+                ],
+                "summary": "Submit listening answers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Listening lesson ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Listening submission payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListeningSubmissionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/modules": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "modules"
+                ],
+                "summary": "Create module",
+                "parameters": [
+                    {
+                        "description": "Module payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertModuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CourseModule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/modules/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "modules"
+                ],
+                "summary": "Update module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Module payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertModuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CourseModule"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "modules"
+                ],
+                "summary": "Delete module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/modules/{id}/lessons": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "modules"
+                ],
+                "summary": "List module lessons",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search lesson title or content",
+                        "name": "q",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Lesson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "List notifications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search title or message",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by category",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by read status",
+                        "name": "is_read",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.NotificationItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/{id}/read": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Mark notification as read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/planner": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "planner"
+                ],
+                "summary": "Get study planner",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Planner"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/planner/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "planner"
+                ],
+                "summary": "Generate study planner",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Planner"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/planner/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "planner"
+                ],
+                "summary": "Update study planner",
+                "parameters": [
+                    {
+                        "description": "Planner payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PlannerUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Planner"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/dictation/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Start practice session",
+                "parameters": [
+                    {
+                        "description": "Practice start payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeStartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/dictation/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Submit practice session",
+                "parameters": [
+                    {
+                        "description": "Practice submit payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeSubmitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/modes": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Get practice modes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeModesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/shadowing/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Start practice session",
+                "parameters": [
+                    {
+                        "description": "Practice start payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeStartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/shadowing/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Submit practice session",
+                "parameters": [
+                    {
+                        "description": "Practice submit payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeSubmitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Start practice session",
+                "parameters": [
+                    {
+                        "description": "Practice start payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeStartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/practice/submit": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "practice"
+                ],
+                "summary": "Submit practice session",
+                "parameters": [
+                    {
+                        "description": "Practice submit payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PracticeSubmitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PracticeSessionItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/premium/features": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "premium"
+                ],
+                "summary": "Get premium feature list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.PremiumFeature"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/premium/unlock": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "premium"
+                ],
+                "summary": "Unlock premium feature",
+                "parameters": [
+                    {
+                        "description": "Premium feature payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PremiumUnlockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/progress": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Get overall progress",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ProgressSnapshot"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/progress/activity/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Get activity progress",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Activity ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/progress/course/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Get course progress",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/pronunciation/analyze-sentence": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pronunciation"
+                ],
+                "summary": "Analyze sentence pronunciation",
+                "parameters": [
+                    {
+                        "description": "Sentence payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PronunciationAnalyzeSentenceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PronunciationHistoryItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pronunciation/analyze-word": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pronunciation"
+                ],
+                "summary": "Analyze word pronunciation",
+                "parameters": [
+                    {
+                        "description": "Word payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PronunciationAnalyzeWordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PronunciationHistoryItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/pronunciation/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pronunciation"
+                ],
+                "summary": "Get pronunciation history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "word or sentence",
+                        "name": "kind",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.PronunciationHistoryItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/reading/lookup": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reading"
+                ],
+                "summary": "Inline reading lookup",
+                "parameters": [
+                    {
+                        "description": "Reading lookup payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadingLookupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DictionaryLookupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/reading/save-word": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reading"
+                ],
+                "summary": "Save reading word",
+                "parameters": [
+                    {
+                        "description": "Reading save payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReadingSaveWordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.DictionaryLookupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/recommendations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Get recommendations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.RecommendationItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/recommendations/next": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Get next recommended lesson",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/recommendations/next-lesson": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "recommendations"
+                ],
+                "summary": "Get next recommended lesson",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -168,13 +4151,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_speaking.AnalyzeResult"
+                                            "$ref": "#/definitions/service.AnalyzeResult"
                                         }
                                     }
                                 }
@@ -184,19 +4167,302 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/speaking/pronunciation": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "speaking"
+                ],
+                "summary": "Analyze pronunciation",
+                "parameters": [
+                    {
+                        "description": "Pronunciation payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PronunciationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.PronunciationResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/speaking/session/start": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "speaking"
+                ],
+                "summary": "Start speaking session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SpeakingSession"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/speaking/session/stop": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "speaking"
+                ],
+                "summary": "Stop speaking session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SpeakingSession"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/speaking/session/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "speaking"
+                ],
+                "summary": "Get speaking session by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SpeakingSession"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/submissions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "Get submission by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Submission ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Submission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/users/activities": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user activities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by title or description",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by activity type",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.UserActivityItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -222,13 +4488,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_user.User"
+                                            "$ref": "#/definitions/model.User"
                                         }
                                     }
                                 }
@@ -238,13 +4504,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -272,7 +4538,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_module_user.UpdateProfileRequest"
+                            "$ref": "#/definitions/service.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -282,13 +4548,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_user.User"
+                                            "$ref": "#/definitions/model.User"
                                         }
                                     }
                                 }
@@ -298,13 +4564,315 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/progress": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user course progress",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.UserProgress"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get current user stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.UserStats"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/vocab/sets": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocab-sets"
+                ],
+                "summary": "List vocabulary sets",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by set name",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by domain",
+                        "name": "domain",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.VocabularySetItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocab-sets"
+                ],
+                "summary": "Create vocabulary set",
+                "parameters": [
+                    {
+                        "description": "Vocabulary set payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VocabularySetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.VocabularySetItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/vocab/sets/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocab-sets"
+                ],
+                "summary": "Get vocabulary set by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.VocabularySetItem"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/vocab/sets/{id}/add-word": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocab-sets"
+                ],
+                "summary": "Add word to vocabulary set",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Word payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VocabularySetAddWordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.VocabularySetItem"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -323,14 +4891,14 @@ const docTemplate = `{
                 "tags": [
                     "vocabulary"
                 ],
-                "summary": "Get vocabulary cards due for review today",
+                "summary": "Get vocabulary cards due for review",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
@@ -338,7 +4906,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/internal_module_vocabulary.UserWordProgress"
+                                                "$ref": "#/definitions/model.UserVocabularyProgress"
                                             }
                                         }
                                     }
@@ -349,7 +4917,72 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/vocabulary/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Get vocabulary review history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by word or definition",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by result",
+                        "name": "result",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.VocabularyHistoryItem"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -374,12 +5007,12 @@ const docTemplate = `{
                 "summary": "Submit a vocabulary review result",
                 "parameters": [
                     {
-                        "description": "Review result",
+                        "description": "Review payload",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_module_vocabulary.ReviewRequest"
+                            "$ref": "#/definitions/service.ReviewRequest"
                         }
                     }
                 ],
@@ -389,13 +5022,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_vocabulary.UserWordProgress"
+                                            "$ref": "#/definitions/model.UserVocabularyProgress"
                                         }
                                     }
                                 }
@@ -405,13 +5038,120 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/vocabulary/reviews": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Submit a vocabulary review result",
+                "parameters": [
+                    {
+                        "description": "Review payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.UserVocabularyProgress"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/vocabulary/reviews/due": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Get vocabulary cards due for review",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.UserVocabularyProgress"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -430,14 +5170,14 @@ const docTemplate = `{
                 "tags": [
                     "vocabulary"
                 ],
-                "summary": "Get all vocabulary words",
+                "summary": "List vocabulary words",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
@@ -445,7 +5185,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/internal_module_vocabulary.Word"
+                                                "$ref": "#/definitions/model.VocabularyWord"
                                             }
                                         }
                                     }
@@ -456,7 +5196,238 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Create a vocabulary word",
+                "parameters": [
+                    {
+                        "description": "Word payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CreateWordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.VocabularyWord"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/vocabulary/words/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Update vocabulary word",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Word ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Word payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateWordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Delete vocabulary word",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Word ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/vocabulary/words/{wordId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vocabulary"
+                ],
+                "summary": "Get a vocabulary word by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Word ID",
+                        "name": "wordId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.VocabularyWord"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/writing/evaluate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Evaluate writing text",
+                "parameters": [
+                    {
+                        "description": "Writing evaluation payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.WritingEvaluationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -475,17 +5446,17 @@ const docTemplate = `{
                 "tags": [
                     "writing"
                 ],
-                "summary": "Get user's writing submission history",
+                "summary": "Get writing submission history",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Page number (default: 1)",
+                        "description": "Page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Page size (default: 10, max: 50)",
+                        "description": "Page size",
                         "name": "page_size",
                         "in": "query"
                     }
@@ -496,13 +5467,16 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_writing.HistoryResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.WritingSubmission"
+                                            }
                                         }
                                     }
                                 }
@@ -512,7 +5486,189 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/writing/submissions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Get writing submission history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.WritingSubmission"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Submit a writing response for AI evaluation",
+                "parameters": [
+                    {
+                        "description": "Writing submission",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.SubmitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.WritingSubmission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/writing/submissions/{submissionId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Get a writing submission by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Submission ID",
+                        "name": "submissionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Envelope"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.WritingSubmission"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     }
                 }
@@ -542,7 +5698,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_module_writing.SubmitRequest"
+                            "$ref": "#/definitions/service.SubmitRequest"
                         }
                     }
                 ],
@@ -552,13 +5708,13 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                                    "$ref": "#/definitions/response.Envelope"
                                 },
                                 {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/internal_module_writing.Submission"
+                                            "$ref": "#/definitions/model.WritingSubmission"
                                         }
                                     }
                                 }
@@ -568,30 +5724,1251 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope"
+                            "$ref": "#/definitions/response.Envelope"
                         }
+                    }
+                }
+            }
+        },
+        "/writing/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "writing"
+                ],
+                "summary": "Get writing item by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Writing ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Envelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/ws/ai-chat": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "realtime"
+                ],
+                "summary": "WebSocket AI chat stream",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
+                    }
+                }
+            }
+        },
+        "/ws/speaking": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "realtime"
+                ],
+                "summary": "WebSocket speaking stream",
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols"
                     }
                 }
             }
         }
     },
     "definitions": {
-        "github_com_unitechio_eLearning_apps_api_internal_module_user.User": {
+        "dto.AIChatRequest": {
             "type": "object",
+            "required": [
+                "message"
+            ],
             "properties": {
-                "createdAt": {
+                "domain": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AIQuestionRequest": {
+            "type": "object",
+            "required": [
+                "domain",
+                "topic"
+            ],
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AIStreamRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "context": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AIUsageSnapshot": {
+            "type": "object",
+            "properties": {
+                "token_usage": {
+                    "type": "integer"
+                },
+                "total_requests": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.Achievement": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unlocked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.Activity": {
+            "type": "object",
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AddXPRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "reason"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AdminUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AnalyticsSnapshot": {
+            "type": "object",
+            "properties": {
+                "active_users": {
+                    "type": "integer"
+                },
+                "total_activities": {
+                    "type": "integer"
+                },
+                "total_courses": {
+                    "type": "integer"
+                },
+                "total_users": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.BillingHistoryItem": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "plan_name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BillingPlan": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.Course": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CourseModule": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DailyActivityPoint": {
+            "type": "object",
+            "properties": {
+                "completed_labs": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "time_spent": {
+                    "type": "integer"
+                },
+                "xp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.DictionaryLookupResponse": {
+            "type": "object",
+            "properties": {
+                "audio": {
+                    "type": "string"
+                },
+                "collocation": {
+                    "type": "string"
+                },
+                "example": {
+                    "type": "string"
+                },
+                "ipa": {
+                    "type": "string"
+                },
+                "meaning": {
+                    "type": "string"
+                },
+                "saved": {
+                    "type": "boolean"
+                },
+                "word": {
+                    "type": "string"
+                },
+                "word_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.DictionarySaveRequest": {
+            "type": "object",
+            "required": [
+                "word"
+            ],
+            "properties": {
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GamificationProfile": {
+            "type": "object",
+            "properties": {
+                "achievement_pct": {
+                    "type": "integer"
+                },
+                "current_badge": {
+                    "type": "string"
+                },
+                "current_streak": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "longest_streak": {
+                    "type": "integer"
+                },
+                "next_level_at_xp": {
+                    "type": "integer"
+                },
+                "total_xp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.HeatmapPoint": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ImprovementInsight": {
+            "type": "object",
+            "properties": {
+                "metric": {
+                    "type": "string"
+                },
+                "trend": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.LeaderboardEntry": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "is_current": {
+                    "type": "boolean"
+                },
+                "rank": {
+                    "type": "integer"
+                },
+                "time_spent": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "xp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.LearningPattern": {
+            "type": "object",
+            "properties": {
+                "preferred_days": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "preferred_time": {
+                    "type": "string"
+                },
+                "strongest_mode": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Lesson": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "module_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ListeningLesson": {
+            "type": "object",
+            "properties": {
+                "audio_url": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ListeningSubmissionRequest": {
+            "type": "object",
+            "required": [
+                "answers"
+            ],
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.NotificationItem": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Planner": {
+            "type": "object",
+            "properties": {
+                "focus_area": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "weekly_target": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PlannerUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "focus_area": {
+                    "type": "string"
+                },
+                "tasks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "weekly_target": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PracticeModesResponse": {
+            "type": "object",
+            "properties": {
+                "modes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.PracticeSessionItem": {
+            "type": "object",
+            "properties": {
+                "expected_text": {
+                    "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sub_mode": {
+                    "type": "string"
+                },
+                "submitted_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PracticeStartRequest": {
+            "type": "object",
+            "properties": {
+                "mode": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "sub_mode": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PracticeSubmitRequest": {
+            "type": "object",
+            "required": [
+                "answer",
+                "session_id"
+            ],
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PremiumFeature": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unlocked": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.PremiumUnlockRequest": {
+            "type": "object",
+            "required": [
+                "feature_code"
+            ],
+            "properties": {
+                "feature_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProgressSnapshot": {
+            "type": "object",
+            "properties": {
+                "current_streak": {
+                    "type": "integer"
+                },
+                "overall_completion": {
+                    "type": "number"
+                },
+                "weekly_minutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.PronunciationAnalyzeSentenceRequest": {
+            "type": "object",
+            "required": [
+                "sentence"
+            ],
+            "properties": {
+                "sentence": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PronunciationAnalyzeWordRequest": {
+            "type": "object",
+            "required": [
+                "word"
+            ],
+            "properties": {
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PronunciationHistoryItem": {
+            "type": "object",
+            "properties": {
+                "accuracy": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PronunciationRequest": {
+            "type": "object",
+            "required": [
+                "text"
+            ],
+            "properties": {
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PronunciationResult": {
+            "type": "object",
+            "properties": {
+                "accuracy": {
+                    "type": "number"
+                },
+                "feedback": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReadingLookupRequest": {
+            "type": "object",
+            "required": [
+                "word"
+            ],
+            "properties": {
+                "context": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReadingSaveWordRequest": {
+            "type": "object",
+            "required": [
+                "word"
+            ],
+            "properties": {
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RecommendationItem": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "ref_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SpeakingSession": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "stopped_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Submission": {
+            "type": "object",
+            "properties": {
+                "activity_id": {
+                    "type": "string"
+                },
+                "answer": {
+                    "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SubmitActivityRequest": {
+            "type": "object",
+            "required": [
+                "answer"
+            ],
+            "properties": {
+                "answer": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SubscribeRequest": {
+            "type": "object",
+            "required": [
+                "plan_id"
+            ],
+            "properties": {
+                "plan_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.TimeSpentSnapshot": {
+            "type": "object",
+            "properties": {
+                "minutes_month": {
+                    "type": "integer"
+                },
+                "minutes_today": {
+                    "type": "integer"
+                },
+                "minutes_week": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.TokenRefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateUserStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateWordRequest": {
+            "type": "object",
+            "required": [
+                "definition",
+                "word"
+            ],
+            "properties": {
+                "definition": {
+                    "type": "string"
+                },
+                "example": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "part_of_speech": {
+                    "type": "string"
+                },
+                "phonetic": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpsertActivityRequest": {
+            "type": "object",
+            "required": [
+                "domain",
+                "title",
+                "type"
+            ],
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpsertCourseRequest": {
+            "type": "object",
+            "required": [
+                "domain",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpsertLessonRequest": {
+            "type": "object",
+            "required": [
+                "module_id",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "module_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpsertModuleRequest": {
+            "type": "object",
+            "required": [
+                "course_id",
+                "title"
+            ],
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserActivityItem": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "occurred_at": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserProgress": {
+            "type": "object",
+            "properties": {
+                "completed_lessons": {
+                    "type": "integer"
+                },
+                "completion_rate": {
+                    "type": "number"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "last_activity_at": {
+                    "type": "string"
+                },
+                "total_lessons": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserStats": {
+            "type": "object",
+            "properties": {
+                "average_score": {
+                    "type": "number"
+                },
+                "completed_courses": {
+                    "type": "integer"
+                },
+                "current_streak": {
+                    "type": "integer"
+                },
+                "total_study_minutes": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.VerifyEmailRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "email"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VocabularyHistoryItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "reviewed_at": {
+                    "type": "string"
+                },
+                "word_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VocabularySetAddWordRequest": {
+            "type": "object",
+            "required": [
+                "word_id"
+            ],
+            "properties": {
+                "word_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VocabularySetItem": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "words": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.VocabularySetRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WeakPoint": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.WritingEvaluationRequest": {
+            "type": "object",
+            "required": [
+                "prompt",
+                "text"
+            ],
+            "properties": {
+                "prompt": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.XPHistoryItem": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Category": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Category"
+                    }
+                },
+                "children_count": {
+                    "description": "Computed field",
+                    "type": "integer"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "description_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "icon": {
                     "type": "string"
                 },
                 "id": {
@@ -600,23 +6977,818 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "name_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    ]
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.CategoryStatus"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.CategoryType"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope": {
+        "model.CategoryStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive"
+            ],
+            "x-enum-varnames": [
+                "CategoryStatusActive",
+                "CategoryStatusInactive"
+            ]
+        },
+        "model.CategoryType": {
+            "type": "string",
+            "enum": [
+                "blog",
+                "header",
+                "footer",
+                "sidebar"
+            ],
+            "x-enum-varnames": [
+                "CategoryTypeBlog",
+                "CategoryTypeHeader",
+                "CategoryTypeFooter",
+                "CategoryTypeSidebar"
+            ]
+        },
+        "model.Department": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Department"
+                    }
+                },
+                "code": {
+                    "description": "e.g., \"sales\", \"editorial\", \"it\"",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_system": {
+                    "type": "boolean"
+                },
+                "manager_id": {
+                    "description": "Department manager (User ID would be UUID in real case)",
+                    "type": "integer"
+                },
+                "module": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Module"
+                        }
+                    ]
+                },
+                "module_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent": {
+                    "$ref": "#/definitions/model.Department"
+                },
+                "parent_id": {
+                    "description": "For hierarchical departments",
+                    "type": "integer"
+                },
+                "services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Service"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Media": {
+            "type": "object",
+            "properties": {
+                "alt": {
+                    "description": "Alt text for images",
+                    "type": "string"
+                },
+                "bucket": {
+                    "description": "MinIO bucket",
+                    "type": "string"
+                },
+                "caption": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "For videos/audio (in seconds)",
+                    "type": "integer"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "file_path": {
+                    "type": "string"
+                },
+                "file_size": {
+                    "type": "integer"
+                },
+                "height": {
+                    "description": "For images/videos",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mime_type": {
+                    "type": "string"
+                },
+                "object_key": {
+                    "description": "MinIO object key",
+                    "type": "string"
+                },
+                "original_name": {
+                    "type": "string"
+                },
+                "posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Post"
+                    }
+                },
+                "tags": {
+                    "description": "JSON array of tags",
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "description": "Thumbnail path for videos",
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.MediaType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "uploaded_by": {
+                    "type": "string"
+                },
+                "uploader": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    ]
+                },
+                "url": {
+                    "description": "Public URL",
+                    "type": "string"
+                },
+                "width": {
+                    "description": "For images/videos",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.MediaType": {
+            "type": "string",
+            "enum": [
+                "image",
+                "video",
+                "document",
+                "audio",
+                "other"
+            ],
+            "x-enum-varnames": [
+                "MediaTypeImage",
+                "MediaTypeVideo",
+                "MediaTypeDocument",
+                "MediaTypeAudio",
+                "MediaTypeOther"
+            ]
+        },
+        "model.Module": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "e.g., \"crm\", \"content\", \"admin\"",
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "departments": {
+                    "description": "Relationships",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Department"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_system": {
+                    "description": "System modules cannot be deleted",
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "order": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Permission": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "e.g., \"create\", \"read\", \"update\", \"delete\"",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "department": {
+                    "description": "Department level",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "module": {
+                    "description": "e.g., \"crm\", \"content\", \"admin\"",
+                    "type": "string"
+                },
+                "resource": {
+                    "description": "e.g., \"users\", \"posts\", \"customers\"",
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "Relationships",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Role"
+                    }
+                },
+                "service": {
+                    "description": "Service level within department",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.User"
+                    }
+                }
+            }
+        },
+        "model.Post": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    ]
+                },
+                "author_id": {
+                    "type": "string"
+                },
+                "author_name": {
+                    "type": "string"
+                },
+                "categories": {
+                    "description": "JSON array of category IDs",
+                    "type": "string"
+                },
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "category_objects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Category"
+                    }
+                },
+                "comment_count": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "content_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "excerpt": {
+                    "type": "string"
+                },
+                "excerpt_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "featured_image": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "like_count": {
+                    "type": "integer"
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Media"
+                    }
+                },
+                "meta_description": {
+                    "type": "string"
+                },
+                "meta_keywords": {
+                    "type": "string"
+                },
+                "meta_title": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "scheduled_at": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "slug_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.PostStatus"
+                },
+                "table_of_contents": {
+                    "description": "JSON array of TOC items",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "JSON array of tags",
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "title_translations": {
+                    "$ref": "#/definitions/model.TranslatableContent"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "view_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.PostStatus": {
+            "type": "string",
+            "enum": [
+                "draft",
+                "scheduled",
+                "published",
+                "archived"
+            ],
+            "x-enum-varnames": [
+                "PostStatusDraft",
+                "PostStatusScheduled",
+                "PostStatusPublished",
+                "PostStatusArchived"
+            ]
+        },
+        "model.Role": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Role"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_system": {
+                    "description": "System roles cannot be deleted",
+                    "type": "boolean"
+                },
+                "level": {
+                    "$ref": "#/definitions/model.RoleLevel"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Role"
+                        }
+                    ]
+                },
+                "parent_id": {
+                    "type": "integer"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Permission"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.User"
+                    }
+                }
+            }
+        },
+        "model.RoleLevel": {
+            "type": "string",
+            "enum": [
+                "organization",
+                "department",
+                "service",
+                "action"
+            ],
+            "x-enum-varnames": [
+                "RoleLevelOrganization",
+                "RoleLevelDepartment",
+                "RoleLevelService",
+                "RoleLevelAction"
+            ]
+        },
+        "model.Service": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "e.g., \"user_management\", \"post_management\"",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "department": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Department"
+                        }
+                    ]
+                },
+                "department_id": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "endpoint": {
+                    "description": "API endpoint prefix",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "is_system": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.TranslatableContent": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "department": {
+                    "description": "Relationships",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Department"
+                        }
+                    ]
+                },
+                "department_id": {
+                    "description": "Foreign key to departments table",
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "email_verified": {
+                    "type": "boolean"
+                },
+                "email_verified_at": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_login_at": {
+                    "type": "string"
+                },
+                "last_login_ip": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Media"
+                    }
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Permission"
+                    }
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Job title/position",
+                    "type": "string"
+                },
+                "posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Post"
+                    }
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Role"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/model.UserStatus"
+                },
+                "tenantID": {
+                    "type": "string"
+                },
+                "two_factor_enabled": {
+                    "type": "boolean"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.UserStatus": {
+            "type": "string",
+            "enum": [
+                "active",
+                "inactive",
+                "suspended",
+                "pending"
+            ],
+            "x-enum-varnames": [
+                "UserStatusActive",
+                "UserStatusInactive",
+                "UserStatusSuspended",
+                "UserStatusPending"
+            ]
+        },
+        "model.UserVocabularyProgress": {
+            "type": "object",
+            "properties": {
+                "box_number": {
+                    "type": "integer"
+                },
+                "consecutive_correct": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_review_date": {
+                    "type": "string"
+                },
+                "next_review_date": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "word": {
+                    "$ref": "#/definitions/model.VocabularyWord"
+                },
+                "word_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.VocabularyWord": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "definition": {
+                    "type": "string"
+                },
+                "example": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "part_of_speech": {
+                    "type": "string"
+                },
+                "phonetic": {
+                    "type": "string"
+                },
+                "tenant_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "word": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.WritingSubmission": {
+            "type": "object",
+            "properties": {
+                "ai_feedback": {
+                    "type": "string"
+                },
+                "ai_score": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "response": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "word_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.Envelope": {
             "type": "object",
             "properties": {
                 "data": {},
                 "error": {
-                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody"
+                    "$ref": "#/definitions/response.ErrorBody"
                 },
                 "message": {
                     "type": "string"
                 },
                 "meta": {
-                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta"
+                    "$ref": "#/definitions/response.Meta"
                 },
                 "request_id": {
                     "type": "string"
@@ -626,7 +7798,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody": {
+        "response.ErrorBody": {
             "type": "object",
             "properties": {
                 "code": {
@@ -644,7 +7816,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta": {
+        "response.Meta": {
             "type": "object",
             "properties": {
                 "page": {
@@ -661,68 +7833,7 @@ const docTemplate = `{
                 }
             }
         },
-        "gorm.DeletedAt": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
-                }
-            }
-        },
-        "internal_module_auth.AuthResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_module_user.User"
-                }
-            }
-        },
-        "internal_module_auth.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "internal_module_auth.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 2
-                },
-                "password": {
-                    "type": "string",
-                    "minLength": 6
-                }
-            }
-        },
-        "internal_module_speaking.AnalyzeResult": {
+        "service.AnalyzeResult": {
             "type": "object",
             "properties": {
                 "feedback": {
@@ -739,111 +7850,29 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_module_user.UpdateProfileRequest": {
+        "service.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
+                }
+            }
+        },
+        "service.CreateWordRequest": {
             "type": "object",
             "required": [
-                "name"
+                "definition",
+                "word"
             ],
             "properties": {
-                "name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 2
-                }
-            }
-        },
-        "internal_module_user.User": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_module_vocabulary.ReviewRequest": {
-            "type": "object",
-            "required": [
-                "word_id"
-            ],
-            "properties": {
-                "correct": {
-                    "type": "boolean"
-                },
-                "word_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_module_vocabulary.UserWordProgress": {
-            "type": "object",
-            "properties": {
-                "box_number": {
-                    "type": "integer"
-                },
-                "consecutive_correct": {
-                    "type": "integer"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "last_review_at": {
-                    "type": "string"
-                },
-                "next_review_at": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "word": {
-                    "$ref": "#/definitions/internal_module_vocabulary.Word"
-                },
-                "word_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_module_vocabulary.Word": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "definition": {
                     "type": "string"
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
                 "example": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "level": {
                     "type": "string"
@@ -854,64 +7883,72 @@ const docTemplate = `{
                 "phonetic": {
                     "type": "string"
                 },
-                "updatedAt": {
-                    "type": "string"
-                },
                 "word": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 1
                 }
             }
         },
-        "internal_module_writing.HistoryResponse": {
+        "service.LoginRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/internal_module_writing.Submission"
-                    }
+                "email": {
+                    "type": "string"
                 },
-                "meta": {
-                    "$ref": "#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta"
+                "password": {
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },
-        "internal_module_writing.Submission": {
+        "service.RegisterRequest": {
             "type": "object",
+            "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password"
+            ],
             "properties": {
-                "ai_feedback": {
+                "email": {
                     "type": "string"
                 },
-                "ai_score": {
-                    "type": "number"
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
                 },
-                "createdAt": {
-                    "type": "string"
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
                 },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "prompt": {
-                    "type": "string"
-                },
-                "response": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
-                },
-                "word_count": {
-                    "type": "integer"
+                "password": {
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },
-        "internal_module_writing.SubmitRequest": {
+        "service.ReviewRequest": {
+            "type": "object",
+            "required": [
+                "word_id"
+            ],
+            "properties": {
+                "correct": {
+                    "type": "boolean"
+                },
+                "word_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.SubmitRequest": {
             "type": "object",
             "required": [
                 "prompt",
@@ -926,26 +7963,31 @@ const docTemplate = `{
                     "minLength": 50
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+        },
+        "service.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "eEnglish IELTS API",
-	Description:      "Production-ready REST API for the eEnglish IELTS AI platform.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

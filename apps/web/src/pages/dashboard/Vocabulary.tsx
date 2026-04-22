@@ -1,8 +1,7 @@
 import React from "react";
-import { FlashcardHero } from "@/features/vocabulary/components/flashcard-hero";
-import { LearningActions } from "@/features/vocabulary/components/learning-actions";
+import { FlashcardHero, LearningActions } from "@/features/vocabulary";
 
-export default function VocabularyPage() {
+export function VocabularyPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 relative">
       <section className="max-w-5xl mx-auto py-12">

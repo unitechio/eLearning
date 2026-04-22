@@ -1,9 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import SideNav from "@/components/shared/side-nav";
-import TopNav from "@/components/shared/top-nav";
+import { SideNav, TopNav } from "@/shared/components";
 
-export default function DashboardLayout() {
+export function DashboardLayout() {
   return (
     <div className="min-h-screen bg-surface flex">
       <SideNav />

@@ -13,29 +13,16 @@ import (
 // -----------------------------------------------------------------------------
 
 type SpeakingAttempt struct {
-	ID              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	CreatedAt       time.Time      `gorm:"primaryKey;default:CURRENT_TIMESTAMP"`
-	TenantID        uuid.UUID      `gorm:"type:uuid;not null;index:idx_speaking_attempts_user_time"`
-	UserID          uuid.UUID      `gorm:"type:uuid;not null;index:idx_speaking_attempts_user_time"`
-	LessonID        *uuid.UUID     `gorm:"type:uuid"`
-	PromptText      *string        `gorm:"type:text"`
-	AudioURL        string         `gorm:"type:text;not null"`
-	Transcript      *string        `gorm:"type:text"`
+	ID              uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	CreatedAt       time.Time  `gorm:"primaryKey;default:CURRENT_TIMESTAMP"`
+	TenantID        uuid.UUID  `gorm:"type:uuid;not null;index:idx_speaking_attempts_user_time"`
+	UserID          uuid.UUID  `gorm:"type:uuid;not null;index:idx_speaking_attempts_user_time"`
+	LessonID        *uuid.UUID `gorm:"type:uuid"`
+	PromptText      *string    `gorm:"type:text"`
+	AudioURL        string     `gorm:"type:text;not null"`
+	Transcript      *string    `gorm:"type:text"`
 	DurationSeconds *int
 	AIScore         *float64       `gorm:"type:decimal(3,1)"`
 	AIFeedback      datatypes.JSON `gorm:"index:idx_speaking_attempts_ai_feedback,type:gin"`
 	DeletedAt       gorm.DeletedAt `gorm:"index"`
-}
-
-type WritingSubmission struct {
-	ID           uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	CreatedAt    time.Time      `gorm:"primaryKey;default:CURRENT_TIMESTAMP"`
-	TenantID     uuid.UUID      `gorm:"type:uuid;not null"`
-	UserID       uuid.UUID      `gorm:"type:uuid;not null"`
-	PromptText   *string        `gorm:"type:text"`
-	UserResponse string         `gorm:"type:text;not null"`
-	WordCount    *int
-	AIScore      *float64       `gorm:"type:decimal(3,1)"`
-	AIFeedback   datatypes.JSON `gorm:"index:idx_writing_submissions_ai_feedback,type:gin"`
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }

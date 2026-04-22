@@ -1,8 +1,7 @@
 import React from "react";
-import { RecordingWorkspace } from "@/features/speaking/components/recording-workspace";
-import { FeedbackPanel } from "@/features/speaking/components/feedback-panel";
+import { RecordingWorkspace, FeedbackPanel } from "@/features/speaking";
 
-export default function SpeakingPage() {
+export function SpeakingPage() {
   return (
     <div className="flex-1 p-8 lg:p-10 hide-scrollbar h-full overflow-y-auto w-full">
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">

@@ -1,9 +1,8 @@
 import React from "react";
-import { DailyPlan } from "@/features/learning/components/daily-plan";
-import { StatsOverview, RecentAssessments } from "@/features/learning/components/stats-overview";
+import { DailyPlan, StatsOverview, RecentAssessments } from "@/features/learning";
 import { Flame } from "lucide-react";
 
-export default function DashboardPage() {
+export function DashboardPage() {
   return (
     <div className="w-full flex-1 p-8 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
       {/* Hero / Welcome Section */}

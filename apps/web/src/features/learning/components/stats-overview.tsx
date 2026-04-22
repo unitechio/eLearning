@@ -1,7 +1,29 @@
 import React from "react";
-import { Mic2, Edit3, BookOpen, Flame, Sparkles } from "lucide-react";
+import { Mic2, Edit3, BookOpen, Flame, Sparkles, Loader2, BarChart3, MessageSquare, Library } from "lucide-react";
+import { useLearningStats } from "../api/hooks";
+
+const ICON_MAP: Record<string, any> = {
+  analytics: BarChart3,
+  forum: MessageSquare,
+  library_books: Library,
+  mic: Mic2,
+  edit: Edit3,
+  book: BookOpen,
+};
 
 export const StatsOverview = () => {
+  const { data: stats, isLoading } = useLearningStats();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-40 flex items-center justify-center bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100/50">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Quick Actions Grid */}
@@ -36,12 +58,12 @@ export const StatsOverview = () => {
         </div>
         
         <div className="h-40 flex items-end justify-between gap-2 px-1">
-          {[40, 55, 45, 70, 65, 85, 95].map((height, i) => (
+          {stats?.scoreProgression.map((height, i) => (
             <div 
               key={i}
               style={{ height: `${height}%` }}
               className={`w-full rounded-t-xl transition-all duration-500 hover:opacity-100 cursor-pointer ${
-                i === 6 
+                i === stats.scoreProgression.length - 1 
                   ? "bg-primary shadow-[0_0_20px_rgba(57,58,200,0.3)] opacity-100" 
                   : "bg-primary/20 opacity-60"
               }`}
@@ -64,7 +86,7 @@ export const StatsOverview = () => {
             <p className="text-[10px] font-black uppercase tracking-widest opacity-80">AI Analysis</p>
           </div>
           <p className="text-sm font-medium leading-relaxed italic opacity-90">
-            &quot;Your coherence and cohesion scores are peaking. Focus on lexical resource—specifically topic-specific vocabulary—to break the Band 8 barrier.&quot;
+            {stats?.aiFeedback}
           </p>
         </div>
         <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -75,11 +97,15 @@ export const StatsOverview = () => {
 };
 
 export const RecentAssessments = () => {
-  const assessments = [
-    { type: "WRITING TASK 1", title: "Graph Description", score: "Band 7.5", icon: Edit3 },
-    { type: "SPEAKING PART 3", title: "Urbanization Trends", score: "Band 8.0", icon: Mic2 },
-    { type: "READING MOCK", title: "Academic Passage 2", score: "Band 9.0", icon: BookOpen },
-  ];
+  const { data: stats, isLoading } = useLearningStats();
+
+  if (isLoading) {
+    return (
+      <div className="pt-8 flex justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <section className="space-y-6 pt-4">
@@ -88,10 +114,10 @@ export const RecentAssessments = () => {
         <button className="text-xs font-black text-primary uppercase tracking-widest hover:underline">View All</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {assessments.map((item, i) => {
-          const Icon = item.icon;
+        {stats?.recentAssessments.map((item) => {
+          const Icon = ICON_MAP[item.icon] || BookOpen;
           return (
-            <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-3xl flex items-center gap-5 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer border border-slate-100/50 dark:border-slate-800/50 shadow-sm group">
+            <div key={item.id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl flex items-center gap-5 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer border border-slate-100/50 dark:border-slate-800/50 shadow-sm group">
               <div className="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
                 <Icon className="w-6 h-6" />
               </div>
@@ -116,3 +142,4 @@ export const RecentAssessments = () => {
     </section>
   );
 };
+

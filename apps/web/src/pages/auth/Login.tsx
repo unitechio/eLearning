@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useLogin } from "@/features/auth/api";
-import { useAuthStore } from "@/lib/store/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useLogin, useAuthStore } from "@/features/auth";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import { Sparkles, ArrowRight, HelpCircle, Check } from "lucide-react";
 
-export default function LoginPage() {
+export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

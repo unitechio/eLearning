@@ -1,9 +1,7 @@
 import React from "react";
-import { NotionEditor } from "@/features/writing/components/notion-editor";
-import { AiWritingFeedback } from "@/features/writing/components/ai-writing-feedback";
-import { FloatingToolbar } from "@/features/writing/components/floating-toolbar";
+import { NotionEditor, AiWritingFeedback, FloatingToolbar } from "@/features/writing";
 
-export default function WritingPage() {
+export function WritingPage() {
   return (
     <div className="flex h-full w-full overflow-hidden bg-white">
       {/* Main Content Area (Central Focus Editor) */}

@@ -14,8 +14,8 @@ import (
 
 var DB *gorm.DB
 
-func NewPostgresConnection(cfg config.DatabaseConfig) (*gorm.DB, error) {
-	dsn := buildDSN(cfg.Host, cfg.User, cfg.Password, cfg.Port, cfg.SSLMode, cfg.SSLMode)
+func InitDatabases(cfg config.DatabaseConfig) (*gorm.DB, error) {
+	dsn := buildDSN(cfg.Host, cfg.User, cfg.Password, cfg.Port, cfg.Database, cfg.SSLMode)
 
 	var gormLogger logger.Interface
 	if cfg.Debug {
@@ -48,7 +48,7 @@ func NewPostgresConnection(cfg config.DatabaseConfig) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Printf("✅ Connected to PostgreSQL database: %s", cfg.User)
+	log.Printf("Connected to PostgreSQL database: %s", cfg.User)
 	return db, nil
 }
 

@@ -1,11 +1,10 @@
-"use client";
-
-import { useLearningStore } from "@/hooks/use-learning";
+import React from "react";
+import { useVocabularyStore } from "../stores/use-vocabulary-store";
 import { PenTool, MousePointerClick, Lightbulb } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/components/ui/badge";
 
 export function FlashcardHero() {
-  const { isFlipped, setFlipped } = useLearningStore();
+  const { isFlipped, setFlipped } = useVocabularyStore();
 
   return (
     <div className="space-y-8">
@@ -62,3 +61,4 @@ export function FlashcardHero() {
     </div>
   );
 }
+

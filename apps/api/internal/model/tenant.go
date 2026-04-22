@@ -10,9 +10,9 @@ import (
 // -----------------------------------------------------------------------------
 
 type Tenant struct {
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Name      string         `gorm:"type:varchar(255);not null"`
-	Domain    *string        `gorm:"type:varchar(255);unique"`
-	Settings  datatypes.JSON `gorm:"default:'{}'"`
+	ID       uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	Name     string         `gorm:"type:varchar(255);not null"`
+	Domain   *string        `gorm:"type:varchar(255);unique"`
+	Settings datatypes.JSON `gorm:"default:'{}'"`
 	BaseModel
 }

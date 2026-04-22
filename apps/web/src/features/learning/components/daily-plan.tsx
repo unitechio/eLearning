@@ -1,34 +1,18 @@
 import React from "react";
-import { Check, PlayCircle } from "lucide-react";
-
-const steps = [
-  {
-    id: 1,
-    title: "Advanced Collocations for 'Environment'",
-    description: "Review 15 high-level phrases and synonyms.",
-    type: "VOCABULARY",
-    duration: "10 MINS",
-    status: "completed"
-  },
-  {
-    id: 2,
-    title: "Critical Analysis: Argumentative Essays",
-    description: "AI-guided breakdown of a Band 9 response.",
-    type: "WRITING",
-    duration: "25 MINS",
-    status: "current"
-  },
-  {
-    id: 3,
-    title: "Mock Speaking: Part 2 Simulation",
-    description: "Practice cue cards with real-time feedback.",
-    type: "SPEAKING",
-    duration: "15 MINS",
-    status: "upcoming"
-  }
-];
+import { Check, PlayCircle, Loader2 } from "lucide-react";
+import { useDailyPlan } from "../api/hooks";
 
 export const DailyPlan = () => {
+  const { data: steps, isLoading } = useDailyPlan();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100/50 dark:border-slate-800/50 h-full flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100/50 dark:border-slate-800/50 h-full">
       <div className="flex justify-between items-center mb-10">
@@ -42,7 +26,7 @@ export const DailyPlan = () => {
       </div>
 
       <div className="space-y-8">
-        {steps.map((step, index) => (
+        {steps?.map((step, index) => (
           <div key={step.id} className="flex gap-6 group">
             <div className="flex flex-col items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -55,7 +39,7 @@ export const DailyPlan = () => {
                 {step.status === "completed" ? (
                   <Check className="w-5 h-5" />
                 ) : (
-                  <span className="text-sm font-bold">{step.id}</span>
+                  <span className="text-sm font-bold">{index + 1}</span>
                 )}
               </div>
               {index !== steps.length - 1 && (
@@ -88,3 +72,4 @@ export const DailyPlan = () => {
     </div>
   );
 };
+

@@ -27,12 +27,12 @@ import (
 
 // Envelope is the standard JSON wrapper for every API response.
 type Envelope struct {
-	Success   bool        `json:"success"`
-	Message   string      `json:"message"`
-	Data      any         `json:"data,omitempty"`
-	Error     *ErrorBody  `json:"error,omitempty"`
-	Meta      *Meta       `json:"meta,omitempty"`
-	RequestID string      `json:"request_id,omitempty"`
+	Success   bool       `json:"success"`
+	Message   string     `json:"message"`
+	Data      any        `json:"data,omitempty"`
+	Error     *ErrorBody `json:"error,omitempty"`
+	Meta      *Meta      `json:"meta,omitempty"`
+	RequestID string     `json:"request_id,omitempty"`
 }
 
 // ErrorBody carries structured error details (never internal stack traces).

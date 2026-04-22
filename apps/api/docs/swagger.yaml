@@ -1,35 +1,1325 @@
-basePath: /api/v1
 definitions:
-  github_com_unitechio_eLearning_apps_api_internal_module_user.User:
+  dto.AIChatRequest:
     properties:
-      createdAt:
+      domain:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  dto.AIQuestionRequest:
+    properties:
+      domain:
+        type: string
+      topic:
+        type: string
+    required:
+    - domain
+    - topic
+    type: object
+  dto.AIStreamRequest:
+    properties:
+      context:
+        type: string
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  dto.AIUsageSnapshot:
+    properties:
+      token_usage:
+        type: integer
+      total_requests:
+        type: integer
+    type: object
+  dto.Achievement:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      unlocked:
+        type: boolean
+    type: object
+  dto.Activity:
+    properties:
+      domain:
+        type: string
+      id:
+        type: string
+      instructions:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.AddXPRequest:
+    properties:
+      amount:
+        type: integer
+      reason:
+        type: string
+    required:
+    - amount
+    - reason
+    type: object
+  dto.AdminUser:
+    properties:
       email:
+        type: string
+      id:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+    type: object
+  dto.AnalyticsSnapshot:
+    properties:
+      active_users:
+        type: integer
+      total_activities:
+        type: integer
+      total_courses:
+        type: integer
+      total_users:
+        type: integer
+    type: object
+  dto.BillingHistoryItem:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      plan_name:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.BillingPlan:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dto.Course:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      level:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.CourseModule:
+    properties:
+      course_id:
+        type: string
+      id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.DailyActivityPoint:
+    properties:
+      completed_labs:
+        type: integer
+      date:
+        type: string
+      time_spent:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  dto.DictionaryLookupResponse:
+    properties:
+      audio:
+        type: string
+      collocation:
+        type: string
+      example:
+        type: string
+      ipa:
+        type: string
+      meaning:
+        type: string
+      saved:
+        type: boolean
+      word:
+        type: string
+      word_type:
+        type: string
+    type: object
+  dto.DictionarySaveRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dto.GamificationProfile:
+    properties:
+      achievement_pct:
+        type: integer
+      current_badge:
+        type: string
+      current_streak:
+        type: integer
+      level:
+        type: integer
+      longest_streak:
+        type: integer
+      next_level_at_xp:
+        type: integer
+      total_xp:
+        type: integer
+    type: object
+  dto.HeatmapPoint:
+    properties:
+      count:
+        type: integer
+      date:
+        type: string
+    type: object
+  dto.ImprovementInsight:
+    properties:
+      metric:
+        type: string
+      trend:
+        type: string
+      value:
+        type: number
+    type: object
+  dto.LeaderboardEntry:
+    properties:
+      display_name:
+        type: string
+      is_current:
+        type: boolean
+      rank:
+        type: integer
+      time_spent:
+        type: integer
+      user_id:
+        type: string
+      xp:
+        type: integer
+    type: object
+  dto.LearningPattern:
+    properties:
+      preferred_days:
+        items:
+          type: string
+        type: array
+      preferred_time:
+        type: string
+      strongest_mode:
+        type: string
+    type: object
+  dto.Lesson:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      module_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.ListeningLesson:
+    properties:
+      audio_url:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ListeningSubmissionRequest:
+    properties:
+      answers:
+        items:
+          type: string
+        type: array
+    required:
+    - answers
+    type: object
+  dto.NotificationItem:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      message:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.Planner:
+    properties:
+      focus_area:
+        type: string
+      tasks:
+        items:
+          type: string
+        type: array
+      weekly_target:
+        type: integer
+    type: object
+  dto.PlannerUpdateRequest:
+    properties:
+      focus_area:
+        type: string
+      tasks:
+        items:
+          type: string
+        type: array
+      weekly_target:
+        type: integer
+    type: object
+  dto.PracticeModesResponse:
+    properties:
+      modes:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.PracticeSessionItem:
+    properties:
+      expected_text:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      mode:
+        type: string
+      prompt:
+        type: string
+      score:
+        type: number
+      started_at:
+        type: string
+      status:
+        type: string
+      sub_mode:
+        type: string
+      submitted_at:
+        type: string
+    type: object
+  dto.PracticeStartRequest:
+    properties:
+      mode:
+        type: string
+      prompt:
+        type: string
+      sub_mode:
+        type: string
+    type: object
+  dto.PracticeSubmitRequest:
+    properties:
+      answer:
+        type: string
+      session_id:
+        type: string
+    required:
+    - answer
+    - session_id
+    type: object
+  dto.PremiumFeature:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      unlocked:
+        type: boolean
+    type: object
+  dto.PremiumUnlockRequest:
+    properties:
+      feature_code:
+        type: string
+    required:
+    - feature_code
+    type: object
+  dto.ProgressSnapshot:
+    properties:
+      current_streak:
+        type: integer
+      overall_completion:
+        type: number
+      weekly_minutes:
+        type: integer
+    type: object
+  dto.PronunciationAnalyzeSentenceRequest:
+    properties:
+      sentence:
+        type: string
+    required:
+    - sentence
+    type: object
+  dto.PronunciationAnalyzeWordRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.PronunciationHistoryItem:
+    properties:
+      accuracy:
+        type: number
+      created_at:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      kind:
+        type: string
+      source:
+        type: string
+    type: object
+  dto.PronunciationRequest:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  dto.PronunciationResult:
+    properties:
+      accuracy:
+        type: number
+      feedback:
+        type: string
+    type: object
+  dto.ReadingLookupRequest:
+    properties:
+      context:
+        type: string
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.ReadingSaveWordRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.RecommendationItem:
+    properties:
+      description:
+        type: string
+      ref_id:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  dto.SpeakingSession:
+    properties:
+      id:
+        type: string
+      started_at:
+        type: string
+      status:
+        type: string
+      stopped_at:
+        type: string
+    type: object
+  dto.Submission:
+    properties:
+      activity_id:
+        type: string
+      answer:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      score:
+        type: number
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.SubmitActivityRequest:
+    properties:
+      answer:
+        type: string
+    required:
+    - answer
+    type: object
+  dto.SubscribeRequest:
+    properties:
+      plan_id:
+        type: string
+    required:
+    - plan_id
+    type: object
+  dto.TimeSpentSnapshot:
+    properties:
+      minutes_month:
+        type: integer
+      minutes_today:
+        type: integer
+      minutes_week:
+        type: integer
+    type: object
+  dto.TokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.UpdateUserStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  dto.UpdateWordRequest:
+    properties:
+      definition:
+        type: string
+      example:
+        type: string
+      level:
+        type: string
+      part_of_speech:
+        type: string
+      phonetic:
+        type: string
+      word:
+        type: string
+    required:
+    - definition
+    - word
+    type: object
+  dto.UpsertActivityRequest:
+    properties:
+      domain:
+        type: string
+      instructions:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    required:
+    - domain
+    - title
+    - type
+    type: object
+  dto.UpsertCourseRequest:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      level:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    required:
+    - domain
+    - title
+    type: object
+  dto.UpsertLessonRequest:
+    properties:
+      content:
+        type: string
+      module_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    required:
+    - module_id
+    - title
+    type: object
+  dto.UpsertModuleRequest:
+    properties:
+      course_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    required:
+    - course_id
+    - title
+    type: object
+  dto.UserActivityItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      occurred_at:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.UserProgress:
+    properties:
+      completed_lessons:
+        type: integer
+      completion_rate:
+        type: number
+      course_id:
+        type: string
+      course_title:
+        type: string
+      last_activity_at:
+        type: string
+      total_lessons:
+        type: integer
+    type: object
+  dto.UserStats:
+    properties:
+      average_score:
+        type: number
+      completed_courses:
+        type: integer
+      current_streak:
+        type: integer
+      total_study_minutes:
+        type: integer
+    type: object
+  dto.VerifyEmailRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  dto.VocabularyHistoryItem:
+    properties:
+      id:
+        type: string
+      result:
+        type: string
+      reviewed_at:
+        type: string
+      word_id:
+        type: string
+    type: object
+  dto.VocabularySetAddWordRequest:
+    properties:
+      word_id:
+        type: string
+    required:
+    - word_id
+    type: object
+  dto.VocabularySetItem:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      words:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.VocabularySetRequest:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.WeakPoint:
+    properties:
+      area:
+        type: string
+      note:
+        type: string
+      score:
+        type: number
+    type: object
+  dto.WritingEvaluationRequest:
+    properties:
+      prompt:
+        type: string
+      text:
+        type: string
+    required:
+    - prompt
+    - text
+    type: object
+  dto.XPHistoryItem:
+    properties:
+      amount:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      reason:
+        type: string
+    type: object
+  model.Category:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/model.Category'
+        type: array
+      children_count:
+        description: Computed field
+        type: integer
+      color:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      description_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      icon:
         type: string
       id:
         type: integer
       name:
         type: string
-      updatedAt:
+      name_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      order:
+        type: integer
+      parent:
+        allOf:
+        - $ref: '#/definitions/model.Category'
+        description: Relationships
+      parent_id:
+        type: integer
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/model.CategoryStatus'
+      type:
+        $ref: '#/definitions/model.CategoryType'
+      updated_at:
         type: string
     type: object
-  github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope:
+  model.CategoryStatus:
+    enum:
+    - active
+    - inactive
+    type: string
+    x-enum-varnames:
+    - CategoryStatusActive
+    - CategoryStatusInactive
+  model.CategoryType:
+    enum:
+    - blog
+    - header
+    - footer
+    - sidebar
+    type: string
+    x-enum-varnames:
+    - CategoryTypeBlog
+    - CategoryTypeHeader
+    - CategoryTypeFooter
+    - CategoryTypeSidebar
+  model.Department:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/model.Department'
+        type: array
+      code:
+        description: e.g., "sales", "editorial", "it"
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      display_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      is_system:
+        type: boolean
+      manager_id:
+        description: Department manager (User ID would be UUID in real case)
+        type: integer
+      module:
+        allOf:
+        - $ref: '#/definitions/model.Module'
+        description: Relationships
+      module_id:
+        type: integer
+      name:
+        type: string
+      parent:
+        $ref: '#/definitions/model.Department'
+      parent_id:
+        description: For hierarchical departments
+        type: integer
+      services:
+        items:
+          $ref: '#/definitions/model.Service'
+        type: array
+      updated_at:
+        type: string
+    type: object
+  model.Media:
+    properties:
+      alt:
+        description: Alt text for images
+        type: string
+      bucket:
+        description: MinIO bucket
+        type: string
+      caption:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        description: For videos/audio (in seconds)
+        type: integer
+      file_name:
+        type: string
+      file_path:
+        type: string
+      file_size:
+        type: integer
+      height:
+        description: For images/videos
+        type: integer
+      id:
+        type: integer
+      mime_type:
+        type: string
+      object_key:
+        description: MinIO object key
+        type: string
+      original_name:
+        type: string
+      posts:
+        items:
+          $ref: '#/definitions/model.Post'
+        type: array
+      tags:
+        description: JSON array of tags
+        type: string
+      thumbnail:
+        description: Thumbnail path for videos
+        type: string
+      type:
+        $ref: '#/definitions/model.MediaType'
+      updated_at:
+        type: string
+      uploaded_by:
+        type: string
+      uploader:
+        allOf:
+        - $ref: '#/definitions/model.User'
+        description: Relationships
+      url:
+        description: Public URL
+        type: string
+      width:
+        description: For images/videos
+        type: integer
+    type: object
+  model.MediaType:
+    enum:
+    - image
+    - video
+    - document
+    - audio
+    - other
+    type: string
+    x-enum-varnames:
+    - MediaTypeImage
+    - MediaTypeVideo
+    - MediaTypeDocument
+    - MediaTypeAudio
+    - MediaTypeOther
+  model.Module:
+    properties:
+      code:
+        description: e.g., "crm", "content", "admin"
+        type: string
+      color:
+        type: string
+      created_at:
+        type: string
+      departments:
+        description: Relationships
+        items:
+          $ref: '#/definitions/model.Department'
+        type: array
+      description:
+        type: string
+      display_name:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      is_system:
+        description: System modules cannot be deleted
+        type: boolean
+      name:
+        type: string
+      order:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  model.Permission:
+    properties:
+      action:
+        description: e.g., "create", "read", "update", "delete"
+        type: string
+      created_at:
+        type: string
+      department:
+        description: Department level
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      module:
+        description: e.g., "crm", "content", "admin"
+        type: string
+      resource:
+        description: e.g., "users", "posts", "customers"
+        type: string
+      roles:
+        description: Relationships
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      service:
+        description: Service level within department
+        type: string
+      updated_at:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+    type: object
+  model.Post:
+    properties:
+      author:
+        allOf:
+        - $ref: '#/definitions/model.User'
+        description: Relationships
+      author_id:
+        type: string
+      author_name:
+        type: string
+      categories:
+        description: JSON array of category IDs
+        type: string
+      category_ids:
+        items:
+          type: integer
+        type: array
+      category_objects:
+        items:
+          $ref: '#/definitions/model.Category'
+        type: array
+      comment_count:
+        type: integer
+      content:
+        type: string
+      content_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      created_at:
+        type: string
+      excerpt:
+        type: string
+      excerpt_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      featured_image:
+        type: string
+      id:
+        type: integer
+      language:
+        type: string
+      like_count:
+        type: integer
+      media:
+        items:
+          $ref: '#/definitions/model.Media'
+        type: array
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      meta_title:
+        type: string
+      published_at:
+        type: string
+      scheduled_at:
+        type: string
+      slug:
+        type: string
+      slug_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      status:
+        $ref: '#/definitions/model.PostStatus'
+      table_of_contents:
+        description: JSON array of TOC items
+        type: string
+      tags:
+        description: JSON array of tags
+        type: string
+      title:
+        type: string
+      title_translations:
+        $ref: '#/definitions/model.TranslatableContent'
+      updated_at:
+        type: string
+      view_count:
+        type: integer
+    type: object
+  model.PostStatus:
+    enum:
+    - draft
+    - scheduled
+    - published
+    - archived
+    type: string
+    x-enum-varnames:
+    - PostStatusDraft
+    - PostStatusScheduled
+    - PostStatusPublished
+    - PostStatusArchived
+  model.Role:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      display_name:
+        type: string
+      id:
+        type: integer
+      is_system:
+        description: System roles cannot be deleted
+        type: boolean
+      level:
+        $ref: '#/definitions/model.RoleLevel'
+      name:
+        type: string
+      parent:
+        allOf:
+        - $ref: '#/definitions/model.Role'
+        description: Relationships
+      parent_id:
+        type: integer
+      permissions:
+        items:
+          $ref: '#/definitions/model.Permission'
+        type: array
+      updated_at:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+    type: object
+  model.RoleLevel:
+    enum:
+    - organization
+    - department
+    - service
+    - action
+    type: string
+    x-enum-varnames:
+    - RoleLevelOrganization
+    - RoleLevelDepartment
+    - RoleLevelService
+    - RoleLevelAction
+  model.Service:
+    properties:
+      code:
+        description: e.g., "user_management", "post_management"
+        type: string
+      created_at:
+        type: string
+      department:
+        allOf:
+        - $ref: '#/definitions/model.Department'
+        description: Relationships
+      department_id:
+        type: integer
+      description:
+        type: string
+      display_name:
+        type: string
+      endpoint:
+        description: API endpoint prefix
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      is_system:
+        type: boolean
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.TranslatableContent:
+    additionalProperties:
+      type: string
+    type: object
+  model.User:
+    properties:
+      avatar:
+        type: string
+      created_at:
+        type: string
+      department:
+        allOf:
+        - $ref: '#/definitions/model.Department'
+        description: Relationships
+      department_id:
+        description: Foreign key to departments table
+        type: integer
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      email_verified_at:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_login_at:
+        type: string
+      last_login_ip:
+        type: string
+      last_name:
+        type: string
+      media:
+        items:
+          $ref: '#/definitions/model.Media'
+        type: array
+      permissions:
+        items:
+          $ref: '#/definitions/model.Permission'
+        type: array
+      phone:
+        type: string
+      position:
+        description: Job title/position
+        type: string
+      posts:
+        items:
+          $ref: '#/definitions/model.Post'
+        type: array
+      roles:
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      status:
+        $ref: '#/definitions/model.UserStatus'
+      tenantID:
+        type: string
+      two_factor_enabled:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  model.UserStatus:
+    enum:
+    - active
+    - inactive
+    - suspended
+    - pending
+    type: string
+    x-enum-varnames:
+    - UserStatusActive
+    - UserStatusInactive
+    - UserStatusSuspended
+    - UserStatusPending
+  model.UserVocabularyProgress:
+    properties:
+      box_number:
+        type: integer
+      consecutive_correct:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      last_review_date:
+        type: string
+      next_review_date:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      word:
+        $ref: '#/definitions/model.VocabularyWord'
+      word_id:
+        type: string
+    type: object
+  model.VocabularyWord:
+    properties:
+      created_at:
+        type: string
+      definition:
+        type: string
+      example:
+        type: string
+      id:
+        type: string
+      level:
+        type: string
+      part_of_speech:
+        type: string
+      phonetic:
+        type: string
+      tenant_id:
+        type: string
+      updated_at:
+        type: string
+      word:
+        type: string
+    type: object
+  model.WritingSubmission:
+    properties:
+      ai_feedback:
+        type: string
+      ai_score:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      prompt:
+        type: string
+      response:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      word_count:
+        type: integer
+    type: object
+  response.Envelope:
     properties:
       data: {}
       error:
-        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody'
+        $ref: '#/definitions/response.ErrorBody'
       message:
         type: string
       meta:
-        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta'
+        $ref: '#/definitions/response.Meta'
       request_id:
         type: string
       success:
         type: boolean
     type: object
-  github_com_unitechio_eLearning_apps_api_internal_pkg_response.ErrorBody:
+  response.ErrorBody:
     properties:
       code:
         type: integer
@@ -41,7 +1331,7 @@ definitions:
       message:
         type: string
     type: object
-  github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta:
+  response.Meta:
     properties:
       page:
         type: integer
@@ -52,49 +1342,7 @@ definitions:
       total_pages:
         type: integer
     type: object
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
-  internal_module_auth.AuthResponse:
-    properties:
-      token:
-        type: string
-      user:
-        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_module_user.User'
-    type: object
-  internal_module_auth.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  internal_module_auth.RegisterRequest:
-    properties:
-      email:
-        type: string
-      name:
-        maxLength: 100
-        minLength: 2
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - name
-    - password
-    type: object
-  internal_module_speaking.AnalyzeResult:
+  service.AnalyzeResult:
     properties:
       feedback:
         type: string
@@ -105,120 +1353,75 @@ definitions:
       transcript:
         type: string
     type: object
-  internal_module_user.UpdateProfileRequest:
+  service.AuthResponse:
     properties:
-      name:
-        maxLength: 100
-        minLength: 2
+      token:
         type: string
-    required:
-    - name
+      user:
+        $ref: '#/definitions/model.User'
     type: object
-  internal_module_user.User:
+  service.CreateWordRequest:
     properties:
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      email:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  internal_module_vocabulary.ReviewRequest:
-    properties:
-      correct:
-        type: boolean
-      word_id:
-        type: integer
-    required:
-    - word_id
-    type: object
-  internal_module_vocabulary.UserWordProgress:
-    properties:
-      box_number:
-        type: integer
-      consecutive_correct:
-        type: integer
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      last_review_at:
-        type: string
-      next_review_at:
-        type: string
-      updatedAt:
-        type: string
-      user_id:
-        type: integer
-      word:
-        $ref: '#/definitions/internal_module_vocabulary.Word'
-      word_id:
-        type: integer
-    type: object
-  internal_module_vocabulary.Word:
-    properties:
-      createdAt:
-        type: string
       definition:
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
       example:
         type: string
-      id:
-        type: integer
       level:
         type: string
       part_of_speech:
         type: string
       phonetic:
         type: string
-      updatedAt:
-        type: string
       word:
+        maxLength: 100
+        minLength: 1
         type: string
+    required:
+    - definition
+    - word
     type: object
-  internal_module_writing.HistoryResponse:
+  service.LoginRequest:
     properties:
-      items:
-        items:
-          $ref: '#/definitions/internal_module_writing.Submission'
-        type: array
-      meta:
-        $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Meta'
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
     type: object
-  internal_module_writing.Submission:
+  service.RegisterRequest:
     properties:
-      ai_feedback:
+      email:
         type: string
-      ai_score:
-        type: number
-      createdAt:
+      first_name:
+        maxLength: 100
+        minLength: 2
         type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      prompt:
+      last_name:
+        maxLength: 100
+        minLength: 2
         type: string
-      response:
+      password:
+        minLength: 6
         type: string
-      updatedAt:
-        type: string
-      user_id:
-        type: integer
-      word_count:
-        type: integer
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
     type: object
-  internal_module_writing.SubmitRequest:
+  service.ReviewRequest:
+    properties:
+      correct:
+        type: boolean
+      word_id:
+        type: string
+    required:
+    - word_id
+    type: object
+  service.SubmitRequest:
     properties:
       prompt:
         type: string
@@ -229,18 +1432,772 @@ definitions:
     - prompt
     - response
     type: object
-host: localhost:8080
+  service.UpdateProfileRequest:
+    properties:
+      first_name:
+        maxLength: 100
+        type: string
+      last_name:
+        maxLength: 100
+        type: string
+    type: object
 info:
-  contact:
-    email: support@eenglish.io
-    name: eEnglish Team
-  description: Production-ready REST API for the eEnglish IELTS AI platform.
-  license:
-    name: MIT
-  termsOfService: http://swagger.io/terms/
-  title: eEnglish IELTS API
-  version: "1.0"
+  contact: {}
 paths:
+  /activities:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Activity payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertActivityRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Activity'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create activity
+      tags:
+      - activities
+  /activities/{id}:
+    delete:
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete activity
+      tags:
+      - activities
+    get:
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Activity'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get activity by id
+      tags:
+      - activities
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Activity payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertActivityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Activity'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update activity
+      tags:
+      - activities
+  /activities/{id}/submissions:
+    get:
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search answer or feedback
+        in: query
+        name: q
+        type: string
+      - description: Filter by submission status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Submission'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List submissions for activity
+      tags:
+      - activities
+  /activities/{id}/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Submission payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SubmitActivityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Submission'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Submit activity answer
+      tags:
+      - activities
+  /activity/daily:
+    get:
+      parameters:
+      - description: 7d, 30d, 3m
+        in: query
+        name: range
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.DailyActivityPoint'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get daily activity stats
+      tags:
+      - activity-tracking
+  /activity/heatmap:
+    get:
+      parameters:
+      - description: 7d, 30d, 3m, 6m
+        in: query
+        name: range
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.HeatmapPoint'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get activity heatmap
+      tags:
+      - activity-tracking
+  /activity/time-spent:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TimeSpentSnapshot'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get time spent summary
+      tags:
+      - activity-tracking
+  /activity/xp:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.XPHistoryItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get XP history
+      tags:
+      - activity-tracking
+  /admin/ai-usage:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AIUsageSnapshot'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get admin AI usage
+      tags:
+      - admin
+  /admin/analytics:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AnalyticsSnapshot'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get admin analytics
+      tags:
+      - admin
+  /admin/courses:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by title or description
+        in: query
+        name: q
+        type: string
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      - description: Filter by level
+        in: query
+        name: level
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Course'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List admin courses
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Course'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create admin course
+      tags:
+      - admin
+  /admin/courses/{id}:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete admin course
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Course'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update admin course
+      tags:
+      - admin
+  /admin/users:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by email or name
+        in: query
+        name: q
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AdminUser'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List admin users
+      tags:
+      - admin
+  /admin/users/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminUser'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update user status
+      tags:
+      - admin
+  /ai/chat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AI chat payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Chat with AI coach
+      tags:
+      - ai
+  /ai/context-correction:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Context correction payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get premium AI context correction
+      tags:
+      - ai
+  /ai/evaluate-speaking:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AI speaking evaluation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Evaluate speaking with AI
+      tags:
+      - ai
+  /ai/evaluate-writing:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AI writing evaluation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WritingEvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Evaluate writing with AI
+      tags:
+      - ai
+  /ai/generate-question:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AI question payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Generate question with AI
+      tags:
+      - ai
+  /ai/pronunciation-feedback:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Pronunciation feedback payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get premium AI pronunciation feedback
+      tags:
+      - ai
+  /ai/stream-response:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: AI stream payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIStreamRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get premium AI stream response
+      tags:
+      - ai
+  /analytics/improvement:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ImprovementInsight'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get improvement analytics
+      tags:
+      - analytics
+  /analytics/learning-pattern:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LearningPattern'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get learning pattern analytics
+      tags:
+      - analytics
+  /analytics/weak-points:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.WeakPoint'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get weak points analytics
+      tags:
+      - analytics
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Forgot password payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Request password reset
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -251,7 +2208,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_module_auth.LoginRequest'
+          $ref: '#/definitions/service.LoginRequest'
       produces:
       - application/json
       responses:
@@ -259,20 +2216,63 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_auth.AuthResponse'
+                  $ref: '#/definitions/service.AuthResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       summary: Login with email and password
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Logout current user
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Refresh token payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TokenRefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Refresh access token
       tags:
       - auth
   /auth/register:
@@ -285,7 +2285,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_module_auth.RegisterRequest'
+          $ref: '#/definitions/service.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -293,22 +2293,1521 @@ paths:
           description: Created
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_auth.AuthResponse'
+                  $ref: '#/definitions/service.AuthResponse'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "409":
           description: Conflict
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       summary: Register a new user
       tags:
       - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reset password payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Reset password
+      tags:
+      - auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Verify email payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Verify email address
+      tags:
+      - auth
+  /billing/history:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by plan name
+        in: query
+        name: q
+        type: string
+      - description: Filter by payment status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.BillingHistoryItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get billing history
+      tags:
+      - billing
+  /billing/plans:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by plan name or description
+        in: query
+        name: q
+        type: string
+      - description: Filter by currency
+        in: query
+        name: currency
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.BillingPlan'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List billing plans
+      tags:
+      - billing
+  /billing/subscribe:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SubscribeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Subscribe billing plan
+      tags:
+      - billing
+  /courses:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by title or description
+        in: query
+        name: q
+        type: string
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      - description: Filter by level
+        in: query
+        name: level
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Course'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Create course
+      tags:
+      - courses
+  /courses/{id}:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete course
+      tags:
+      - courses
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Course'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get course by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Course payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Course'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Update course
+      tags:
+      - courses
+  /courses/{id}/modules:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search module title
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CourseModule'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List course modules
+      tags:
+      - courses
+  /dictionary/history:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by word or meaning
+        in: query
+        name: q
+        type: string
+      - description: Filter by saved state
+        in: query
+        name: saved
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.DictionaryLookupResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get dictionary history
+      tags:
+      - dictionary
+  /dictionary/lookup:
+    get:
+      parameters:
+      - description: Word to lookup
+        in: query
+        name: word
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DictionaryLookupResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Lookup dictionary entry
+      tags:
+      - dictionary
+  /dictionary/save:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Word payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DictionarySaveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DictionaryLookupResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Save dictionary word
+      tags:
+      - dictionary
+  /gamification/achievements:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Achievement'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get achievements
+      tags:
+      - gamification
+  /gamification/profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GamificationProfile'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get gamification profile
+      tags:
+      - gamification
+  /gamification/streak:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get streak summary
+      tags:
+      - gamification
+  /gamification/xp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: XP payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddXPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GamificationProfile'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Add XP for current user
+      tags:
+      - gamification
+  /gamification/xp/add:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: XP payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddXPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GamificationProfile'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Add XP for current user
+      tags:
+      - gamification
+  /leaderboard:
+    get:
+      parameters:
+      - description: weekly or monthly
+        in: query
+        name: type
+        type: string
+      - description: xp or time
+        in: query
+        name: metric
+        type: string
+      - description: Result limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.LeaderboardEntry'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get leaderboard
+      tags:
+      - leaderboard
+  /leaderboard/me:
+    get:
+      parameters:
+      - description: weekly or monthly
+        in: query
+        name: type
+        type: string
+      - description: xp or time
+        in: query
+        name: metric
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LeaderboardEntry'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get my leaderboard standing
+      tags:
+      - leaderboard
+  /lessons:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Lesson'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create lesson
+      tags:
+      - lessons
+  /lessons/{id}:
+    delete:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete lesson
+      tags:
+      - lessons
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Lesson payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Lesson'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update lesson
+      tags:
+      - lessons
+  /listening/{id}:
+    get:
+      parameters:
+      - description: Listening lesson ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ListeningLesson'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get listening lesson by id
+      tags:
+      - listening
+  /listening/{id}/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Listening lesson ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Listening submission payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ListeningSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Submit listening answers
+      tags:
+      - listening
+  /listening/lessons:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search title, description or transcript
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ListeningLesson'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List listening lessons
+      tags:
+      - listening
+  /modules:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Module payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CourseModule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create module
+      tags:
+      - modules
+  /modules/{id}:
+    delete:
+      parameters:
+      - description: Module ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete module
+      tags:
+      - modules
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Module ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Module payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CourseModule'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update module
+      tags:
+      - modules
+  /modules/{id}/lessons:
+    get:
+      parameters:
+      - description: Module ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search lesson title or content
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Lesson'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List module lessons
+      tags:
+      - modules
+  /notifications:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search title or message
+        in: query
+        name: q
+        type: string
+      - description: Filter by category
+        in: query
+        name: category
+        type: string
+      - description: Filter by read status
+        in: query
+        name: is_read
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.NotificationItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List notifications
+      tags:
+      - notifications
+  /notifications/{id}/read:
+    put:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Mark notification as read
+      tags:
+      - notifications
+  /planner:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Planner'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get study planner
+      tags:
+      - planner
+  /planner/generate:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Planner'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Generate study planner
+      tags:
+      - planner
+  /planner/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Planner payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PlannerUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Planner'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update study planner
+      tags:
+      - planner
+  /practice/dictation/start:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice start payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeStartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Start practice session
+      tags:
+      - practice
+  /practice/dictation/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice submit payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeSubmitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Submit practice session
+      tags:
+      - practice
+  /practice/modes:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeModesResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get practice modes
+      tags:
+      - practice
+  /practice/shadowing/start:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice start payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeStartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Start practice session
+      tags:
+      - practice
+  /practice/shadowing/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice submit payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeSubmitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Submit practice session
+      tags:
+      - practice
+  /practice/start:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice start payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeStartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Start practice session
+      tags:
+      - practice
+  /practice/submit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Practice submit payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PracticeSubmitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PracticeSessionItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Submit practice session
+      tags:
+      - practice
+  /premium/features:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.PremiumFeature'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get premium feature list
+      tags:
+      - premium
+  /premium/unlock:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Premium feature payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PremiumUnlockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Unlock premium feature
+      tags:
+      - premium
+  /progress:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ProgressSnapshot'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get overall progress
+      tags:
+      - progress
+  /progress/activity/{id}:
+    get:
+      parameters:
+      - description: Activity ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get activity progress
+      tags:
+      - progress
+  /progress/course/{id}:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get course progress
+      tags:
+      - progress
+  /pronunciation/analyze-sentence:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Sentence payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PronunciationAnalyzeSentenceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PronunciationHistoryItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Analyze sentence pronunciation
+      tags:
+      - pronunciation
+  /pronunciation/analyze-word:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Word payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PronunciationAnalyzeWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PronunciationHistoryItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Analyze word pronunciation
+      tags:
+      - pronunciation
+  /pronunciation/history:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: word or sentence
+        in: query
+        name: kind
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.PronunciationHistoryItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get pronunciation history
+      tags:
+      - pronunciation
+  /reading/lookup:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reading lookup payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadingLookupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DictionaryLookupResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Inline reading lookup
+      tags:
+      - reading
+  /reading/save-word:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reading save payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReadingSaveWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DictionaryLookupResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Save reading word
+      tags:
+      - reading
+  /recommendations:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.RecommendationItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get recommendations
+      tags:
+      - recommendations
+  /recommendations/next:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get next recommended lesson
+      tags:
+      - recommendations
+  /recommendations/next-lesson:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get next recommended lesson
+      tags:
+      - recommendations
   /speaking/analyze:
     post:
       consumes:
@@ -326,28 +3825,186 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_speaking.AnalyzeResult'
+                  $ref: '#/definitions/service.AnalyzeResult'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
       summary: Analyze speaking audio
       tags:
       - speaking
+  /speaking/pronunciation:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Pronunciation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PronunciationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PronunciationResult'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Analyze pronunciation
+      tags:
+      - speaking
+  /speaking/session/{id}:
+    get:
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SpeakingSession'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get speaking session by id
+      tags:
+      - speaking
+  /speaking/session/start:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SpeakingSession'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Start speaking session
+      tags:
+      - speaking
+  /speaking/session/stop:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SpeakingSession'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Stop speaking session
+      tags:
+      - speaking
+  /submissions/{id}:
+    get:
+      parameters:
+      - description: Submission ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Submission'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get submission by id
+      tags:
+      - submissions
+  /users/activities:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by title or description
+        in: query
+        name: q
+        type: string
+      - description: Filter by activity type
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.UserActivityItem'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get current user activities
+      tags:
+      - users
   /users/me:
     get:
       produces:
@@ -357,19 +4014,19 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_user.User'
+                  $ref: '#/definitions/model.User'
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
       summary: Get current user profile
@@ -384,7 +4041,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_module_user.UpdateProfileRequest'
+          $ref: '#/definitions/service.UpdateProfileRequest'
       produces:
       - application/json
       responses:
@@ -392,24 +4049,195 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_user.User'
+                  $ref: '#/definitions/model.User'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
       summary: Update current user profile
       tags:
       - users
+  /users/progress:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.UserProgress'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get current user course progress
+      tags:
+      - users
+  /users/stats:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserStats'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get current user stats
+      tags:
+      - users
+  /vocab/sets:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by set name
+        in: query
+        name: q
+        type: string
+      - description: Filter by domain
+        in: query
+        name: domain
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.VocabularySetItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List vocabulary sets
+      tags:
+      - vocab-sets
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Vocabulary set payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VocabularySetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.VocabularySetItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create vocabulary set
+      tags:
+      - vocab-sets
+  /vocab/sets/{id}:
+    get:
+      parameters:
+      - description: Set ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.VocabularySetItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get vocabulary set by id
+      tags:
+      - vocab-sets
+  /vocab/sets/{id}/add-word:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Set ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Word payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VocabularySetAddWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.VocabularySetItem'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Add word to vocabulary set
+      tags:
+      - vocab-sets
   /vocabulary/due:
     get:
       produces:
@@ -419,33 +4247,41 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/internal_module_vocabulary.UserWordProgress'
+                    $ref: '#/definitions/model.UserVocabularyProgress'
                   type: array
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
-      summary: Get vocabulary cards due for review today
+      summary: Get vocabulary cards due for review
       tags:
       - vocabulary
-  /vocabulary/review:
-    post:
-      consumes:
-      - application/json
+  /vocabulary/history:
+    get:
       parameters:
-      - description: Review result
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/internal_module_vocabulary.ReviewRequest'
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by word or definition
+        in: query
+        name: q
+        type: string
+      - description: Filter by result
+        in: query
+        name: result
+        type: string
       produces:
       - application/json
       responses:
@@ -453,22 +4289,113 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_vocabulary.UserWordProgress'
+                  items:
+                    $ref: '#/definitions/dto.VocabularyHistoryItem'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get vocabulary review history
+      tags:
+      - vocabulary
+  /vocabulary/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Review payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserVocabularyProgress'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
       summary: Submit a vocabulary review result
+      tags:
+      - vocabulary
+  /vocabulary/reviews:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Review payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.ReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserVocabularyProgress'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Submit a vocabulary review result
+      tags:
+      - vocabulary
+  /vocabulary/reviews/due:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.UserVocabularyProgress'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get vocabulary cards due for review
       tags:
       - vocabulary
   /vocabulary/words:
@@ -480,30 +4407,188 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/internal_module_vocabulary.Word'
+                    $ref: '#/definitions/model.VocabularyWord'
                   type: array
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
-      summary: Get all vocabulary words
+      summary: List vocabulary words
       tags:
       - vocabulary
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Word payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.CreateWordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.VocabularyWord'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Create a vocabulary word
+      tags:
+      - vocabulary
+  /vocabulary/words/{id}:
+    delete:
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete vocabulary word
+      tags:
+      - vocabulary
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Word ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Word payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateWordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Update vocabulary word
+      tags:
+      - vocabulary
+  /vocabulary/words/{wordId}:
+    get:
+      parameters:
+      - description: Word ID
+        in: path
+        name: wordId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.VocabularyWord'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get a vocabulary word by id
+      tags:
+      - vocabulary
+  /writing/{id}:
+    get:
+      parameters:
+      - description: Writing ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get writing item by id
+      tags:
+      - writing
+  /writing/evaluate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Writing evaluation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.WritingEvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Evaluate writing text
+      tags:
+      - writing
   /writing/history:
     get:
       parameters:
-      - description: 'Page number (default: 1)'
+      - description: Page number
         in: query
         name: page
         type: integer
-      - description: 'Page size (default: 10, max: 50)'
+      - description: Page size
         in: query
         name: page_size
         type: integer
@@ -514,18 +4599,126 @@ paths:
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_writing.HistoryResponse'
+                  items:
+                    $ref: '#/definitions/model.WritingSubmission'
+                  type: array
               type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
-      summary: Get user's writing submission history
+      summary: Get writing submission history
+      tags:
+      - writing
+  /writing/submissions:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.WritingSubmission'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get writing submission history
+      tags:
+      - writing
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Writing submission
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.SubmitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.WritingSubmission'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Submit a writing response for AI evaluation
+      tags:
+      - writing
+  /writing/submissions/{submissionId}:
+    get:
+      parameters:
+      - description: Submission ID
+        in: path
+        name: submissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.WritingSubmission'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Envelope'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get a writing submission by id
       tags:
       - writing
   /writing/submit:
@@ -538,7 +4731,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/internal_module_writing.SubmitRequest'
+          $ref: '#/definitions/service.SubmitRequest'
       produces:
       - application/json
       responses:
@@ -546,28 +4739,42 @@ paths:
           description: Created
           schema:
             allOf:
-            - $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/internal_module_writing.Submission'
+                  $ref: '#/definitions/model.WritingSubmission'
               type: object
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_unitechio_eLearning_apps_api_internal_pkg_response.Envelope'
+            $ref: '#/definitions/response.Envelope'
       security:
       - BearerAuth: []
       summary: Submit a writing response for AI evaluation
       tags:
       - writing
-securityDefinitions:
-  BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
-    in: header
-    name: Authorization
-    type: apiKey
+  /ws/ai-chat:
+    get:
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+      summary: WebSocket AI chat stream
+      tags:
+      - realtime
+  /ws/speaking:
+    get:
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+      summary: WebSocket speaking stream
+      tags:
+      - realtime
 swagger: "2.0"

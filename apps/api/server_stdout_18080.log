@@ -1,0 +1,17 @@
+{"time":"2026-04-21T00:47:08.1436095+07:00","level":"INFO","msg":"Connected to PostgreSQL database: einfra"}
+{"time":"2026-04-21T00:47:08.1452318+07:00","level":"INFO","msg":"Running database migrations..."}
+{"time":"2026-04-21T00:47:13.306733+07:00","level":"INFO","msg":"Database migrations completed successfully"}
+{"time":"2026-04-21T00:47:13.3072893+07:00","level":"INFO","msg":"Seeding initial data..."}
+{"time":"2026-04-21T00:47:13.3184866+07:00","level":"INFO","msg":"Modules seeded successfully"}
+{"time":"2026-04-21T00:47:13.3351259+07:00","level":"INFO","msg":"Departments seeded successfully"}
+{"time":"2026-04-21T00:47:13.3474539+07:00","level":"INFO","msg":"Services seeded successfully"}
+{"time":"2026-04-21T00:47:13.3534107+07:00","level":"INFO","msg":"Scopes seeded successfully"}
+{"time":"2026-04-21T00:47:13.3597032+07:00","level":"INFO","msg":"Roles seeded successfully"}
+{"time":"2026-04-21T00:47:13.3597032+07:00","level":"INFO","msg":"Permissions seeded successfully"}
+{"time":"2026-04-21T00:47:13.3603932+07:00","level":"INFO","msg":"Enhanced permissions seeded successfully"}
+{"time":"2026-04-21T00:47:13.3603932+07:00","level":"INFO","msg":"Permissions assigned to super_admin successfully"}
+{"time":"2026-04-21T00:47:13.5108595+07:00","level":"INFO","msg":"Admin user seeded successfully"}
+{"time":"2026-04-21T00:47:13.5113804+07:00","level":"INFO","msg":"Categories seeded successfully"}
+{"time":"2026-04-21T00:47:13.5113804+07:00","level":"INFO","msg":"Initial data seeded successfully"}
+{"time":"2026-04-21T00:47:13.5125257+07:00","level":"INFO","msg":"server starting","addr":":18080"}
+{"time":"2026-04-21T00:47:23.7114841+07:00","level":"INFO","msg":"request","status":200,"method":"GET","path":"/health","latency":0,"ip":"127.0.0.1","request_id":"ee9eccb2-5738-4eb6-b50d-91c54ce4f354"}

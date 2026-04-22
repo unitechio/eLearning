@@ -35,6 +35,15 @@ func getEnv(key, defaultValue string) string {
 	return value
 }
 
+func getEnvAny(keys []string, defaultValue string) string {
+	for _, key := range keys {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return defaultValue
+}
+
 func getEnvAsInt(key string, defaultValue int) int {
 	valueStr := os.Getenv(key)
 	if valueStr == "" {
@@ -42,6 +51,19 @@ func getEnvAsInt(key string, defaultValue int) int {
 	}
 	if value, err := strconv.Atoi(valueStr); err == nil {
 		return value
+	}
+	return defaultValue
+}
+
+func getEnvAsIntAny(keys []string, defaultValue int) int {
+	for _, key := range keys {
+		valueStr := strings.TrimSpace(os.Getenv(key))
+		if valueStr == "" {
+			continue
+		}
+		if value, err := strconv.Atoi(valueStr); err == nil {
+			return value
+		}
 	}
 	return defaultValue
 }
@@ -59,7 +81,17 @@ func getEnvAsBool(key string, defaultValue bool) bool {
 
 func getSliceEnv(key string, defaultValue []string) []string {
 	if value := os.Getenv(key); value != "" {
-		return strings.Split(value, ",")
+		rawItems := strings.Split(value, ",")
+		items := make([]string, 0, len(rawItems))
+		for _, item := range rawItems {
+			trimmed := strings.TrimSpace(item)
+			if trimmed != "" {
+				items = append(items, trimmed)
+			}
+		}
+		if len(items) > 0 {
+			return items
+		}
 	}
 	return defaultValue
 }

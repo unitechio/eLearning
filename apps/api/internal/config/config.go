@@ -13,12 +13,14 @@ type Config struct {
 	Database  DatabaseConfig `validate:"required"`
 	Auth      AuthConfig     `validate:"required"`
 	JWT       JWTConfig
+	CORS      CORSConfig
 	Email     EmailConfig
 	Storage   StorageConfig
 	Cache     RedisConfig
 	Minio     MinioConfig
 	RateLimit RateLimitConfig
 	ELK       ELKConfig
+	Log       LoggingConfig
 }
 
 type ServerConfig struct {
@@ -65,6 +67,7 @@ type EmailConfig struct {
 
 type JWTConfig struct {
 	Secret               string
+	AccessExpiry         time.Duration
 	ExpirationHours      int
 	RefreshExpiration    time.Duration
 	Issuer               string
@@ -88,6 +91,15 @@ type RedisConfig struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 	IdleTimeout  time.Duration
+}
+
+type CORSConfig struct {
+	AllowedOrigins   []string
+	AllowedMethods   []string
+	AllowedHeaders   []string
+	ExposedHeaders   []string
+	AllowCredentials bool
+	MaxAge           time.Duration
 }
 
 // RateLimitConfig holds rate limiting configuration
@@ -178,7 +190,8 @@ func LoadConfig(configPath string) (*Config, error) {
 			Port:            getEnvAsInt("DB_PORT", 1521),
 			User:            getEnv("DB_USER", ""),
 			Password:        getEnv("DB_PASSWORD", ""),
-			SSLMode:         getEnv("DB_SSL_MODE", "disable"),
+			Database:        getEnvAny([]string{"DB_DATABASE", "DB_NAME"}, ""),
+			SSLMode:         getEnvAny([]string{"DB_SSL_MODE", "DB_SSLMODE"}, "disable"),
 			MaxIdleConns:    getEnvAsInt("DB_MAX_IDLE_CONNS", 10),
 			MaxOpenConns:    getEnvAsInt("DB_MAX_OPEN_CONNS", 100),
 			ConnMaxLifetime: getEnvAsInt("DB_CONN_MAX_LIFETIME", 300),
@@ -189,11 +202,12 @@ func LoadConfig(configPath string) (*Config, error) {
 
 		JWT: JWTConfig{
 			Secret:               getEnv("JWT_SECRET", "your-jwt-secret-key"),
+			AccessExpiry:         getEnvAsDuration("JWT_ACCESS_TOKEN_EXPIRE", 15*time.Minute),
 			ExpirationHours:      getEnvAsInt("JWT_EXPIRATION_HOURS", 1),
-			RefreshExpiration:    getEnvAsDuration("JWT_REFRESH_EXPIRATION", "168h"),
+			RefreshExpiration:    getEnvAsDuration("JWT_REFRESH_EXPIRATION", 168*time.Hour),
 			Issuer:               getEnv("JWT_ISSUER", "EOFFICE_CRM_BE"),
 			MaxSessionsPerUser:   getEnvAsInt("JWT_MAX_SESSIONS_PER_USER", 5),
-			TokenCleanupInterval: getEnvAsDuration("JWT_TOKEN_CLEANUP_INTERVAL", "1h"),
+			TokenCleanupInterval: getEnvAsDuration("JWT_TOKEN_CLEANUP_INTERVAL", 1*time.Hour),
 		},
 
 		Storage: StorageConfig{
@@ -212,10 +226,10 @@ func LoadConfig(configPath string) (*Config, error) {
 
 		Minio: MinioConfig{
 			Endpoint:        getEnv("MINIO_ENDPOINT", "localhost:9000"),
-			AccessKeyID:     getEnv("MINIO_ACCESS_KEY_ID", "minioadmin"),
-			SecretAccessKey: getEnv("MINIO_SECRET_ACCESS_KEY", "minioadmin"),
+			AccessKeyID:     getEnvAny([]string{"MINIO_ACCESS_KEY_ID", "MINIO_ACCESS_KEY"}, "minioadmin"),
+			SecretAccessKey: getEnvAny([]string{"MINIO_SECRET_ACCESS_KEY", "MINIO_SECRET_KEY"}, "minioadmin"),
 			UseSSL:          getEnvAsBool("MINIO_USE_SSL", false),
-			BucketName:      getEnv("MINIO_BUCKET_NAME", "einfra-crm"),
+			BucketName:      getEnvAny([]string{"MINIO_BUCKET_NAME", "MINIO_BUCKET"}, "einfra-crm"),
 		},
 
 		Email: EmailConfig{
@@ -231,11 +245,24 @@ func LoadConfig(configPath string) (*Config, error) {
 
 		RateLimit: RateLimitConfig{
 			Enabled:        getEnvAsBool("RATE_LIMIT_ENABLED", true),
-			RequestsPerMin: getEnvAsInt("RATE_LIMIT_REQUESTS_PER_MIN", 100),
+			RequestsPerMin: getEnvAsIntAny([]string{"RATE_LIMIT_REQUESTS_PER_MIN", "RATE_LIMIT_REQUESTS"}, 100),
 			Burst:          getEnvAsInt("RATE_LIMIT_BURST", 20),
+		},
+		CORS: CORSConfig{
+			AllowedOrigins:   getSliceEnv("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:5173"}),
+			AllowedMethods:   getSliceEnv("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+			AllowedHeaders:   getSliceEnv("CORS_ALLOWED_HEADERS", []string{"Origin", "Content-Type", "Authorization", "X-Request-ID"}),
+			ExposedHeaders:   getSliceEnv("CORS_EXPOSED_HEADERS", []string{"X-Request-ID"}),
+			AllowCredentials: getEnvAsBool("CORS_ALLOW_CREDENTIALS", true),
+			MaxAge:           getEnvAsDuration("CORS_MAX_AGE", 12*time.Hour),
 		},
 		ELK: ELKConfig{
 			ElasticAPMEndpoint: getEnv("ELK_ELASTIC_APM_ENDPOINT", ""),
+		},
+		Log: LoggingConfig{
+			Level:  getEnv("LOG_LEVEL", "info"),
+			Format: getEnv("LOG_FORMAT", "json"),
+			Output: getEnv("LOG_OUTPUT", "stdout"),
 		},
 	}
 

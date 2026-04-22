@@ -33,8 +33,8 @@ func (s *llmService) EvaluateWriting(prompt, text string) (*EvaluationResult, er
 		return nil, fmt.Errorf("empty response")
 	}
 	return &EvaluationResult{
-		Score:    7.0,
-		Feedback: "Well-structured essay. Strengthen your argument in paragraph 2 with more specific evidence.",
+		Score:          7.0,
+		Feedback:       "Well-structured essay. Strengthen your argument in paragraph 2 with more specific evidence.",
 		ImprovedAnswer: "",
 	}, nil
 }
