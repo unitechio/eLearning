@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/service"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
@@ -13,7 +13,7 @@ type WritingHandler struct {
 	svc service.WritingService
 }
 
-func NewWritingHandler(svc service.WritingService) *WritingHandler {
+func NewWritingHandler(svc service.WritingUsecase) *WritingHandler {
 	return &WritingHandler{svc: svc}
 }
 
@@ -24,7 +24,7 @@ func NewWritingHandler(svc service.WritingService) *WritingHandler {
 // @Accept       json
 // @Produce      json
 // @Param        body  body      service.SubmitRequest  true  "Writing submission"
-// @Success      201   {object}  response.Envelope{data=model.WritingSubmission}
+// @Success      201   {object}  response.Envelope{data=domain.WritingSubmission}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /writing/submit [post]
@@ -57,7 +57,7 @@ func (h *WritingHandler) Submit(c *gin.Context) {
 // @Produce      json
 // @Param        page       query     int  false  "Page number"
 // @Param        page_size  query     int  false  "Page size"
-// @Success      200        {object}  response.Envelope{data=[]model.WritingSubmission}
+// @Success      200        {object}  response.Envelope{data=[]domain.WritingSubmission}
 // @Failure      401        {object}  response.Envelope
 // @Router       /writing/history [get]
 // @Router       /writing/submissions [get]
@@ -85,7 +85,7 @@ func (h *WritingHandler) GetHistory(c *gin.Context) {
 // @Security     BearerAuth
 // @Produce      json
 // @Param        submissionId  path      string  true  "Submission ID"
-// @Success      200           {object}  response.Envelope{data=model.WritingSubmission}
+// @Success      200           {object}  response.Envelope{data=domain.WritingSubmission}
 // @Failure      400           {object}  response.Envelope
 // @Failure      401           {object}  response.Envelope
 // @Failure      404           {object}  response.Envelope

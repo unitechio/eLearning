@@ -29,7 +29,7 @@ func (u *ActivityUsecase) GetActivity(id string) (*usecase.Activity, error) {
 	return mapActivity(item), nil
 }
 func (u *ActivityUsecase) CreateActivity(req usecase.UpsertActivityRequest) (*usecase.Activity, error) {
-	item := &model.Activity{TenantID: uuid.Nil, Title: req.Title, Type: req.Type, Domain: req.Domain, Instructions: req.Instructions, Status: fallback(req.Status, "draft"), MaxScore: 100, ExpectedInput: "text"}
+	item := &domain.Activity{TenantID: uuid.Nil, Title: req.Title, Type: req.Type, Domain: req.Domain, Instructions: req.Instructions, Status: fallback(req.Status, "draft"), MaxScore: 100, ExpectedInput: "text"}
 	if err := u.repo.CreateActivity(item); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -73,7 +73,7 @@ func (u *ActivityUsecase) SubmitActivity(id string, userID uuid.UUID, req usecas
 		return nil, apperr.Internal(err)
 	}
 	score := 85.0
-	sub := &model.ActivitySubmission{ActivityID: activityID, UserID: userID, TenantID: activity.TenantID, Answer: req.Answer, Score: &score, Feedback: "Submission reviewed successfully.", Status: "graded"}
+	sub := &domain.ActivitySubmission{ActivityID: activityID, UserID: userID, TenantID: activity.TenantID, Answer: req.Answer, Score: &score, Feedback: "Submission reviewed successfully.", Status: "graded"}
 	if err := u.repo.CreateSubmission(sub); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -109,10 +109,10 @@ func (u *ActivityUsecase) GetSubmission(id string) (*usecase.Submission, error) 
 	return mapSubmission(item), nil
 }
 
-func mapActivity(item *model.Activity) *usecase.Activity {
+func mapActivity(item *domain.Activity) *usecase.Activity {
 	return &usecase.Activity{ID: item.ID.String(), Title: item.Title, Type: item.Type, Domain: item.Domain, Instructions: item.Instructions, Status: item.Status}
 }
-func mapSubmission(item *model.ActivitySubmission) *usecase.Submission {
+func mapSubmission(item *domain.ActivitySubmission) *usecase.Submission {
 	score := 0.0
 	if item.Score != nil {
 		score = *item.Score

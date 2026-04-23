@@ -5,16 +5,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/unitechio/eLearning/apps/api/internal/service"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 type AuthHandler struct {
-	svc service.AuthService
+	authService service.AuthService
 }
 
-func NewAuthHandler(svc service.AuthService) *AuthHandler {
-	return &AuthHandler{svc: svc}
+func NewAuthHandler(authService service.AuthUsecase) *AuthHandler {
+	return &AuthHandler{authService: authService}
 }
 
 // Register godoc
@@ -34,7 +34,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	res, err := h.svc.Register(req)
+	res, err := h.authService.Register(req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -59,7 +59,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	res, err := h.svc.Login(req)
+	res, err := h.authService.Login(req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -87,7 +87,7 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 	}
 
 	resetReq := &domain.PasswordResetRequest{Email: req.Email}
-	if err := h.authUsecase.RequestPasswordReset(c.Request.Context(), resetReq); err != nil {
+	if err := h.authService.RequestPasswordReset(c.Request.Context(), resetReq); err != nil {
 		// Don't reveal if email exists or not for security
 		c.JSON(http.StatusOK, gin.H{"message": "If the email exists, a password reset link has been sent"})
 		return
@@ -113,7 +113,7 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.ResetPassword(c.Request.Context(), &req); err != nil {
+	if err := h.authService.ResetPassword(c.Request.Context(), &req); err != nil {
 		c.Error(errorx.New(http.StatusBadRequest, err.Error()))
 		return
 	}
@@ -138,7 +138,7 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.VerifyEmail(c.Request.Context(), &req); err != nil {
+	if err := h.authService.VerifyEmail(c.Request.Context(), &req); err != nil {
 		c.Error(errorx.New(http.StatusBadRequest, err.Error()))
 		return
 	}

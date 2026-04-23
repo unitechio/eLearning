@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -16,12 +16,12 @@ func NewPermissionRepository(db *gorm.DB) *PermissionRepository {
 	return &PermissionRepository{db: db}
 }
 
-func (r *PermissionRepository) Create(ctx context.Context, permission *model.Permission) error {
+func (r *PermissionRepository) Create(ctx context.Context, permission *domain.Permission) error {
 	return r.db.WithContext(ctx).Create(permission).Error
 }
 
-func (r *PermissionRepository) GetByID(ctx context.Context, id string) (*model.Permission, error) {
-	var permission model.Permission
+func (r *PermissionRepository) GetByID(ctx context.Context, id string) (*domain.Permission, error) {
+	var permission domain.Permission
 	err := r.db.WithContext(ctx).First(&permission, "id = ?", id).Error
 
 	if err != nil {
@@ -34,8 +34,8 @@ func (r *PermissionRepository) GetByID(ctx context.Context, id string) (*model.P
 	return &permission, nil
 }
 
-func (r *PermissionRepository) GetByName(ctx context.Context, name string) (*model.Permission, error) {
-	var permission model.Permission
+func (r *PermissionRepository) GetByName(ctx context.Context, name string) (*domain.Permission, error) {
+	var permission domain.Permission
 	err := r.db.WithContext(ctx).First(&permission, "name = ?", name).Error
 
 	if err != nil {
@@ -48,11 +48,11 @@ func (r *PermissionRepository) GetByName(ctx context.Context, name string) (*mod
 	return &permission, nil
 }
 
-func (r *PermissionRepository) List(ctx context.Context, filter model.PermissionFilter) ([]*model.Permission, int64, error) {
-	var permissions []*model.Permission
+func (r *PermissionRepository) List(ctx context.Context, filter domain.PermissionFilter) ([]*domain.Permission, int64, error) {
+	var permissions []*domain.Permission
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&model.Permission{})
+	query := r.db.WithContext(ctx).Model(&domain.Permission{})
 
 	if filter.Resource != "" {
 		query = query.Where("resource = ?", filter.Resource)
@@ -76,16 +76,16 @@ func (r *PermissionRepository) List(ctx context.Context, filter model.Permission
 	return permissions, total, nil
 }
 
-func (r *PermissionRepository) Update(ctx context.Context, permission *model.Permission) error {
+func (r *PermissionRepository) Update(ctx context.Context, permission *domain.Permission) error {
 	return r.db.WithContext(ctx).Save(permission).Error
 }
 
 func (r *PermissionRepository) Delete(ctx context.Context, id string) error {
-	return r.db.WithContext(ctx).Delete(&model.Permission{}, "id = ?", id).Error
+	return r.db.WithContext(ctx).Delete(&domain.Permission{}, "id = ?", id).Error
 }
 
-func (r *PermissionRepository) GetByResource(ctx context.Context, resource string) ([]*model.Permission, error) {
-	var permissions []*model.Permission
+func (r *PermissionRepository) GetByResource(ctx context.Context, resource string) ([]*domain.Permission, error) {
+	var permissions []*domain.Permission
 	err := r.db.WithContext(ctx).
 		Where("resource = ?", resource).
 		Find(&permissions).Error

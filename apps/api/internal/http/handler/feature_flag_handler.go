@@ -6,18 +6,18 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"einfra/api/internal/modules/server/application/settings_uc"
 	"einfra/api/internal/domain"
+
+	"github.com/gin-gonic/gin"
 )
 
 // FeatureFlagHandler handles HTTP requests related to feature flags.
 type FeatureFlagHandler struct {
-	uc usecase.FeatureFlagUsecase
+	uc service.FeatureFlagUsecase
 }
 
 // NewFeatureFlagHandler creates a new instance of FeatureFlagHandler.
-func NewFeatureFlagHandler(uc usecase.FeatureFlagUsecase) *FeatureFlagHandler {
+func NewFeatureFlagHandler(uc service.FeatureFlagUsecase) *FeatureFlagHandler {
 	return &FeatureFlagHandler{uc: uc}
 }
 

@@ -15,11 +15,11 @@ import (
 
 // RoleHandler handles role management HTTP requests
 type RoleHandler struct {
-	roleUsecase usecase.RoleUsecase
+	roleUsecase service.RoleUsecase
 }
 
 // NewRoleHandler creates a new role handler instance
-func NewRoleHandler(roleUsecase usecase.RoleUsecase) *RoleHandler {
+func NewRoleHandler(roleUsecase service.RoleUsecase) *RoleHandler {
 	return &RoleHandler{
 		roleUsecase: roleUsecase,
 	}
@@ -52,7 +52,7 @@ func (h *RoleHandler) Create(c *gin.Context) {
 	}
 
 	// Create role using usecase
-	if err := h.roleUsecase.Create(c.Request.Context(), &role); err != nil {
+	if err := h.roleservice.Create(c.Request.Context(), &role); err != nil {
 		// Check if it's a duplicate name error
 		if errorx.GetCode(err) == errorx.CodeConflict {
 			c.Error(err)
@@ -99,7 +99,7 @@ func (h *RoleHandler) Get(c *gin.Context) {
 	}
 
 	// Retrieve role from usecase
-	role, err := h.roleUsecase.GetByID(c.Request.Context(), id)
+	role, err := h.roleservice.GetByID(c.Request.Context(), id)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeNotFound, "Role not found"))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -173,7 +173,7 @@ func (h *RoleHandler) List(c *gin.Context) {
 	}
 
 	// Retrieve roles from usecase
-	roles, total, err := h.roleUsecase.List(c.Request.Context(), filter)
+	roles, total, err := h.roleservice.List(c.Request.Context(), filter)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to list roles"))
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -237,7 +237,7 @@ func (h *RoleHandler) Update(c *gin.Context) {
 	role.ID = id
 
 	// Update role using usecase
-	if err := h.roleUsecase.Update(c.Request.Context(), &role); err != nil {
+	if err := h.roleservice.Update(c.Request.Context(), &role); err != nil {
 		// Check error type
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
@@ -291,7 +291,7 @@ func (h *RoleHandler) Delete(c *gin.Context) {
 	}
 
 	// Delete role using usecase
-	if err := h.roleUsecase.Delete(c.Request.Context(), id); err != nil {
+	if err := h.roleservice.Delete(c.Request.Context(), id); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{

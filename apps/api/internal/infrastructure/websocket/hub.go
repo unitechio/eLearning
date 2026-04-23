@@ -6,21 +6,21 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
-	"github.com/unitechio/eLearning/apps/api/internal/service"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"go.uber.org/zap"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the clients
 type Hub struct {
 	// Registered clients mapped by client ID
-	clients map[string]*model.WebSocketClient
+	clients map[string]*domain.WebSocketClient
 
 	// User ID to client IDs mapping (one user can have multiple connections)
 	userClients map[uuid.UUID]map[string]bool
 
 	// Register requests from the clients
-	register chan *model.WebSocketClient
+	register chan *domain.WebSocketClient
 
 	// Unregister requests from clients
 	unregister chan string
@@ -51,11 +51,11 @@ type clientMessage struct {
 	message  []byte
 }
 
-func NewHub(logger *zap.Logger) service.WebSocketService {
+func NewHub(logger *zap.Logger) service.WebSocketUsecase {
 	return &Hub{
-		clients:      make(map[string]*model.WebSocketClient),
+		clients:      make(map[string]*domain.WebSocketClient),
 		userClients:  make(map[uuid.UUID]map[string]bool),
-		register:     make(chan *model.WebSocketClient),
+		register:     make(chan *domain.WebSocketClient),
 		unregister:   make(chan string),
 		broadcast:    make(chan []byte),
 		sendToUser:   make(chan *userMessage),
@@ -159,7 +159,7 @@ func (h *Hub) Run() {
 }
 
 // RegisterClient registers a new WebSocket client
-func (h *Hub) RegisterClient(client *model.WebSocketClient) {
+func (h *Hub) RegisterClient(client *domain.WebSocketClient) {
 	h.register <- client
 }
 
@@ -169,7 +169,7 @@ func (h *Hub) UnregisterClient(clientID string) {
 }
 
 // SendToUser sends a message to a specific user (all their connections)
-func (h *Hub) SendToUser(userID uuid.UUID, message *model.WebSocketMessage) error {
+func (h *Hub) SendToUser(userID uuid.UUID, message *domain.WebSocketMessage) error {
 	message.Timestamp = time.Now()
 	data, err := json.Marshal(message)
 	if err != nil {
@@ -184,7 +184,7 @@ func (h *Hub) SendToUser(userID uuid.UUID, message *model.WebSocketMessage) erro
 }
 
 // SendToClient sends a message to a specific client connection
-func (h *Hub) SendToClient(clientID string, message *model.WebSocketMessage) error {
+func (h *Hub) SendToClient(clientID string, message *domain.WebSocketMessage) error {
 	message.Timestamp = time.Now()
 	data, err := json.Marshal(message)
 	if err != nil {
@@ -199,7 +199,7 @@ func (h *Hub) SendToClient(clientID string, message *model.WebSocketMessage) err
 }
 
 // Broadcast sends a message to all connected clients
-func (h *Hub) Broadcast(message *model.WebSocketMessage) error {
+func (h *Hub) Broadcast(message *domain.WebSocketMessage) error {
 	message.Timestamp = time.Now()
 	data, err := json.Marshal(message)
 	if err != nil {
@@ -211,7 +211,7 @@ func (h *Hub) Broadcast(message *model.WebSocketMessage) error {
 }
 
 // BroadcastExcept sends a message to all clients except the specified one
-func (h *Hub) BroadcastExcept(excludeClientID string, message *model.WebSocketMessage) error {
+func (h *Hub) BroadcastExcept(excludeClientID string, message *domain.WebSocketMessage) error {
 	message.Timestamp = time.Now()
 	data, err := json.Marshal(message)
 	if err != nil {
@@ -276,14 +276,14 @@ func (h *Hub) GetTotalConnections() int {
 }
 
 // NotifyNotification sends a notification event to user(s)
-func (h *Hub) NotifyNotification(notification *model.Notification, action string) error {
-	event := &model.NotificationEvent{
+func (h *Hub) NotifyNotification(notification *domain.Notification, action string) error {
+	event := &domain.NotificationEvent{
 		Notification: notification,
 		Action:       action,
 	}
 
-	message := &model.WebSocketMessage{
-		Type:    model.WSEventNotification,
+	message := &domain.WebSocketMessage{
+		Type:    domain.WSEventNotification,
 		Payload: event,
 	}
 
@@ -298,20 +298,20 @@ func (h *Hub) NotifyNotification(notification *model.Notification, action string
 
 // broadcastUserPresence broadcasts user online/offline status
 func (h *Hub) broadcastUserPresence(userID uuid.UUID, status string) {
-	presence := &model.UserPresence{
+	presence := &domain.UserPresence{
 		UserID:    userID,
 		Status:    status,
 		Timestamp: time.Now(),
 	}
 
-	var eventType model.WebSocketEventType
+	var eventType domain.WebSocketEventType
 	if status == "online" {
-		eventType = model.WSEventUserOnline
+		eventType = domain.WSEventUserOnline
 	} else {
-		eventType = model.WSEventUserOffline
+		eventType = domain.WSEventUserOffline
 	}
 
-	message := &model.WebSocketMessage{
+	message := &domain.WebSocketMessage{
 		Type:    eventType,
 		Payload: presence,
 	}

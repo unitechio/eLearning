@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"einfra/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type PermissionRepository interface {

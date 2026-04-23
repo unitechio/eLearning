@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -28,37 +28,37 @@ func AutoMigrate(db *gorm.DB) error {
 	}
 
 	if err := db.AutoMigrate(
-		&model.User{},
-		&model.Customer{},
-		&model.Role{},
-		&model.Permission{},
-		&model.UserRole{},
-		&model.RolePermission{},
-		&model.UserPermission{},
-		&model.OTP{},
-		&model.RefreshToken{},
-		&model.VocabularyWord{},
-		&model.UserVocabularyProgress{},
-		&model.WritingSubmission{},
-		&model.Course{},
-		&model.Unit{},
-		&model.Lesson{},
-		&model.UserProgress{},
-		&model.Activity{},
-		&model.ActivitySubmission{},
-		&model.SpeakingSession{},
-		&model.ListeningLesson{},
-		&model.StudyPlanner{},
-		&model.BillingPlan{},
-		&model.BillingSubscription{},
-		&model.BillingHistory{},
-		&model.Streak{},
-		&model.XPPoint{},
-		&model.PracticeSession{},
-		&model.PronunciationHistory{},
-		&model.DictionaryHistory{},
-		&model.VocabularySet{},
-		&model.VocabularySetWord{},
+		&domain.User{},
+		&domain.Customer{},
+		&domain.Role{},
+		&domain.Permission{},
+		&domain.UserRole{},
+		&domain.RolePermission{},
+		&domain.UserPermission{},
+		&domain.OTP{},
+		&domain.RefreshToken{},
+		&domain.VocabularyWord{},
+		&domain.UserVocabularyProgress{},
+		&domain.WritingSubmission{},
+		&domain.Course{},
+		&domain.Unit{},
+		&domain.Lesson{},
+		&domain.UserProgress{},
+		&domain.Activity{},
+		&domain.ActivitySubmission{},
+		&domain.SpeakingSession{},
+		&domain.ListeningLesson{},
+		&domain.StudyPlanner{},
+		&domain.BillingPlan{},
+		&domain.BillingSubscription{},
+		&domain.BillingHistory{},
+		&domain.Streak{},
+		&domain.XPPoint{},
+		&domain.PracticeSession{},
+		&domain.PronunciationHistory{},
+		&domain.DictionaryHistory{},
+		&domain.VocabularySet{},
+		&domain.VocabularySetWord{},
 	); err != nil {
 		slog.Error("Failed to migrate user tables", slog.String("error", err.Error()))
 		return err
@@ -66,13 +66,13 @@ func AutoMigrate(db *gorm.DB) error {
 
 	// Authorization related tables
 	if err := db.AutoMigrate(
-		&model.Module{},
-		&model.Department{},
-		&model.Service{},
-		&model.Scope{},
-		&model.EnhancedPermission{},
-		&model.RoleEnhancedPermission{},
-		&model.UserEnhancedPermission{},
+		&domain.Module{},
+		&domain.Department{},
+		&domain.Usecase{},
+		&domain.Scope{},
+		&domain.EnhancedPermission{},
+		&domain.RoleEnhancedPermission{},
+		&domain.UserEnhancedPermission{},
 	); err != nil {
 		slog.Error("Failed to migrate authorization tables", slog.String("error", err.Error()))
 		return err
@@ -80,12 +80,12 @@ func AutoMigrate(db *gorm.DB) error {
 
 	// Content related tables
 	if err := db.AutoMigrate(
-		&model.Post{},
-		&model.Media{},
-		&model.PostMedia{},
-		&model.Category{},
-		&model.Tag{},
-		&model.PostSchedule{},
+		&domain.Post{},
+		&domain.Media{},
+		&domain.PostMedia{},
+		&domain.Category{},
+		&domain.Tag{},
+		&domain.PostSchedule{},
 	); err != nil {
 		slog.Error("Failed to migrate content tables", slog.String("error", err.Error()))
 		return err
@@ -93,16 +93,16 @@ func AutoMigrate(db *gorm.DB) error {
 
 	// System related tables
 	if err := db.AutoMigrate(
-		&model.AuditLog{},
-		&model.SystemSetting{},
-		&model.Notification{},
-		&model.ActivityLog{},
-		&model.EmailTemplate{},
-		&model.EmailLog{},
-		&model.Document{},
-		&model.DocumentPermission{},
-		&model.DocumentComment{},
-		&model.DocumentVersion{},
+		&domain.AuditLog{},
+		&domain.SystemSetting{},
+		&domain.Notification{},
+		&domain.ActivityLog{},
+		&domain.EmailTemplate{},
+		&domain.EmailLog{},
+		&domain.Document{},
+		&domain.DocumentPermission{},
+		&domain.DocumentComment{},
+		&domain.DocumentVersion{},
 	); err != nil {
 		slog.Error("Failed to migrate system tables", slog.String("error", err.Error()))
 		return err
@@ -221,14 +221,14 @@ func SeedData(db *gorm.DB) error {
 }
 
 func seedModules(db *gorm.DB) error {
-	modules := []model.Module{
+	modules := []domain.Module{
 		{Code: "admin", Name: "Administration", DisplayName: "System Administration", IsActive: true, IsSystem: true},
 		{Code: "crm", Name: "CRM", DisplayName: "Customer Relationship Management", IsActive: true, IsSystem: true},
 		{Code: "content", Name: "Content", DisplayName: "Content Management", IsActive: true, IsSystem: true},
 	}
 
 	for i := range modules {
-		if err := db.Where(model.Module{Code: modules[i].Code}).FirstOrCreate(&modules[i]).Error; err != nil {
+		if err := db.Where(domain.Module{Code: modules[i].Code}).FirstOrCreate(&modules[i]).Error; err != nil {
 			slog.Error("Failed to create module", slog.String("module", modules[i].Code), slog.String("error", err.Error()))
 			return err
 		}
@@ -238,12 +238,12 @@ func seedModules(db *gorm.DB) error {
 }
 
 func seedDepartments(db *gorm.DB) error {
-	var adminModule, crmModule, contentModule model.Module
+	var adminModule, crmModule, contentModule domain.Module
 	db.Where("code = ?", "admin").First(&adminModule)
 	db.Where("code = ?", "crm").First(&crmModule)
 	db.Where("code = ?", "content").First(&contentModule)
 
-	departments := []model.Department{
+	departments := []domain.Department{
 		{ModuleID: adminModule.ID, Code: "system", Name: "System", IsActive: true, IsSystem: true},
 		{ModuleID: crmModule.ID, Code: "sales", Name: "Sales", IsActive: true, IsSystem: true},
 		{ModuleID: contentModule.ID, Code: "editorial", Name: "Editorial", IsActive: true, IsSystem: true},
@@ -260,18 +260,18 @@ func seedDepartments(db *gorm.DB) error {
 }
 
 func seedServices(db *gorm.DB) error {
-	var systemDept, salesDept, editorialDept model.Department
+	var systemDept, salesDept, editorialDept domain.Department
 	db.Where("code = ?", "system").First(&systemDept)
 	db.Where("code = ?", "sales").First(&salesDept)
 	db.Where("code = ?", "editorial").First(&editorialDept)
 
-	services := []model.Service{
+	services := []domain.Usecase{
 		{DepartmentID: systemDept.ID, Code: "users", Name: "User Management", IsActive: true, IsSystem: true},
 		{DepartmentID: salesDept.ID, Code: "customers", Name: "Customer Management", IsActive: true, IsSystem: true},
 	}
 
 	for _, service := range services {
-		if err := db.Where("code = ?", service.Code).FirstOrCreate(&service).Error; err != nil {
+		if err := db.Where("code = ?", service.Code).FirstOrCreate(&Usecase).Error; err != nil {
 			slog.Error("Failed to create service", slog.String("service", service.Code), slog.String("error", err.Error()))
 			return err
 		}
@@ -281,9 +281,9 @@ func seedServices(db *gorm.DB) error {
 }
 
 func seedScopes(db *gorm.DB) error {
-	scopes := []model.Scope{
-		{Code: "org", Name: "Organization", Level: model.ScopeLevelOrganization, IsSystem: true},
-		{Code: "personal", Name: "Personal", Level: model.ScopeLevelPersonal, IsSystem: true},
+	scopes := []domain.Scope{
+		{Code: "org", Name: "Organization", Level: domain.ScopeLevelOrganization, IsSystem: true},
+		{Code: "personal", Name: "Personal", Level: domain.ScopeLevelPersonal, IsSystem: true},
 	}
 
 	for _, scope := range scopes {
@@ -297,12 +297,12 @@ func seedScopes(db *gorm.DB) error {
 }
 
 func seedRoles(db *gorm.DB) error {
-	roles := []model.Role{
-		{Name: "super_admin", DisplayName: "Super Administrator", Level: model.RoleLevelOrganization, IsSystem: true},
-		{Name: "admin", DisplayName: "Administrator", Level: model.RoleLevelOrganization, IsSystem: true},
-		{Name: "instructor", DisplayName: "Instructor", Level: model.RoleLevelOrganization, IsSystem: true},
-		{Name: "premium", DisplayName: "Premium User", Level: model.RoleLevelOrganization, IsSystem: true},
-		{Name: "user", DisplayName: "User", Level: model.RoleLevelOrganization, IsSystem: true},
+	roles := []domain.Role{
+		{Name: "super_admin", DisplayName: "Super Administrator", Level: domain.RoleLevelOrganization, IsSystem: true},
+		{Name: "admin", DisplayName: "Administrator", Level: domain.RoleLevelOrganization, IsSystem: true},
+		{Name: "instructor", DisplayName: "Instructor", Level: domain.RoleLevelOrganization, IsSystem: true},
+		{Name: "premium", DisplayName: "Premium User", Level: domain.RoleLevelOrganization, IsSystem: true},
+		{Name: "user", DisplayName: "User", Level: domain.RoleLevelOrganization, IsSystem: true},
 	}
 
 	for _, role := range roles {
@@ -333,10 +333,10 @@ func assignPermissionsToSuperAdmin(db *gorm.DB) error {
 func seedUsers(db *gorm.DB) error {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
 
-	adminUser := model.User{
+	adminUser := domain.User{
 		Email:    "admin@eenglish.io",
 		Password: string(hashedPassword),
-		Status:   model.UserStatusActive,
+		Status:   domain.UserStatusActive,
 		TenantID: uuid.New(),
 	}
 
@@ -344,7 +344,7 @@ func seedUsers(db *gorm.DB) error {
 		slog.Error("Failed to create admin user", slog.String("error", err.Error()))
 		return err
 	}
-	var superAdminRole model.Role
+	var superAdminRole domain.Role
 	if err := db.Where("name = ?", "super_admin").First(&superAdminRole).Error; err == nil {
 		if err := db.Model(&adminUser).Association("Roles").Append(&superAdminRole); err != nil {
 			slog.Warn("Failed to attach super_admin role", slog.String("error", err.Error()))
@@ -360,7 +360,7 @@ func seedCategories(db *gorm.DB) error {
 }
 
 func seedBillingPlans(db *gorm.DB) error {
-	plans := []model.BillingPlan{
+	plans := []domain.BillingPlan{
 		{TenantID: uuid.Nil, Name: "Starter", Code: "starter", Price: 9.99, Currency: "USD", Description: "Starter access for Academy English", BillingCycle: "monthly", IsActive: true},
 		{TenantID: uuid.Nil, Name: "Pro", Code: "pro", Price: 19.99, Currency: "USD", Description: "Full AI coaching for Academy English", BillingCycle: "monthly", IsActive: true},
 	}
@@ -375,7 +375,7 @@ func seedBillingPlans(db *gorm.DB) error {
 }
 
 func seedListeningLessons(db *gorm.DB) error {
-	items := []model.ListeningLesson{
+	items := []domain.ListeningLesson{
 		{TenantID: uuid.Nil, Title: "Daily Conversation", Description: "Practice everyday academy english listening.", AudioURL: "https://cdn.eenglish.local/audio/daily-conversation.mp3", Transcript: "Two friends discuss their study plan for the week.", Level: "beginner", Domain: "english", IsActive: true},
 		{TenantID: uuid.Nil, Title: "Campus Interview", Description: "Listen to an interview about learning goals.", AudioURL: "https://cdn.eenglish.local/audio/campus-interview.mp3", Transcript: "A student explains how speaking practice improved confidence.", Level: "intermediate", Domain: "english", IsActive: true},
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	httpmw "github.com/unitechio/eLearning/apps/api/internal/http/middleware"
-	"github.com/unitechio/eLearning/apps/api/internal/service"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
@@ -12,7 +12,7 @@ type UserHandler struct {
 	svc service.UserService
 }
 
-func NewUserHandler(svc service.UserService) *UserHandler {
+func NewUserHandler(svc service.UserUsecase) *UserHandler {
 	return &UserHandler{svc: svc}
 }
 
@@ -21,7 +21,7 @@ func NewUserHandler(svc service.UserService) *UserHandler {
 // @Tags         users
 // @Security     BearerAuth
 // @Produce      json
-// @Success      200  {object}  response.Envelope{data=model.User}
+// @Success      200  {object}  response.Envelope{data=domain.User}
 // @Failure      401  {object}  response.Envelope
 // @Failure      404  {object}  response.Envelope
 // @Router       /users/me [get]
@@ -47,7 +47,7 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        body  body      service.UpdateProfileRequest  true  "Profile data"
-// @Success      200   {object}  response.Envelope{data=model.User}
+// @Success      200   {object}  response.Envelope{data=domain.User}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /users/me [put]

@@ -40,11 +40,11 @@ func (u *BillingUsecase) Subscribe(userID uuid.UUID, req usecase.SubscribeReques
 		return nil, apperr.Internal(err)
 	}
 	expiresAt := time.Now().UTC().AddDate(0, 1, 0)
-	subscription := &model.BillingSubscription{UserID: userID, TenantID: uuid.Nil, PlanID: plan.ID, Status: "active", ExpiresAt: &expiresAt}
+	subscription := &domain.BillingSubscription{UserID: userID, TenantID: uuid.Nil, PlanID: plan.ID, Status: "active", ExpiresAt: &expiresAt}
 	if err := u.repo.CreateSubscription(subscription); err != nil {
 		return nil, apperr.Internal(err)
 	}
-	history := &model.BillingHistory{UserID: userID, SubscriptionID: subscription.ID, PlanName: plan.Name, Amount: plan.Price, Currency: plan.Currency, Status: "paid"}
+	history := &domain.BillingHistory{UserID: userID, SubscriptionID: subscription.ID, PlanName: plan.Name, Amount: plan.Price, Currency: plan.Currency, Status: "paid"}
 	if err := u.repo.CreateHistory(history); err != nil {
 		return nil, apperr.Internal(err)
 	}

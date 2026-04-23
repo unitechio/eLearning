@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"gorm.io/gorm"
 )
 
@@ -17,12 +18,12 @@ func NewAuditRepository(db *gorm.DB) *AuditLogRepository {
 	return &AuditLogRepository{db: db}
 }
 
-func (r *AuditLogRepository) Create(ctx context.Context, log *model.AuditLog) error {
+func (r *AuditLogRepository) Create(ctx context.Context, log *domain.AuditLog) error {
 	return r.db.WithContext(ctx).Create(log).Error
 }
 
-func (r *AuditLogRepository) GetByID(ctx context.Context, id string) (*model.AuditLog, error) {
-	var log model.AuditLog
+func (r *AuditLogRepository) GetByID(ctx context.Context, id string) (*domain.AuditLog, error) {
+	var log domain.AuditLog
 	err := r.db.WithContext(ctx).First(&log, "id = ?", id).Error
 
 	if err != nil {
@@ -35,11 +36,11 @@ func (r *AuditLogRepository) GetByID(ctx context.Context, id string) (*model.Aud
 	return &log, nil
 }
 
-func (r *AuditLogRepository) List(ctx context.Context, filter model.AuditFilter) ([]*model.AuditLog, int64, error) {
-	var logs []*model.AuditLog
+func (r *AuditLogRepository) List(ctx context.Context, filter dto.AuditFilter) ([]*domain.AuditLog, int64, error) {
+	var logs []*domain.AuditLog
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&model.AuditLog{})
+	query := r.db.WithContext(ctx).Model(&domain.AuditLog{})
 
 	query = r.applyFilters(query, filter)
 
@@ -67,23 +68,23 @@ func (r *AuditLogRepository) List(ctx context.Context, filter model.AuditFilter)
 	return logs, total, nil
 }
 
-func (r *AuditLogRepository) GetByUserID(ctx context.Context, userID string, filter model.AuditFilter) ([]*model.AuditLog, int64, error) {
+func (r *AuditLogRepository) GetByUserID(ctx context.Context, userID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.UserID = &userID
 	return r.List(ctx, filter)
 }
 
-func (r *AuditLogRepository) GetByResource(ctx context.Context, resource, resourceID string, filter model.AuditFilter) ([]*model.AuditLog, int64, error) {
+func (r *AuditLogRepository) GetByResource(ctx context.Context, resource, resourceID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Resource = resource
 	filter.ResourceID = resourceID
 	return r.List(ctx, filter)
 }
 
-func (r *AuditLogRepository) GetByAction(ctx context.Context, action model.AuditAction, filter model.AuditFilter) ([]*model.AuditLog, int64, error) {
+func (r *AuditLogRepository) GetByAction(ctx context.Context, action domain.AuditAction, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Action = &action
 	return r.List(ctx, filter)
 }
 
-func (r *AuditLogRepository) GetByDateRange(ctx context.Context, startDate, endDate time.Time, filter model.AuditFilter) ([]*model.AuditLog, int64, error) {
+func (r *AuditLogRepository) GetByDateRange(ctx context.Context, startDate, endDate time.Time, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.StartDate = &startDate
 	filter.EndDate = &endDate
 	return r.List(ctx, filter)
@@ -93,39 +94,39 @@ func (r *AuditLogRepository) DeleteOlderThan(ctx context.Context, duration time.
 	cutoff := time.Now().Add(-duration)
 	return r.db.WithContext(ctx).
 		Where("created_at < ?", cutoff).
-		Delete(&model.AuditLog{}).Error
+		Delete(&domain.AuditLog{}).Error
 }
 
-func (r *AuditLogRepository) GetStatistics(ctx context.Context, startDate, endDate time.Time) (*model.AuditStatistics, error) {
-	stats := &model.AuditStatistics{
-		ActionBreakdown:   make(map[model.AuditAction]int64),
+func (r *AuditLogRepository) GetStatistics(ctx context.Context, startDate, endDate time.Time) (*domain.AuditStatistics, error) {
+	stats := &domain.AuditStatistics{
+		ActionBreakdown:   make(map[domain.AuditAction]int64),
 		ResourceBreakdown: make(map[string]int64),
 	}
 
 	r.db.WithContext(ctx).
-		Model(&model.AuditLog{}).
+		Model(&domain.AuditLog{}).
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
 		Count(&stats.TotalLogs)
 
 	r.db.WithContext(ctx).
-		Model(&model.AuditLog{}).
+		Model(&domain.AuditLog{}).
 		Where("created_at BETWEEN ? AND ? AND success = true", startDate, endDate).
 		Count(&stats.SuccessfulActions)
 
 	stats.FailedActions = stats.TotalLogs - stats.SuccessfulActions
 
 	r.db.WithContext(ctx).
-		Model(&model.AuditLog{}).
+		Model(&domain.AuditLog{}).
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
 		Distinct("user_id").
 		Count(&stats.UniqueUsers)
 
 	var actionStats []struct {
-		Action model.AuditAction
+		Action domain.AuditAction
 		Count  int64
 	}
 	r.db.WithContext(ctx).
-		Model(&model.AuditLog{}).
+		Model(&domain.AuditLog{}).
 		Select("action, COUNT(*) as count").
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
 		Group("action").
@@ -140,7 +141,7 @@ func (r *AuditLogRepository) GetStatistics(ctx context.Context, startDate, endDa
 		Count    int64
 	}
 	r.db.WithContext(ctx).
-		Model(&model.AuditLog{}).
+		Model(&domain.AuditLog{}).
 		Select("resource, COUNT(*) as count").
 		Where("created_at BETWEEN ? AND ?", startDate, endDate).
 		Group("resource").
@@ -153,7 +154,7 @@ func (r *AuditLogRepository) GetStatistics(ctx context.Context, startDate, endDa
 	return stats, nil
 }
 
-func (r *AuditLogRepository) applyFilters(query *gorm.DB, filter model.AuditFilter) *gorm.DB {
+func (r *AuditLogRepository) applyFilters(query *gorm.DB, filter domain.AuditFilter) *gorm.DB {
 	if filter.UserID != nil {
 		query = query.Where("user_id = ?", *filter.UserID)
 	}

@@ -2,7 +2,7 @@ package impl
 
 import (
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -45,7 +45,7 @@ func (r *ProgressRepository) ListCourseProgressByUser(userID uuid.UUID) ([]repos
 
 func (r *ProgressRepository) GetAverageScoreByUser(userID uuid.UUID) (float64, error) {
 	var avg float64
-	err := r.db.Model(&model.UserProgress{}).Where("user_id = ?", userID).Select("coalesce(avg(score), 0)").Scan(&avg).Error
+	err := r.db.Model(&domain.UserProgress{}).Where("user_id = ?", userID).Select("coalesce(avg(score), 0)").Scan(&avg).Error
 	return avg, err
 }
 
@@ -60,8 +60,8 @@ func (r *ProgressRepository) GetCompletedCoursesCountByUser(userID uuid.UUID) (i
 		Count(&count).Error
 	return count, err
 }
-func (r *ProgressRepository) ListRecentProgressByUser(userID uuid.UUID, limit int) ([]model.UserProgress, error) {
-	var items []model.UserProgress
+func (r *ProgressRepository) ListRecentProgressByUser(userID uuid.UUID, limit int) ([]domain.UserProgress, error) {
+	var items []domain.UserProgress
 	err := r.db.Where("user_id = ?", userID).Order("updated_at desc").Limit(limit).Find(&items).Error
 	return items, err
 }
@@ -77,8 +77,8 @@ func (r *ProgressRepository) GetCourseProgress(userID, courseID uuid.UUID) (*rep
 	}
 	return nil, gorm.ErrRecordNotFound
 }
-func (r *ProgressRepository) GetLessonProgressByUser(userID uuid.UUID) ([]model.UserProgress, error) {
-	var items []model.UserProgress
+func (r *ProgressRepository) GetLessonProgressByUser(userID uuid.UUID) ([]domain.UserProgress, error) {
+	var items []domain.UserProgress
 	err := r.db.Where("user_id = ?", userID).Find(&items).Error
 	return items, err
 }

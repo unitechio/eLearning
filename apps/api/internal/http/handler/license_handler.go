@@ -14,11 +14,11 @@ import (
 
 // LicenseHandler handles HTTP requests for license management
 type LicenseHandler struct {
-	usecase usecase.LicenseUsecase
+	usecase service.LicenseUsecase
 }
 
 // NewLicenseHandler creates a new LicenseHandler instance
-func NewLicenseHandler(uc usecase.LicenseUsecase) *LicenseHandler {
+func NewLicenseHandler(uc service.LicenseUsecase) *LicenseHandler {
 	return &LicenseHandler{usecase: uc}
 }
 
@@ -40,7 +40,7 @@ func (h *LicenseHandler) ActivateLicense(c *gin.Context) {
 		return
 	}
 
-	response, err := h.usecase.ActivateLicense(&req)
+	response, err := h.service.ActivateLicense(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,7 +67,7 @@ func (h *LicenseHandler) ValidateLicense(c *gin.Context) {
 		return
 	}
 
-	response, err := h.usecase.ValidateLicense(licenseKey)
+	response, err := h.service.ValidateLicense(licenseKey)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -94,7 +94,7 @@ func (h *LicenseHandler) GetCurrentLicense(c *gin.Context) {
 		return
 	}
 
-	license, err := h.usecase.GetLicenseByKey(licenseKey.(string))
+	license, err := h.service.GetLicenseByKey(licenseKey.(string))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -121,7 +121,7 @@ func (h *LicenseHandler) GetUsageStatistics(c *gin.Context) {
 		return
 	}
 
-	stats, err := h.usecase.GetUsageStatistics(licenseKey.(string))
+	stats, err := h.service.GetUsageStatistics(licenseKey.(string))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -165,7 +165,7 @@ func (h *LicenseHandler) CreateLicense(c *gin.Context) {
 		duration = &d
 	}
 
-	license, err := h.usecase.CreateLicense(tier, req.OrganizationID, req.OrganizationName, req.ContactEmail, duration)
+	license, err := h.service.CreateLicense(tier, req.OrganizationID, req.OrganizationName, req.ContactEmail, duration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -184,7 +184,7 @@ func (h *LicenseHandler) CreateLicense(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/admin/licenses [get]
 func (h *LicenseHandler) ListLicenses(c *gin.Context) {
-	licenses, err := h.usecase.GetAllLicenses()
+	licenses, err := h.service.GetAllLicenses()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -224,7 +224,7 @@ func (h *LicenseHandler) UpgradeLicense(c *gin.Context) {
 	}
 
 	newTier := domain.LicenseTier(req.NewTier)
-	license, err := h.usecase.UpgradeLicense(licenseKey.(string), newTier)
+	license, err := h.service.UpgradeLicense(licenseKey.(string), newTier)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -255,7 +255,7 @@ func (h *LicenseHandler) SuspendLicense(c *gin.Context) {
 		return
 	}
 
-	if err := h.usecase.SuspendLicense(licenseKey, req.Reason); err != nil {
+	if err := h.service.SuspendLicense(licenseKey, req.Reason); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -276,7 +276,7 @@ func (h *LicenseHandler) SuspendLicense(c *gin.Context) {
 func (h *LicenseHandler) ReactivateLicense(c *gin.Context) {
 	licenseKey := c.Param("license_key")
 
-	if err := h.usecase.ReactivateLicense(licenseKey); err != nil {
+	if err := h.service.ReactivateLicense(licenseKey); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

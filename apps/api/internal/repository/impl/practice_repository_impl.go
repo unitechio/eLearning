@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -18,30 +18,30 @@ func NewPracticeRepository(db *gorm.DB) *PracticeRepository {
 	return &PracticeRepository{db: db}
 }
 
-func (r *PracticeRepository) CreateSession(session *model.PracticeSession) error {
+func (r *PracticeRepository) CreateSession(session *domain.PracticeSession) error {
 	return r.db.Create(session).Error
 }
 
-func (r *PracticeRepository) FindSessionByIDForUser(id, userID uuid.UUID) (*model.PracticeSession, error) {
-	var item model.PracticeSession
+func (r *PracticeRepository) FindSessionByIDForUser(id, userID uuid.UUID) (*domain.PracticeSession, error) {
+	var item domain.PracticeSession
 	if err := r.db.Where("id = ? and user_id = ?", id, userID).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *PracticeRepository) SaveSession(session *model.PracticeSession) error {
+func (r *PracticeRepository) SaveSession(session *domain.PracticeSession) error {
 	return r.db.Save(session).Error
 }
 
-func (r *PracticeRepository) CreatePronunciationHistory(item *model.PronunciationHistory) error {
+func (r *PracticeRepository) CreatePronunciationHistory(item *domain.PronunciationHistory) error {
 	return r.db.Create(item).Error
 }
 
-func (r *PracticeRepository) ListPronunciationHistory(userID uuid.UUID, filter repository.PronunciationHistoryFilter) ([]model.PronunciationHistory, int64, error) {
-	var items []model.PronunciationHistory
+func (r *PracticeRepository) ListPronunciationHistory(userID uuid.UUID, filter repository.PronunciationHistoryFilter) ([]domain.PronunciationHistory, int64, error) {
+	var items []domain.PronunciationHistory
 	var total int64
-	q := r.db.Model(&model.PronunciationHistory{}).Where("user_id = ?", userID)
+	q := r.db.Model(&domain.PronunciationHistory{}).Where("user_id = ?", userID)
 	if filter.Kind != "" {
 		q = q.Where("kind = ?", filter.Kind)
 	}
@@ -54,12 +54,12 @@ func (r *PracticeRepository) ListPronunciationHistory(userID uuid.UUID, filter r
 	return items, total, nil
 }
 
-func (r *PracticeRepository) CreateDictionaryHistory(item *model.DictionaryHistory) error {
+func (r *PracticeRepository) CreateDictionaryHistory(item *domain.DictionaryHistory) error {
 	return r.db.Create(item).Error
 }
 
-func (r *PracticeRepository) FindLatestDictionaryHistoryByWord(userID uuid.UUID, word string) (*model.DictionaryHistory, error) {
-	var item model.DictionaryHistory
+func (r *PracticeRepository) FindLatestDictionaryHistoryByWord(userID uuid.UUID, word string) (*domain.DictionaryHistory, error) {
+	var item domain.DictionaryHistory
 	if err := r.db.Where("user_id = ? and lower(word) = ?", userID, strings.ToLower(word)).
 		Order("created_at desc").
 		First(&item).Error; err != nil {
@@ -68,10 +68,10 @@ func (r *PracticeRepository) FindLatestDictionaryHistoryByWord(userID uuid.UUID,
 	return &item, nil
 }
 
-func (r *PracticeRepository) ListDictionaryHistory(userID uuid.UUID, filter repository.DictionaryHistoryFilter) ([]model.DictionaryHistory, int64, error) {
-	var items []model.DictionaryHistory
+func (r *PracticeRepository) ListDictionaryHistory(userID uuid.UUID, filter repository.DictionaryHistoryFilter) ([]domain.DictionaryHistory, int64, error) {
+	var items []domain.DictionaryHistory
 	var total int64
-	q := r.db.Model(&model.DictionaryHistory{}).Where("user_id = ?", userID)
+	q := r.db.Model(&domain.DictionaryHistory{}).Where("user_id = ?", userID)
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(word) like ? or lower(meaning) like ? or lower(example) like ?", like, like, like)
@@ -88,22 +88,22 @@ func (r *PracticeRepository) ListDictionaryHistory(userID uuid.UUID, filter repo
 	return items, total, nil
 }
 
-func (r *PracticeRepository) CreateVocabularySet(item *model.VocabularySet) error {
+func (r *PracticeRepository) CreateVocabularySet(item *domain.VocabularySet) error {
 	return r.db.Create(item).Error
 }
 
-func (r *PracticeRepository) FindVocabularySetByIDForUser(id, userID uuid.UUID) (*model.VocabularySet, error) {
-	var item model.VocabularySet
+func (r *PracticeRepository) FindVocabularySetByIDForUser(id, userID uuid.UUID) (*domain.VocabularySet, error) {
+	var item domain.VocabularySet
 	if err := r.db.Where("id = ? and user_id = ?", id, userID).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *PracticeRepository) ListVocabularySets(userID uuid.UUID, filter repository.VocabularySetFilter) ([]model.VocabularySet, int64, error) {
-	var items []model.VocabularySet
+func (r *PracticeRepository) ListVocabularySets(userID uuid.UUID, filter repository.VocabularySetFilter) ([]domain.VocabularySet, int64, error) {
+	var items []domain.VocabularySet
 	var total int64
-	q := r.db.Model(&model.VocabularySet{}).Where("user_id = ?", userID)
+	q := r.db.Model(&domain.VocabularySet{}).Where("user_id = ?", userID)
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(name) like ? or lower(description) like ?", like, like)
@@ -120,12 +120,12 @@ func (r *PracticeRepository) ListVocabularySets(userID uuid.UUID, filter reposit
 	return items, total, nil
 }
 
-func (r *PracticeRepository) AddWordToSet(item *model.VocabularySetWord) error {
+func (r *PracticeRepository) AddWordToSet(item *domain.VocabularySetWord) error {
 	return r.db.Where("set_id = ? and word_id = ?", item.SetID, item.WordID).FirstOrCreate(item).Error
 }
 
-func (r *PracticeRepository) ListVocabularySetWords(setID uuid.UUID) ([]model.VocabularyWord, error) {
-	var items []model.VocabularyWord
+func (r *PracticeRepository) ListVocabularySetWords(setID uuid.UUID) ([]domain.VocabularyWord, error) {
+	var items []domain.VocabularyWord
 	err := r.db.Table("vocabulary_words vw").
 		Select("vw.*").
 		Joins("join vocabulary_set_words vsw on vsw.word_id = vw.id").

@@ -1,26 +1,21 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
+	"einfra/api/pkg/errorx"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/domain"
-	"einfra/api/internal/usecase"
-	"einfra/api/pkg/errorx"
 )
 
 // AuditHandler handles audit log-related HTTP requests.
 type AuditHandler struct {
-	auditService usecase.AuditUsecase
+	auditService service.AuditUsecase
 }
 
 // NewAuditHandler creates a new AuditHandler instance.
-func NewAuditHandler(auditService usecase.AuditUsecase) *AuditHandler {
+func NewAuditHandler(auditService service.AuditUsecase) *AuditHandler {
 	return &AuditHandler{
 		auditService: auditService,
 	}

@@ -13,11 +13,11 @@ import (
 
 // SystemSettingHandler handles HTTP requests related to system settings.
 type SystemSettingHandler struct {
-	uc *usecase.SystemSettingUsecase
+	uc *service.SystemSettingUsecase
 }
 
 // NewSystemSettingHandler creates a new instance of SystemSettingHandler.
-func NewSystemSettingHandler(uc *usecase.SystemSettingUsecase) *SystemSettingHandler {
+func NewSystemSettingHandler(uc *service.SystemSettingUsecase) *SystemSettingHandler {
 	return &SystemSettingHandler{uc: uc}
 }
 

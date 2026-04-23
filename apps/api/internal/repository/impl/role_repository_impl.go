@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -16,12 +16,12 @@ func NewRoleRepository(db *gorm.DB) *RoleRepository {
 	return &RoleRepository{db: db}
 }
 
-func (r *RoleRepository) Create(ctx context.Context, role *model.Role) error {
+func (r *RoleRepository) Create(ctx context.Context, role *domain.Role) error {
 	return r.db.WithContext(ctx).Create(role).Error
 }
 
-func (r *RoleRepository) GetByID(ctx context.Context, id string) (*model.Role, error) {
-	var role model.Role
+func (r *RoleRepository) GetByID(ctx context.Context, id string) (*domain.Role, error) {
+	var role domain.Role
 	err := r.db.WithContext(ctx).
 		Preload("Permissions").
 		First(&role, "id = ?", id).Error
@@ -36,8 +36,8 @@ func (r *RoleRepository) GetByID(ctx context.Context, id string) (*model.Role, e
 	return &role, nil
 }
 
-func (r *RoleRepository) GetByName(ctx context.Context, name string) (*model.Role, error) {
-	var role model.Role
+func (r *RoleRepository) GetByName(ctx context.Context, name string) (*domain.Role, error) {
+	var role domain.Role
 	err := r.db.WithContext(ctx).
 		Preload("Permissions").
 		First(&role, "name = ?", name).Error
@@ -52,11 +52,11 @@ func (r *RoleRepository) GetByName(ctx context.Context, name string) (*model.Rol
 	return &role, nil
 }
 
-func (r *RoleRepository) List(ctx context.Context, filter model.RoleFilter) ([]*model.Role, int64, error) {
-	var roles []*model.Role
+func (r *RoleRepository) List(ctx context.Context, filter domain.RoleFilter) ([]*domain.Role, int64, error) {
+	var roles []*domain.Role
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&model.Role{})
+	query := r.db.WithContext(ctx).Model(&domain.Role{})
 
 	if filter.IsActive != nil {
 		query = query.Where("is_active = ?", *filter.IsActive)
@@ -78,21 +78,21 @@ func (r *RoleRepository) List(ctx context.Context, filter model.RoleFilter) ([]*
 	return roles, total, nil
 }
 
-func (r *RoleRepository) Update(ctx context.Context, role *model.Role) error {
+func (r *RoleRepository) Update(ctx context.Context, role *domain.Role) error {
 	return r.db.WithContext(ctx).Save(role).Error
 }
 
 func (r *RoleRepository) Delete(ctx context.Context, id string) error {
-	return r.db.WithContext(ctx).Delete(&model.Role{}, "id = ?", id).Error
+	return r.db.WithContext(ctx).Delete(&domain.Role{}, "id = ?", id).Error
 }
 
 func (r *RoleRepository) AssignPermissions(ctx context.Context, roleID string, permissionIDs []string) error {
-	var role model.Role
+	var role domain.Role
 	if err := r.db.WithContext(ctx).First(&role, "id = ?", roleID).Error; err != nil {
 		return err
 	}
 
-	var permissions []model.Permission
+	var permissions []domain.Permission
 	if err := r.db.WithContext(ctx).Find(&permissions, "id IN ?", permissionIDs).Error; err != nil {
 		return err
 	}
@@ -101,12 +101,12 @@ func (r *RoleRepository) AssignPermissions(ctx context.Context, roleID string, p
 }
 
 func (r *RoleRepository) RemovePermissions(ctx context.Context, roleID string, permissionIDs []string) error {
-	var role model.Role
+	var role domain.Role
 	if err := r.db.WithContext(ctx).First(&role, "id = ?", roleID).Error; err != nil {
 		return err
 	}
 
-	var permissions []model.Permission
+	var permissions []domain.Permission
 	if err := r.db.WithContext(ctx).Find(&permissions, "id IN ?", permissionIDs).Error; err != nil {
 		return err
 	}

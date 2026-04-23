@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -75,10 +75,10 @@ func (r *EngagementRepository) GetLeaderboardEntrySince(userID uuid.UUID, since 
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (r *EngagementRepository) ListXPByUser(userID uuid.UUID, filter repository.Pagination) ([]model.XPPoint, int64, error) {
-	var items []model.XPPoint
+func (r *EngagementRepository) ListXPByUser(userID uuid.UUID, filter repository.Pagination) ([]domain.XPPoint, int64, error) {
+	var items []domain.XPPoint
 	var total int64
-	q := r.db.Model(&model.XPPoint{}).Where("user_id = ?", userID)
+	q := r.db.Model(&domain.XPPoint{}).Where("user_id = ?", userID)
 	if err := q.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -88,18 +88,18 @@ func (r *EngagementRepository) ListXPByUser(userID uuid.UUID, filter repository.
 	return items, total, nil
 }
 
-func (r *EngagementRepository) AddXP(point *model.XPPoint) error {
+func (r *EngagementRepository) AddXP(point *domain.XPPoint) error {
 	return r.db.Create(point).Error
 }
 
-func (r *EngagementRepository) FindStreakByUser(userID uuid.UUID) (*model.Streak, error) {
-	var item model.Streak
+func (r *EngagementRepository) FindStreakByUser(userID uuid.UUID) (*domain.Streak, error) {
+	var item domain.Streak
 	if err := r.db.Where("user_id = ?", userID).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *EngagementRepository) SaveStreak(streak *model.Streak) error {
+func (r *EngagementRepository) SaveStreak(streak *domain.Streak) error {
 	return r.db.Save(streak).Error
 }

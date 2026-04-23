@@ -2,16 +2,16 @@ package repository
 
 import (
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type ActivityRepository interface {
-	CreateActivity(activity *model.Activity) error
-	FindActivityByID(id uuid.UUID) (*model.Activity, error)
-	UpdateActivity(activity *model.Activity) error
+	CreateActivity(activity *domain.Activity) error
+	FindActivityByID(id uuid.UUID) (*domain.Activity, error)
+	UpdateActivity(activity *domain.Activity) error
 	DeleteActivity(id uuid.UUID) error
-	CreateSubmission(submission *model.ActivitySubmission) error
-	ListSubmissionsByActivity(activityID uuid.UUID, filter ActivitySubmissionListFilter) ([]model.ActivitySubmission, int64, error)
-	ListSubmissionsByUser(userID uuid.UUID, filter ActivitySubmissionUserFilter) ([]model.ActivitySubmission, error)
-	FindSubmissionByID(id uuid.UUID) (*model.ActivitySubmission, error)
+	CreateSubmission(submission *domain.ActivitySubmission) error
+	ListSubmissionsByActivity(activityID uuid.UUID, filter ActivitySubmissionListFilter) ([]domain.ActivitySubmission, int64, error)
+	ListSubmissionsByUser(userID uuid.UUID, filter ActivitySubmissionUserFilter) ([]domain.ActivitySubmission, error)
+	FindSubmissionByID(id uuid.UUID) (*domain.ActivitySubmission, error)
 }

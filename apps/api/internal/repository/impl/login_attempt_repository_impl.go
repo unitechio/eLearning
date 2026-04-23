@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -16,12 +16,12 @@ func NewLoginAttemptRepository(db *gorm.DB) *LoginAttemptRepository {
 	return &LoginAttemptRepository{db: db}
 }
 
-func (r *LoginAttemptRepository) Create(ctx context.Context, attempt *model.LoginAttempt) error {
+func (r *LoginAttemptRepository) Create(ctx context.Context, attempt *domain.LoginAttempt) error {
 	return r.db.WithContext(ctx).Create(attempt).Error
 }
 
-func (r *LoginAttemptRepository) GetRecentAttempts(ctx context.Context, username, ipAddress string, duration time.Duration) ([]*model.LoginAttempt, error) {
-	var attempts []*model.LoginAttempt
+func (r *LoginAttemptRepository) GetRecentAttempts(ctx context.Context, username, ipAddress string, duration time.Duration) ([]*domain.LoginAttempt, error) {
+	var attempts []*domain.LoginAttempt
 	since := time.Now().Add(-duration)
 
 	err := r.db.WithContext(ctx).
@@ -41,7 +41,7 @@ func (r *LoginAttemptRepository) GetFailedAttempts(ctx context.Context, username
 	since := time.Now().Add(-duration)
 
 	err := r.db.WithContext(ctx).
-		Model(&model.LoginAttempt{}).
+		Model(&domain.LoginAttempt{}).
 		Where("username = ? AND ip_address = ? AND success = false AND created_at > ?", username, ipAddress, since).
 		Count(&count).Error
 
@@ -56,5 +56,5 @@ func (r *LoginAttemptRepository) DeleteOlderThan(ctx context.Context, duration t
 	cutoff := time.Now().Add(-duration)
 	return r.db.WithContext(ctx).
 		Where("created_at < ?", cutoff).
-		Delete(&model.LoginAttempt{}).Error
+		Delete(&domain.LoginAttempt{}).Error
 }

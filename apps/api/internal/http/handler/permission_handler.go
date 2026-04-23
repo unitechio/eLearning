@@ -15,11 +15,11 @@ import (
 
 // PermissionHandler handles permission management HTTP requests
 type PermissionHandler struct {
-	permissionUsecase usecase.PermissionUsecase
+	permissionUsecase service.PermissionUsecase
 }
 
 // NewPermissionHandler creates a new permission handler instance
-func NewPermissionHandler(permissionUsecase usecase.PermissionUsecase) *PermissionHandler {
+func NewPermissionHandler(permissionUsecase service.PermissionUsecase) *PermissionHandler {
 	return &PermissionHandler{
 		permissionUsecase: permissionUsecase,
 	}
@@ -61,7 +61,7 @@ func (h *PermissionHandler) Create(c *gin.Context) {
 	}
 
 	// Create permission using usecase
-	if err := h.permissionUsecase.Create(c.Request.Context(), &permission); err != nil {
+	if err := h.permissionservice.Create(c.Request.Context(), &permission); err != nil {
 		// Check if it's a duplicate name error
 		if errorx.GetCode(err) == errorx.CodeConflict {
 			c.Error(err)
@@ -108,7 +108,7 @@ func (h *PermissionHandler) Get(c *gin.Context) {
 	}
 
 	// Retrieve permission from usecase
-	permission, err := h.permissionUsecase.GetByID(c.Request.Context(), id)
+	permission, err := h.permissionservice.GetByID(c.Request.Context(), id)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeNotFound, "Permission not found"))
 		c.JSON(http.StatusNotFound, gin.H{
@@ -173,7 +173,7 @@ func (h *PermissionHandler) List(c *gin.Context) {
 	}
 
 	// Retrieve permissions from usecase
-	permissions, total, err := h.permissionUsecase.List(c.Request.Context(), filter)
+	permissions, total, err := h.permissionservice.List(c.Request.Context(), filter)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to list permissions"))
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -250,7 +250,7 @@ func (h *PermissionHandler) Update(c *gin.Context) {
 	}
 
 	// Update permission using usecase
-	if err := h.permissionUsecase.Update(c.Request.Context(), &permission); err != nil {
+	if err := h.permissionservice.Update(c.Request.Context(), &permission); err != nil {
 		// Check error type
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
@@ -305,7 +305,7 @@ func (h *PermissionHandler) Delete(c *gin.Context) {
 	}
 
 	// Delete permission using usecase
-	if err := h.permissionUsecase.Delete(c.Request.Context(), id); err != nil {
+	if err := h.permissionservice.Delete(c.Request.Context(), id); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{
@@ -356,7 +356,7 @@ func (h *PermissionHandler) GetByResource(c *gin.Context) {
 	}
 
 	// Retrieve permissions by resource from usecase
-	permissions, err := h.permissionUsecase.GetByResource(c.Request.Context(), resource)
+	permissions, err := h.permissionservice.GetByResource(c.Request.Context(), resource)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to retrieve permissions"))
 		c.JSON(http.StatusInternalServerError, gin.H{

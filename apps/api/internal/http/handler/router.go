@@ -5,7 +5,6 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/modules/auth/application"
 )
 
 // AuthHandlers groups all Auth-related handlers
@@ -20,12 +19,12 @@ type AuthHandlers struct {
 
 // NewAuthHandlers creates a new Auth handlers instance
 func NewAuthHandlers(
-	authUC usecase.AuthUsecase,
-	userUC usecase.UserUsecase,
-	roleUC usecase.RoleUsecase,
-	permissionUC usecase.PermissionUsecase,
-	authorizationUC usecase.AuthorizationUsecase,
-	auditUC usecase.AuditUsecase,
+	authUC service.AuthUsecase,
+	userUC service.UserUsecase,
+	roleUC service.RoleUsecase,
+	permissionUC service.PermissionUsecase,
+	authorizationUC service.AuthorizationUsecase,
+	auditUC service.AuditUsecase,
 ) *AuthHandlers {
 	return &AuthHandlers{
 		Auth:          NewAuthHandler(authUC),

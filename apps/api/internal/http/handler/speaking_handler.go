@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/gin-gonic/gin"
-	"github.com/unitechio/eLearning/apps/api/internal/service"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
@@ -12,7 +12,7 @@ type SpeakingHandler struct {
 	svc service.SpeakingService
 }
 
-func NewSpeakingHandler(svc service.SpeakingService) *SpeakingHandler {
+func NewSpeakingHandler(svc service.SpeakingUsecase) *SpeakingHandler {
 	return &SpeakingHandler{svc: svc}
 }
 

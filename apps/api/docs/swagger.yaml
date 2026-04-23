@@ -741,11 +741,11 @@ definitions:
       reason:
         type: string
     type: object
-  model.Category:
+  domain.Category:
     properties:
       children:
         items:
-          $ref: '#/definitions/model.Category'
+          $ref: '#/definitions/domain.Category'
         type: array
       children_count:
         description: Computed field
@@ -757,7 +757,7 @@ definitions:
       description:
         type: string
       description_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       icon:
         type: string
       id:
@@ -765,25 +765,25 @@ definitions:
       name:
         type: string
       name_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       order:
         type: integer
       parent:
         allOf:
-        - $ref: '#/definitions/model.Category'
+        - $ref: '#/definitions/domain.Category'
         description: Relationships
       parent_id:
         type: integer
       slug:
         type: string
       status:
-        $ref: '#/definitions/model.CategoryStatus'
+        $ref: '#/definitions/domain.CategoryStatus'
       type:
-        $ref: '#/definitions/model.CategoryType'
+        $ref: '#/definitions/domain.CategoryType'
       updated_at:
         type: string
     type: object
-  model.CategoryStatus:
+  domain.CategoryStatus:
     enum:
     - active
     - inactive
@@ -791,7 +791,7 @@ definitions:
     x-enum-varnames:
     - CategoryStatusActive
     - CategoryStatusInactive
-  model.CategoryType:
+  domain.CategoryType:
     enum:
     - blog
     - header
@@ -803,11 +803,11 @@ definitions:
     - CategoryTypeHeader
     - CategoryTypeFooter
     - CategoryTypeSidebar
-  model.Department:
+  domain.Department:
     properties:
       children:
         items:
-          $ref: '#/definitions/model.Department'
+          $ref: '#/definitions/domain.Department'
         type: array
       code:
         description: e.g., "sales", "editorial", "it"
@@ -829,25 +829,25 @@ definitions:
         type: integer
       module:
         allOf:
-        - $ref: '#/definitions/model.Module'
+        - $ref: '#/definitions/domain.Module'
         description: Relationships
       module_id:
         type: integer
       name:
         type: string
       parent:
-        $ref: '#/definitions/model.Department'
+        $ref: '#/definitions/domain.Department'
       parent_id:
         description: For hierarchical departments
         type: integer
       services:
         items:
-          $ref: '#/definitions/model.Service'
+          $ref: '#/definitions/domain.Service'
         type: array
       updated_at:
         type: string
     type: object
-  model.Media:
+  domain.Media:
     properties:
       alt:
         description: Alt text for images
@@ -884,7 +884,7 @@ definitions:
         type: string
       posts:
         items:
-          $ref: '#/definitions/model.Post'
+          $ref: '#/definitions/domain.Post'
         type: array
       tags:
         description: JSON array of tags
@@ -893,14 +893,14 @@ definitions:
         description: Thumbnail path for videos
         type: string
       type:
-        $ref: '#/definitions/model.MediaType'
+        $ref: '#/definitions/domain.MediaType'
       updated_at:
         type: string
       uploaded_by:
         type: string
       uploader:
         allOf:
-        - $ref: '#/definitions/model.User'
+        - $ref: '#/definitions/domain.User'
         description: Relationships
       url:
         description: Public URL
@@ -909,7 +909,7 @@ definitions:
         description: For images/videos
         type: integer
     type: object
-  model.MediaType:
+  domain.MediaType:
     enum:
     - image
     - video
@@ -923,7 +923,7 @@ definitions:
     - MediaTypeDocument
     - MediaTypeAudio
     - MediaTypeOther
-  model.Module:
+  domain.Module:
     properties:
       code:
         description: e.g., "crm", "content", "admin"
@@ -935,7 +935,7 @@ definitions:
       departments:
         description: Relationships
         items:
-          $ref: '#/definitions/model.Department'
+          $ref: '#/definitions/domain.Department'
         type: array
       description:
         type: string
@@ -957,7 +957,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  model.Permission:
+  domain.Permission:
     properties:
       action:
         description: e.g., "create", "read", "update", "delete"
@@ -980,7 +980,7 @@ definitions:
       roles:
         description: Relationships
         items:
-          $ref: '#/definitions/model.Role'
+          $ref: '#/definitions/domain.Role'
         type: array
       service:
         description: Service level within department
@@ -989,14 +989,14 @@ definitions:
         type: string
       users:
         items:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/domain.User'
         type: array
     type: object
-  model.Post:
+  domain.Post:
     properties:
       author:
         allOf:
-        - $ref: '#/definitions/model.User'
+        - $ref: '#/definitions/domain.User'
         description: Relationships
       author_id:
         type: string
@@ -1011,20 +1011,20 @@ definitions:
         type: array
       category_objects:
         items:
-          $ref: '#/definitions/model.Category'
+          $ref: '#/definitions/domain.Category'
         type: array
       comment_count:
         type: integer
       content:
         type: string
       content_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       created_at:
         type: string
       excerpt:
         type: string
       excerpt_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       featured_image:
         type: string
       id:
@@ -1035,7 +1035,7 @@ definitions:
         type: integer
       media:
         items:
-          $ref: '#/definitions/model.Media'
+          $ref: '#/definitions/domain.Media'
         type: array
       meta_description:
         type: string
@@ -1050,9 +1050,9 @@ definitions:
       slug:
         type: string
       slug_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       status:
-        $ref: '#/definitions/model.PostStatus'
+        $ref: '#/definitions/domain.PostStatus'
       table_of_contents:
         description: JSON array of TOC items
         type: string
@@ -1062,13 +1062,13 @@ definitions:
       title:
         type: string
       title_translations:
-        $ref: '#/definitions/model.TranslatableContent'
+        $ref: '#/definitions/domain.TranslatableContent'
       updated_at:
         type: string
       view_count:
         type: integer
     type: object
-  model.PostStatus:
+  domain.PostStatus:
     enum:
     - draft
     - scheduled
@@ -1080,11 +1080,11 @@ definitions:
     - PostStatusScheduled
     - PostStatusPublished
     - PostStatusArchived
-  model.Role:
+  domain.Role:
     properties:
       children:
         items:
-          $ref: '#/definitions/model.Role'
+          $ref: '#/definitions/domain.Role'
         type: array
       created_at:
         type: string
@@ -1098,27 +1098,27 @@ definitions:
         description: System roles cannot be deleted
         type: boolean
       level:
-        $ref: '#/definitions/model.RoleLevel'
+        $ref: '#/definitions/domain.RoleLevel'
       name:
         type: string
       parent:
         allOf:
-        - $ref: '#/definitions/model.Role'
+        - $ref: '#/definitions/domain.Role'
         description: Relationships
       parent_id:
         type: integer
       permissions:
         items:
-          $ref: '#/definitions/model.Permission'
+          $ref: '#/definitions/domain.Permission'
         type: array
       updated_at:
         type: string
       users:
         items:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/domain.User'
         type: array
     type: object
-  model.RoleLevel:
+  domain.RoleLevel:
     enum:
     - organization
     - department
@@ -1130,7 +1130,7 @@ definitions:
     - RoleLevelDepartment
     - RoleLevelService
     - RoleLevelAction
-  model.Service:
+  domain.Service:
     properties:
       code:
         description: e.g., "user_management", "post_management"
@@ -1139,7 +1139,7 @@ definitions:
         type: string
       department:
         allOf:
-        - $ref: '#/definitions/model.Department'
+        - $ref: '#/definitions/domain.Department'
         description: Relationships
       department_id:
         type: integer
@@ -1161,11 +1161,11 @@ definitions:
       updated_at:
         type: string
     type: object
-  model.TranslatableContent:
+  domain.TranslatableContent:
     additionalProperties:
       type: string
     type: object
-  model.User:
+  domain.User:
     properties:
       avatar:
         type: string
@@ -1173,7 +1173,7 @@ definitions:
         type: string
       department:
         allOf:
-        - $ref: '#/definitions/model.Department'
+        - $ref: '#/definitions/domain.Department'
         description: Relationships
       department_id:
         description: Foreign key to departments table
@@ -1196,11 +1196,11 @@ definitions:
         type: string
       media:
         items:
-          $ref: '#/definitions/model.Media'
+          $ref: '#/definitions/domain.Media'
         type: array
       permissions:
         items:
-          $ref: '#/definitions/model.Permission'
+          $ref: '#/definitions/domain.Permission'
         type: array
       phone:
         type: string
@@ -1209,14 +1209,14 @@ definitions:
         type: string
       posts:
         items:
-          $ref: '#/definitions/model.Post'
+          $ref: '#/definitions/domain.Post'
         type: array
       roles:
         items:
-          $ref: '#/definitions/model.Role'
+          $ref: '#/definitions/domain.Role'
         type: array
       status:
-        $ref: '#/definitions/model.UserStatus'
+        $ref: '#/definitions/domain.UserStatus'
       tenantID:
         type: string
       two_factor_enabled:
@@ -1224,7 +1224,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  model.UserStatus:
+  domain.UserStatus:
     enum:
     - active
     - inactive
@@ -1236,7 +1236,7 @@ definitions:
     - UserStatusInactive
     - UserStatusSuspended
     - UserStatusPending
-  model.UserVocabularyProgress:
+  domain.UserVocabularyProgress:
     properties:
       box_number:
         type: integer
@@ -1257,11 +1257,11 @@ definitions:
       user_id:
         type: string
       word:
-        $ref: '#/definitions/model.VocabularyWord'
+        $ref: '#/definitions/domain.VocabularyWord'
       word_id:
         type: string
     type: object
-  model.VocabularyWord:
+  domain.VocabularyWord:
     properties:
       created_at:
         type: string
@@ -1284,7 +1284,7 @@ definitions:
       word:
         type: string
     type: object
-  model.WritingSubmission:
+  domain.WritingSubmission:
     properties:
       ai_feedback:
         type: string
@@ -1358,7 +1358,7 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/model.User'
+        $ref: '#/definitions/domain.User'
     type: object
   service.CreateWordRequest:
     properties:
@@ -4017,7 +4017,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.User'
+                  $ref: '#/definitions/domain.User'
               type: object
         "401":
           description: Unauthorized
@@ -4052,7 +4052,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.User'
+                  $ref: '#/definitions/domain.User'
               type: object
         "400":
           description: Bad Request
@@ -4251,7 +4251,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/model.UserVocabularyProgress'
+                    $ref: '#/definitions/domain.UserVocabularyProgress'
                   type: array
               type: object
         "401":
@@ -4322,7 +4322,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.UserVocabularyProgress'
+                  $ref: '#/definitions/domain.UserVocabularyProgress'
               type: object
         "400":
           description: Bad Request
@@ -4358,7 +4358,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.UserVocabularyProgress'
+                  $ref: '#/definitions/domain.UserVocabularyProgress'
               type: object
         "400":
           description: Bad Request
@@ -4386,7 +4386,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/model.UserVocabularyProgress'
+                    $ref: '#/definitions/domain.UserVocabularyProgress'
                   type: array
               type: object
         "401":
@@ -4411,7 +4411,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/model.VocabularyWord'
+                    $ref: '#/definitions/domain.VocabularyWord'
                   type: array
               type: object
         "401":
@@ -4443,7 +4443,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.VocabularyWord'
+                  $ref: '#/definitions/domain.VocabularyWord'
               type: object
         "400":
           description: Bad Request
@@ -4519,7 +4519,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.VocabularyWord'
+                  $ref: '#/definitions/domain.VocabularyWord'
               type: object
         "400":
           description: Bad Request
@@ -4603,7 +4603,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/model.WritingSubmission'
+                    $ref: '#/definitions/domain.WritingSubmission'
                   type: array
               type: object
         "401":
@@ -4637,7 +4637,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/model.WritingSubmission'
+                    $ref: '#/definitions/domain.WritingSubmission'
                   type: array
               type: object
         "401":
@@ -4669,7 +4669,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.WritingSubmission'
+                  $ref: '#/definitions/domain.WritingSubmission'
               type: object
         "400":
           description: Bad Request
@@ -4702,7 +4702,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.WritingSubmission'
+                  $ref: '#/definitions/domain.WritingSubmission'
               type: object
         "400":
           description: Bad Request
@@ -4742,7 +4742,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/model.WritingSubmission'
+                  $ref: '#/definitions/domain.WritingSubmission'
               type: object
         "400":
           description: Bad Request

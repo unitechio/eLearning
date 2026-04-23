@@ -4494,7 +4494,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.User"
+                                            "$ref": "#/definitions/domain.User"
                                         }
                                     }
                                 }
@@ -4554,7 +4554,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.User"
+                                            "$ref": "#/definitions/domain.User"
                                         }
                                     }
                                 }
@@ -4906,7 +4906,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/model.UserVocabularyProgress"
+                                                "$ref": "#/definitions/domain.UserVocabularyProgress"
                                             }
                                         }
                                     }
@@ -5028,7 +5028,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.UserVocabularyProgress"
+                                            "$ref": "#/definitions/domain.UserVocabularyProgress"
                                         }
                                     }
                                 }
@@ -5090,7 +5090,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.UserVocabularyProgress"
+                                            "$ref": "#/definitions/domain.UserVocabularyProgress"
                                         }
                                     }
                                 }
@@ -5140,7 +5140,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/model.UserVocabularyProgress"
+                                                "$ref": "#/definitions/domain.UserVocabularyProgress"
                                             }
                                         }
                                     }
@@ -5185,7 +5185,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/model.VocabularyWord"
+                                                "$ref": "#/definitions/domain.VocabularyWord"
                                             }
                                         }
                                     }
@@ -5240,7 +5240,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.VocabularyWord"
+                                            "$ref": "#/definitions/domain.VocabularyWord"
                                         }
                                     }
                                 }
@@ -5367,7 +5367,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.VocabularyWord"
+                                            "$ref": "#/definitions/domain.VocabularyWord"
                                         }
                                     }
                                 }
@@ -5475,7 +5475,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/model.WritingSubmission"
+                                                "$ref": "#/definitions/domain.WritingSubmission"
                                             }
                                         }
                                     }
@@ -5534,7 +5534,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/model.WritingSubmission"
+                                                "$ref": "#/definitions/domain.WritingSubmission"
                                             }
                                         }
                                     }
@@ -5589,7 +5589,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.WritingSubmission"
+                                            "$ref": "#/definitions/domain.WritingSubmission"
                                         }
                                     }
                                 }
@@ -5646,7 +5646,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.WritingSubmission"
+                                            "$ref": "#/definitions/domain.WritingSubmission"
                                         }
                                     }
                                 }
@@ -5714,7 +5714,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.WritingSubmission"
+                                            "$ref": "#/definitions/domain.WritingSubmission"
                                         }
                                     }
                                 }
@@ -6943,13 +6943,13 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Category": {
+        "domain.Category": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Category"
+                        "$ref": "#/definitions/domain.Category"
                     }
                 },
                 "children_count": {
@@ -6966,7 +6966,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "description_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "icon": {
                     "type": "string"
@@ -6978,7 +6978,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "order": {
                     "type": "integer"
@@ -6987,7 +6987,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/domain.Category"
                         }
                     ]
                 },
@@ -6998,17 +6998,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/model.CategoryStatus"
+                    "$ref": "#/definitions/domain.CategoryStatus"
                 },
                 "type": {
-                    "$ref": "#/definitions/model.CategoryType"
+                    "$ref": "#/definitions/domain.CategoryType"
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "model.CategoryStatus": {
+        "domain.CategoryStatus": {
             "type": "string",
             "enum": [
                 "active",
@@ -7019,7 +7019,7 @@ const docTemplate = `{
                 "CategoryStatusInactive"
             ]
         },
-        "model.CategoryType": {
+        "domain.CategoryType": {
             "type": "string",
             "enum": [
                 "blog",
@@ -7034,13 +7034,13 @@ const docTemplate = `{
                 "CategoryTypeSidebar"
             ]
         },
-        "model.Department": {
+        "domain.Department": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Department"
+                        "$ref": "#/definitions/domain.Department"
                     }
                 },
                 "code": {
@@ -7073,7 +7073,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Module"
+                            "$ref": "#/definitions/domain.Module"
                         }
                     ]
                 },
@@ -7084,7 +7084,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent": {
-                    "$ref": "#/definitions/model.Department"
+                    "$ref": "#/definitions/domain.Department"
                 },
                 "parent_id": {
                     "description": "For hierarchical departments",
@@ -7093,7 +7093,7 @@ const docTemplate = `{
                 "services": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Service"
+                        "$ref": "#/definitions/domain.Service"
                     }
                 },
                 "updated_at": {
@@ -7101,7 +7101,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Media": {
+        "domain.Media": {
             "type": "object",
             "properties": {
                 "alt": {
@@ -7154,7 +7154,7 @@ const docTemplate = `{
                 "posts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Post"
+                        "$ref": "#/definitions/domain.Post"
                     }
                 },
                 "tags": {
@@ -7166,7 +7166,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/model.MediaType"
+                    "$ref": "#/definitions/domain.MediaType"
                 },
                 "updated_at": {
                     "type": "string"
@@ -7178,7 +7178,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     ]
                 },
@@ -7192,7 +7192,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.MediaType": {
+        "domain.MediaType": {
             "type": "string",
             "enum": [
                 "image",
@@ -7209,7 +7209,7 @@ const docTemplate = `{
                 "MediaTypeOther"
             ]
         },
-        "model.Module": {
+        "domain.Module": {
             "type": "object",
             "properties": {
                 "code": {
@@ -7226,7 +7226,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Department"
+                        "$ref": "#/definitions/domain.Department"
                     }
                 },
                 "description": {
@@ -7259,7 +7259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Permission": {
+        "domain.Permission": {
             "type": "object",
             "properties": {
                 "action": {
@@ -7291,7 +7291,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Role"
+                        "$ref": "#/definitions/domain.Role"
                     }
                 },
                 "service": {
@@ -7304,19 +7304,19 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.User"
+                        "$ref": "#/definitions/domain.User"
                     }
                 }
             }
         },
-        "model.Post": {
+        "domain.Post": {
             "type": "object",
             "properties": {
                 "author": {
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     ]
                 },
@@ -7339,7 +7339,7 @@ const docTemplate = `{
                 "category_objects": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Category"
+                        "$ref": "#/definitions/domain.Category"
                     }
                 },
                 "comment_count": {
@@ -7349,7 +7349,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "content_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "created_at": {
                     "type": "string"
@@ -7358,7 +7358,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "excerpt_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "featured_image": {
                     "type": "string"
@@ -7375,7 +7375,7 @@ const docTemplate = `{
                 "media": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Media"
+                        "$ref": "#/definitions/domain.Media"
                     }
                 },
                 "meta_description": {
@@ -7397,10 +7397,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "slug_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "status": {
-                    "$ref": "#/definitions/model.PostStatus"
+                    "$ref": "#/definitions/domain.PostStatus"
                 },
                 "table_of_contents": {
                     "description": "JSON array of TOC items",
@@ -7414,7 +7414,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title_translations": {
-                    "$ref": "#/definitions/model.TranslatableContent"
+                    "$ref": "#/definitions/domain.TranslatableContent"
                 },
                 "updated_at": {
                     "type": "string"
@@ -7424,7 +7424,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.PostStatus": {
+        "domain.PostStatus": {
             "type": "string",
             "enum": [
                 "draft",
@@ -7439,13 +7439,13 @@ const docTemplate = `{
                 "PostStatusArchived"
             ]
         },
-        "model.Role": {
+        "domain.Role": {
             "type": "object",
             "properties": {
                 "children": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Role"
+                        "$ref": "#/definitions/domain.Role"
                     }
                 },
                 "created_at": {
@@ -7465,7 +7465,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "level": {
-                    "$ref": "#/definitions/model.RoleLevel"
+                    "$ref": "#/definitions/domain.RoleLevel"
                 },
                 "name": {
                     "type": "string"
@@ -7474,7 +7474,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Role"
+                            "$ref": "#/definitions/domain.Role"
                         }
                     ]
                 },
@@ -7484,7 +7484,7 @@ const docTemplate = `{
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Permission"
+                        "$ref": "#/definitions/domain.Permission"
                     }
                 },
                 "updated_at": {
@@ -7493,12 +7493,12 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.User"
+                        "$ref": "#/definitions/domain.User"
                     }
                 }
             }
         },
-        "model.RoleLevel": {
+        "domain.RoleLevel": {
             "type": "string",
             "enum": [
                 "organization",
@@ -7513,7 +7513,7 @@ const docTemplate = `{
                 "RoleLevelAction"
             ]
         },
-        "model.Service": {
+        "domain.Service": {
             "type": "object",
             "properties": {
                 "code": {
@@ -7527,7 +7527,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Department"
+                            "$ref": "#/definitions/domain.Department"
                         }
                     ]
                 },
@@ -7561,13 +7561,13 @@ const docTemplate = `{
                 }
             }
         },
-        "model.TranslatableContent": {
+        "domain.TranslatableContent": {
             "type": "object",
             "additionalProperties": {
                 "type": "string"
             }
         },
-        "model.User": {
+        "domain.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -7580,7 +7580,7 @@ const docTemplate = `{
                     "description": "Relationships",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/model.Department"
+                            "$ref": "#/definitions/domain.Department"
                         }
                     ]
                 },
@@ -7615,13 +7615,13 @@ const docTemplate = `{
                 "media": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Media"
+                        "$ref": "#/definitions/domain.Media"
                     }
                 },
                 "permissions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Permission"
+                        "$ref": "#/definitions/domain.Permission"
                     }
                 },
                 "phone": {
@@ -7634,17 +7634,17 @@ const docTemplate = `{
                 "posts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Post"
+                        "$ref": "#/definitions/domain.Post"
                     }
                 },
                 "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Role"
+                        "$ref": "#/definitions/domain.Role"
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/model.UserStatus"
+                    "$ref": "#/definitions/domain.UserStatus"
                 },
                 "tenantID": {
                     "type": "string"
@@ -7657,7 +7657,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.UserStatus": {
+        "domain.UserStatus": {
             "type": "string",
             "enum": [
                 "active",
@@ -7672,7 +7672,7 @@ const docTemplate = `{
                 "UserStatusPending"
             ]
         },
-        "model.UserVocabularyProgress": {
+        "domain.UserVocabularyProgress": {
             "type": "object",
             "properties": {
                 "box_number": {
@@ -7703,14 +7703,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "word": {
-                    "$ref": "#/definitions/model.VocabularyWord"
+                    "$ref": "#/definitions/domain.VocabularyWord"
                 },
                 "word_id": {
                     "type": "string"
                 }
             }
         },
-        "model.VocabularyWord": {
+        "domain.VocabularyWord": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -7745,7 +7745,7 @@ const docTemplate = `{
                 }
             }
         },
-        "model.WritingSubmission": {
+        "domain.WritingSubmission": {
             "type": "object",
             "properties": {
                 "ai_feedback": {
@@ -7857,7 +7857,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/model.User"
+                    "$ref": "#/definitions/domain.User"
                 }
             }
         },

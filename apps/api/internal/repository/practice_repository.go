@@ -2,21 +2,21 @@ package repository
 
 import (
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type PracticeRepository interface {
-	CreateSession(session *model.PracticeSession) error
-	FindSessionByIDForUser(id, userID uuid.UUID) (*model.PracticeSession, error)
-	SaveSession(session *model.PracticeSession) error
-	CreatePronunciationHistory(item *model.PronunciationHistory) error
-	ListPronunciationHistory(userID uuid.UUID, filter PronunciationHistoryFilter) ([]model.PronunciationHistory, int64, error)
-	CreateDictionaryHistory(item *model.DictionaryHistory) error
-	FindLatestDictionaryHistoryByWord(userID uuid.UUID, word string) (*model.DictionaryHistory, error)
-	ListDictionaryHistory(userID uuid.UUID, filter DictionaryHistoryFilter) ([]model.DictionaryHistory, int64, error)
-	CreateVocabularySet(item *model.VocabularySet) error
-	FindVocabularySetByIDForUser(id, userID uuid.UUID) (*model.VocabularySet, error)
-	ListVocabularySets(userID uuid.UUID, filter VocabularySetFilter) ([]model.VocabularySet, int64, error)
-	AddWordToSet(item *model.VocabularySetWord) error
-	ListVocabularySetWords(setID uuid.UUID) ([]model.VocabularyWord, error)
+	CreateSession(session *domain.PracticeSession) error
+	FindSessionByIDForUser(id, userID uuid.UUID) (*domain.PracticeSession, error)
+	SaveSession(session *domain.PracticeSession) error
+	CreatePronunciationHistory(item *domain.PronunciationHistory) error
+	ListPronunciationHistory(userID uuid.UUID, filter PronunciationHistoryFilter) ([]domain.PronunciationHistory, int64, error)
+	CreateDictionaryHistory(item *domain.DictionaryHistory) error
+	FindLatestDictionaryHistoryByWord(userID uuid.UUID, word string) (*domain.DictionaryHistory, error)
+	ListDictionaryHistory(userID uuid.UUID, filter DictionaryHistoryFilter) ([]domain.DictionaryHistory, int64, error)
+	CreateVocabularySet(item *domain.VocabularySet) error
+	FindVocabularySetByIDForUser(id, userID uuid.UUID) (*domain.VocabularySet, error)
+	ListVocabularySets(userID uuid.UUID, filter VocabularySetFilter) ([]domain.VocabularySet, int64, error)
+	AddWordToSet(item *domain.VocabularySetWord) error
+	ListVocabularySetWords(setID uuid.UUID) ([]domain.VocabularyWord, error)
 }

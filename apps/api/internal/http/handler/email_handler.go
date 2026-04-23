@@ -16,10 +16,10 @@ import (
 )
 
 type EmailHandler struct {
-	emailUsecase usecase.EmailUsecase
+	emailUsecase service.EmailUsecase
 }
 
-func NewEmailHandler(emailUsecase usecase.EmailUsecase) *EmailHandler {
+func NewEmailHandler(emailUsecase service.EmailUsecase) *EmailHandler {
 	return &EmailHandler{
 		emailUsecase: emailUsecase,
 	}
@@ -95,9 +95,9 @@ func (h *EmailHandler) SendEmail(c *gin.Context) {
 	var err error
 
 	if req.HTMLBody != "" {
-		err = h.emailUsecase.SendHTMLEmail(ctx, req.To, req.Subject, req.HTMLBody)
+		err = h.emailservice.SendHTMLEmail(ctx, req.To, req.Subject, req.HTMLBody)
 	} else {
-		err = h.emailUsecase.SendEmail(ctx, req.To, req.Subject, req.Body)
+		err = h.emailservice.SendEmail(ctx, req.To, req.Subject, req.Body)
 	}
 
 	if err != nil {
@@ -127,7 +127,7 @@ func (h *EmailHandler) SendTemplateEmail(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	err := h.emailUsecase.SendEmailWithTemplate(ctx, req.To, req.TemplateName, req.Data)
+	err := h.emailservice.SendEmailWithTemplate(ctx, req.To, req.TemplateName, req.Data)
 	if err != nil {
 		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
 		return
@@ -170,7 +170,7 @@ func (h *EmailHandler) SendBulkEmail(c *gin.Context) {
 		}
 	}
 
-	err := h.emailUsecase.SendBulkEmail(ctx, emails)
+	err := h.emailservice.SendBulkEmail(ctx, emails)
 	if err != nil {
 		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
 		return
@@ -219,7 +219,7 @@ func (h *EmailHandler) SendEmailWithAttachment(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	err := h.emailUsecase.SendEmailWithAttachment(ctx, req.To, req.Subject, req.Body, attachments)
+	err := h.emailservice.SendEmailWithAttachment(ctx, req.To, req.Subject, req.Body, attachments)
 	if err != nil {
 		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
 		return
@@ -258,7 +258,7 @@ func (h *EmailHandler) ScheduleEmail(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	err := h.emailUsecase.ScheduleEmail(ctx, req.SendAt, emailData)
+	err := h.emailservice.ScheduleEmail(ctx, req.SendAt, emailData)
 	if err != nil {
 		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
 		return
@@ -322,7 +322,7 @@ func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	logs, err := h.emailUsecase.ListEmailLogs(ctx, filter)
+	logs, err := h.emailservice.ListEmailLogs(ctx, filter)
 	if err != nil {
 		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
 		return
@@ -349,7 +349,7 @@ func (h *EmailHandler) GetEmailLog(c *gin.Context) {
 	id := c.Param("id")
 
 	ctx := c.Request.Context()
-	log, err := h.emailUsecase.GetEmailLog(ctx, id)
+	log, err := h.emailservice.GetEmailLog(ctx, id)
 	if err != nil {
 		c.Error(errorx.New(http.StatusNotFound, err.Error()))
 		return
@@ -375,7 +375,7 @@ func (h *EmailHandler) GetEmailStatus(c *gin.Context) {
 	id := c.Param("id")
 
 	ctx := c.Request.Context()
-	status, err := h.emailUsecase.GetEmailStatus(ctx, id)
+	status, err := h.emailservice.GetEmailStatus(ctx, id)
 	if err != nil {
 		c.Error(errorx.New(http.StatusNotFound, err.Error()))
 		return
@@ -404,7 +404,7 @@ func (h *EmailHandler) ValidateEmail(c *gin.Context) {
 		return
 	}
 
-	isValid := h.emailUsecase.ValidateEmail(req.Email)
+	isValid := h.emailservice.ValidateEmail(req.Email)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "Email validated",

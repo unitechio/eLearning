@@ -14,10 +14,10 @@ import (
 )
 
 type EnvironmentHandler struct {
-	envUsecase usecase.EnvironmentUsecase
+	envUsecase service.EnvironmentUsecase
 }
 
-func NewEnvironmentHandler(envUsecase usecase.EnvironmentUsecase) *EnvironmentHandler {
+func NewEnvironmentHandler(envUsecase service.EnvironmentUsecase) *EnvironmentHandler {
 	return &EnvironmentHandler{
 		envUsecase: envUsecase,
 	}
@@ -44,7 +44,7 @@ func (h *EnvironmentHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.envUsecase.CreateEnvironment(c.Request.Context(), &env); err != nil {
+	if err := h.envservice.CreateEnvironment(c.Request.Context(), &env); err != nil {
 		if errorx.GetCode(err) == errorx.CodeConflict {
 			c.Error(err)
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
@@ -81,7 +81,7 @@ func (h *EnvironmentHandler) Get(c *gin.Context) {
 		return
 	}
 
-	env, err := h.envUsecase.GetEnvironment(c.Request.Context(), id)
+	env, err := h.envservice.GetEnvironment(c.Request.Context(), id)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeNotFound, "Environment not found"))
 		c.JSON(http.StatusNotFound, gin.H{"error": "Environment not found"})
@@ -147,7 +147,7 @@ func (h *EnvironmentHandler) List(c *gin.Context) {
 		filter.PageSize = pageSize
 	}
 
-	environments, total, err := h.envUsecase.ListEnvironments(c.Request.Context(), filter)
+	environments, total, err := h.envservice.ListEnvironments(c.Request.Context(), filter)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to list environments"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list environments"})
@@ -198,7 +198,7 @@ func (h *EnvironmentHandler) Update(c *gin.Context) {
 
 	env.ID = id
 
-	if err := h.envUsecase.UpdateEnvironment(c.Request.Context(), &env); err != nil {
+	if err := h.envservice.UpdateEnvironment(c.Request.Context(), &env); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -240,7 +240,7 @@ func (h *EnvironmentHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.envUsecase.DeleteEnvironment(c.Request.Context(), id); err != nil {
+	if err := h.envservice.DeleteEnvironment(c.Request.Context(), id); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

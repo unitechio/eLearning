@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -17,12 +17,12 @@ func NewSessionRepository(db *gorm.DB) *SessionRepository {
 	return &SessionRepository{db: db}
 }
 
-func (r *SessionRepository) Create(ctx context.Context, session *model.Session) error {
+func (r *SessionRepository) Create(ctx context.Context, session *domain.Session) error {
 	return r.db.WithContext(ctx).Create(session).Error
 }
 
-func (r *SessionRepository) GetByToken(ctx context.Context, token string) (*model.Session, error) {
-	var session model.Session
+func (r *SessionRepository) GetByToken(ctx context.Context, token string) (*domain.Session, error) {
+	var session domain.Session
 	err := r.db.WithContext(ctx).
 		First(&session, "token = ?", token).Error
 
@@ -36,8 +36,8 @@ func (r *SessionRepository) GetByToken(ctx context.Context, token string) (*mode
 	return &session, nil
 }
 
-func (r *SessionRepository) GetByUserID(ctx context.Context, userID string) ([]*model.Session, error) {
-	var sessions []*model.Session
+func (r *SessionRepository) GetByUserID(ctx context.Context, userID string) ([]*domain.Session, error) {
+	var sessions []*domain.Session
 	err := r.db.WithContext(ctx).
 		Where("user_id = ? AND is_active = true", userID).
 		Order("last_activity DESC").
@@ -50,33 +50,33 @@ func (r *SessionRepository) GetByUserID(ctx context.Context, userID string) ([]*
 	return sessions, nil
 }
 
-func (r *SessionRepository) Update(ctx context.Context, session *model.Session) error {
+func (r *SessionRepository) Update(ctx context.Context, session *domain.Session) error {
 	return r.db.WithContext(ctx).Save(session).Error
 }
 
 func (r *SessionRepository) Delete(ctx context.Context, id string) error {
-	return r.db.WithContext(ctx).Delete(&model.Session{}, "id = ?", id).Error
+	return r.db.WithContext(ctx).Delete(&domain.Session{}, "id = ?", id).Error
 }
 
 func (r *SessionRepository) DeleteByToken(ctx context.Context, token string) error {
-	return r.db.WithContext(ctx).Delete(&model.Session{}, "token = ?", token).Error
+	return r.db.WithContext(ctx).Delete(&domain.Session{}, "token = ?", token).Error
 }
 
 func (r *SessionRepository) DeleteAllForUser(ctx context.Context, userID string) error {
 	return r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
-		Delete(&model.Session{}).Error
+		Delete(&domain.Session{}).Error
 }
 
 func (r *SessionRepository) DeleteExpired(ctx context.Context) error {
 	return r.db.WithContext(ctx).
 		Where("expires_at < ? OR (is_active = false)", time.Now()).
-		Delete(&model.Session{}).Error
+		Delete(&domain.Session{}).Error
 }
 
 func (r *SessionRepository) UpdateActivity(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).
-		Model(&model.Session{}).
+		Model(&domain.Session{}).
 		Where("token = ?", token).
 		Update("last_activity", time.Now()).Error
 }

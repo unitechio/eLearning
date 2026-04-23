@@ -14,11 +14,11 @@ import (
 
 // UserSettingsHandler handles user settings API endpoints
 type UserSettingsHandler struct {
-	usecase usecase.UserSettingsUsecase
+	usecase service.UserSettingsUsecase
 }
 
 // NewUserSettingsHandler creates a new handler instance
-func NewUserSettingsHandler(us usecase.UserSettingsUsecase) *UserSettingsHandler {
+func NewUserSettingsHandler(us service.UserSettingsUsecase) *UserSettingsHandler {
 	return &UserSettingsHandler{usecase: us}
 }
 
@@ -34,7 +34,7 @@ func NewUserSettingsHandler(us usecase.UserSettingsUsecase) *UserSettingsHandler
 // @Router /users/{userId}/settings [get]
 func (h *UserSettingsHandler) Get(c *gin.Context) {
 	userID := c.Param("userId")
-	settings, err := h.usecase.GetUserSettings(c.Request.Context(), userID)
+	settings, err := h.service.GetUserSettings(c.Request.Context(), userID)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to get user settings"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user settings"})
@@ -63,7 +63,7 @@ func (h *UserSettingsHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	if err := h.usecase.UpdateUserSettings(c.Request.Context(), userID, &update); err != nil {
+	if err := h.service.UpdateUserSettings(c.Request.Context(), userID, &update); err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to update settings"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
 		return
@@ -91,7 +91,7 @@ func (h *UserSettingsHandler) Patch(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
-	if err := h.usecase.UpdateUserSettings(c.Request.Context(), userID, &upd); err != nil {
+	if err := h.service.UpdateUserSettings(c.Request.Context(), userID, &upd); err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to patch settings"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to patch settings"})
 		return
@@ -111,7 +111,7 @@ func (h *UserSettingsHandler) Patch(c *gin.Context) {
 // @Router /users/{userId}/settings/reset [post]
 func (h *UserSettingsHandler) Reset(c *gin.Context) {
 	userID := c.Param("userId")
-	if err := h.usecase.ResetToDefaults(c.Request.Context(), userID); err != nil {
+	if err := h.service.ResetToDefaults(c.Request.Context(), userID); err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to reset settings"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset settings"})
 		return

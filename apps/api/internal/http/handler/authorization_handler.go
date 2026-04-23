@@ -59,7 +59,7 @@ func (h *AuthorizationHandler) GrantResourcePermission(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.GrantResourcePermission(c.Request.Context(), &req, grantedByStr); err != nil {
+	if err := h.authservice.GrantResourcePermission(c.Request.Context(), &req, grantedByStr); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -111,7 +111,7 @@ func (h *AuthorizationHandler) RevokeResourcePermission(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.RevokeResourcePermission(c.Request.Context(), &req, revokedByStr); err != nil {
+	if err := h.authservice.RevokeResourcePermission(c.Request.Context(), &req, revokedByStr); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -168,7 +168,7 @@ func (h *AuthorizationHandler) AssignEnvironmentRole(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.AssignEnvironmentRole(c.Request.Context(), req.UserID, req.RoleID, req.EnvironmentID, assignedByStr); err != nil {
+	if err := h.authservice.AssignEnvironmentRole(c.Request.Context(), req.UserID, req.RoleID, req.EnvironmentID, assignedByStr); err != nil {
 		if errorx.GetCode(err) == errorx.CodeNotFound {
 			c.Error(err)
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -203,7 +203,7 @@ func (h *AuthorizationHandler) RemoveEnvironmentRole(c *gin.Context) {
 		return
 	}
 
-	if err := h.authUsecase.RemoveEnvironmentRole(c.Request.Context(), id); err != nil {
+	if err := h.authservice.RemoveEnvironmentRole(c.Request.Context(), id); err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to remove role"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove role"})
 		return
@@ -233,7 +233,7 @@ func (h *AuthorizationHandler) GetUserPermissions(c *gin.Context) {
 		return
 	}
 
-	permissions, err := h.authUsecase.ListUserPermissions(c.Request.Context(), userID)
+	permissions, err := h.authservice.ListUserPermissions(c.Request.Context(), userID)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to retrieve permissions"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve permissions"})
@@ -268,7 +268,7 @@ func (h *AuthorizationHandler) GetResourcePermissions(c *gin.Context) {
 		return
 	}
 
-	permissions, err := h.authUsecase.ListResourcePermissions(c.Request.Context(), domain.ResourceType(resourceType), resourceID)
+	permissions, err := h.authservice.ListResourcePermissions(c.Request.Context(), domain.ResourceType(resourceType), resourceID)
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to retrieve permissions"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve permissions"})
@@ -291,7 +291,7 @@ func (h *AuthorizationHandler) GetResourcePermissions(c *gin.Context) {
 // @Router /api/permissions/cleanup [post]
 // @Security BearerAuth
 func (h *AuthorizationHandler) CleanupExpiredPermissions(c *gin.Context) {
-	count, err := h.authUsecase.CleanupExpiredPermissions(c.Request.Context())
+	count, err := h.authservice.CleanupExpiredPermissions(c.Request.Context())
 	if err != nil {
 		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to cleanup permissions"))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cleanup permissions"})

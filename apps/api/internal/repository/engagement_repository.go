@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type LeaderboardMetricRow struct {
@@ -20,8 +20,8 @@ type LeaderboardMetricRow struct {
 type EngagementRepository interface {
 	ListLeaderboardSince(since time.Time, limit int) ([]LeaderboardMetricRow, error)
 	GetLeaderboardEntrySince(userID uuid.UUID, since time.Time) (*LeaderboardMetricRow, error)
-	ListXPByUser(userID uuid.UUID, filter Pagination) ([]model.XPPoint, int64, error)
-	AddXP(point *model.XPPoint) error
-	FindStreakByUser(userID uuid.UUID) (*model.Streak, error)
-	SaveStreak(streak *model.Streak) error
+	ListXPByUser(userID uuid.UUID, filter Pagination) ([]domain.XPPoint, int64, error)
+	AddXP(point *domain.XPPoint) error
+	FindStreakByUser(userID uuid.UUID) (*domain.Streak, error)
+	SaveStreak(streak *domain.Streak) error
 }

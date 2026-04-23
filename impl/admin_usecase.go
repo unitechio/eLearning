@@ -43,7 +43,7 @@ func (u *AdminUsecase) UpdateUserStatus(id string, req usecase.UpdateUserStatusR
 		}
 		return nil, apperr.Internal(err)
 	}
-	user.Status = model.UserStatus(req.Status)
+	user.Status = domain.UserStatus(req.Status)
 	if err := u.userRepo.Update(user); err != nil {
 		return nil, apperr.Internal(err)
 	}

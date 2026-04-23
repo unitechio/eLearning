@@ -26,7 +26,7 @@ func (u *CourseUsecase) ListCourses() ([]usecase.Course, error) {
 	return res, nil
 }
 func (u *CourseUsecase) CreateCourse(req usecase.UpsertCourseRequest) (*usecase.Course, error) {
-	item := &model.Course{TenantID: uuid.Nil, Title: req.Title, Description: req.Description, Domain: req.Domain, Level: req.Level, Status: fallback(req.Status, "draft")}
+	item := &domain.Course{TenantID: uuid.Nil, Title: req.Title, Description: req.Description, Domain: req.Domain, Level: req.Level, Status: fallback(req.Status, "draft")}
 	if err := u.repo.CreateCourse(item); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -98,7 +98,7 @@ func (u *CourseUsecase) CreateModule(req usecase.UpsertModuleRequest) (*usecase.
 	if err != nil {
 		return nil, apperr.BadRequest("invalid course id")
 	}
-	unit := &model.Unit{CourseID: courseID, TenantID: uuid.Nil, Title: req.Title, OrderIndex: req.Order}
+	unit := &domain.Unit{CourseID: courseID, TenantID: uuid.Nil, Title: req.Title, OrderIndex: req.Order}
 	if err := u.repo.CreateUnit(unit); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -156,7 +156,7 @@ func (u *CourseUsecase) CreateLesson(req usecase.UpsertLessonRequest) (*usecase.
 	if err != nil {
 		return nil, apperr.BadRequest("invalid module id")
 	}
-	item := &model.Lesson{UnitID: moduleID, TenantID: uuid.Nil, Title: req.Title, ContentType: "markdown", Content: req.Content, OrderIndex: req.Order}
+	item := &domain.Lesson{UnitID: moduleID, TenantID: uuid.Nil, Title: req.Title, ContentType: "markdown", Content: req.Content, OrderIndex: req.Order}
 	if err := u.repo.CreateLesson(item); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -195,7 +195,7 @@ func (u *CourseUsecase) DeleteLesson(id string) error {
 	return nil
 }
 
-func mapCourse(item model.Course) usecase.Course {
+func mapCourse(item domain.Course) usecase.Course {
 	return usecase.Course{ID: item.ID.String(), Title: item.Title, Description: item.Description, Domain: item.Domain, Level: item.Level, Status: item.Status}
 }
 

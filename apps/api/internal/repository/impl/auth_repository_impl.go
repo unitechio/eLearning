@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -25,15 +25,15 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 }
 
 // Basic CRUD operations
-func (r *AuthRepository) SaveRefreshToken(ctx context.Context, token *model.RefreshToken) error {
+func (r *AuthRepository) SaveRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
 	if err := r.db.WithContext(ctx).Create(token).Error; err != nil {
 		return fmt.Errorf("failed to save refresh token: %w", err)
 	}
 	return nil
 }
 
-func (r *AuthRepository) GetRefreshTokenByID(ctx context.Context, tokenID string) (*model.RefreshToken, error) {
-	var refreshToken model.RefreshToken
+func (r *AuthRepository) GetRefreshTokenByID(ctx context.Context, tokenID string) (*domain.RefreshToken, error) {
+	var refreshToken domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		First(&refreshToken, "id = ?", tokenID).Error
 
@@ -47,8 +47,8 @@ func (r *AuthRepository) GetRefreshTokenByID(ctx context.Context, tokenID string
 	return &refreshToken, nil
 }
 
-func (r *AuthRepository) GetRefreshTokenByToken(ctx context.Context, token string) (*model.RefreshToken, error) {
-	var refreshToken model.RefreshToken
+func (r *AuthRepository) GetRefreshTokenByToken(ctx context.Context, token string) (*domain.RefreshToken, error) {
+	var refreshToken domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		First(&refreshToken, "token = ?", token).Error
 
@@ -62,8 +62,8 @@ func (r *AuthRepository) GetRefreshTokenByToken(ctx context.Context, token strin
 	return &refreshToken, nil
 }
 
-func (r *AuthRepository) GetRefreshTokensByUserID(ctx context.Context, userID string) ([]*model.RefreshToken, error) {
-	var tokens []*model.RefreshToken
+func (r *AuthRepository) GetRefreshTokensByUserID(ctx context.Context, userID string) ([]*domain.RefreshToken, error) {
+	var tokens []*domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
@@ -76,9 +76,9 @@ func (r *AuthRepository) GetRefreshTokensByUserID(ctx context.Context, userID st
 	return tokens, nil
 }
 
-func (r *AuthRepository) UpdateRefreshToken(ctx context.Context, token *model.RefreshToken) error {
+func (r *AuthRepository) UpdateRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
 	result := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("id = ?", token.ID).
 		Updates(token)
 
@@ -95,7 +95,7 @@ func (r *AuthRepository) UpdateRefreshToken(ctx context.Context, token *model.Re
 
 func (r *AuthRepository) DeleteRefreshToken(ctx context.Context, tokenID string) error {
 	result := r.db.WithContext(ctx).
-		Delete(&model.RefreshToken{}, "id = ?", tokenID)
+		Delete(&domain.RefreshToken{}, "id = ?", tokenID)
 
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete refresh token: %w", result.Error)
@@ -111,7 +111,7 @@ func (r *AuthRepository) DeleteRefreshToken(ctx context.Context, tokenID string)
 // Token validation and status
 
 func (r *AuthRepository) IsTokenValid(ctx context.Context, token string) (bool, error) {
-	var refreshToken model.RefreshToken
+	var refreshToken domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		Select("id, expires_at, is_revoked").
 		First(&refreshToken, "token = ?", token).Error
@@ -134,8 +134,8 @@ func (r *AuthRepository) IsTokenValid(ctx context.Context, token string) (bool, 
 	return true, nil
 }
 
-func (r *AuthRepository) GetActiveRefreshTokensByUserID(ctx context.Context, userID string) ([]*model.RefreshToken, error) {
-	var tokens []*model.RefreshToken
+func (r *AuthRepository) GetActiveRefreshTokensByUserID(ctx context.Context, userID string) ([]*domain.RefreshToken, error) {
+	var tokens []*domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, time.Now()).
 		Order("created_at DESC").
@@ -151,7 +151,7 @@ func (r *AuthRepository) GetActiveRefreshTokensByUserID(ctx context.Context, use
 func (r *AuthRepository) GetUserTokenCount(ctx context.Context, userID string) (int64, error) {
 	var count int64
 	err := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ?", userID).
 		Count(&count).Error
 
@@ -165,7 +165,7 @@ func (r *AuthRepository) GetUserTokenCount(ctx context.Context, userID string) (
 func (r *AuthRepository) GetActiveUserTokenCount(ctx context.Context, userID string) (int64, error) {
 	var count int64
 	err := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, time.Now()).
 		Count(&count).Error
 
@@ -181,7 +181,7 @@ func (r *AuthRepository) GetActiveUserTokenCount(ctx context.Context, userID str
 func (r *AuthRepository) RevokeRefreshToken(ctx context.Context, tokenID string) error {
 	now := time.Now()
 	result := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("id = ?", tokenID).
 		Updates(map[string]interface{}{
 			"is_revoked": true,
@@ -202,7 +202,7 @@ func (r *AuthRepository) RevokeRefreshToken(ctx context.Context, tokenID string)
 func (r *AuthRepository) RevokeRefreshTokenByToken(ctx context.Context, token string) error {
 	now := time.Now()
 	result := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("token = ?", token).
 		Updates(map[string]interface{}{
 			"is_revoked": true,
@@ -223,7 +223,7 @@ func (r *AuthRepository) RevokeRefreshTokenByToken(ctx context.Context, token st
 func (r *AuthRepository) RevokeAllRefreshTokensForUser(ctx context.Context, userID string) error {
 	now := time.Now()
 	err := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ? AND is_revoked = false", userID).
 		Updates(map[string]interface{}{
 			"is_revoked": true,
@@ -239,7 +239,7 @@ func (r *AuthRepository) RevokeAllRefreshTokensForUser(ctx context.Context, user
 
 func (r *AuthRepository) RevokeOldestTokensForUser(ctx context.Context, userID string, keepCount int) error {
 	// Get all tokens ordered by creation date (newest first)
-	var tokens []*model.RefreshToken
+	var tokens []*domain.RefreshToken
 	err := r.db.WithContext(ctx).
 		Where("user_id = ? AND is_revoked = false", userID).
 		Order("created_at DESC").
@@ -264,7 +264,7 @@ func (r *AuthRepository) RevokeOldestTokensForUser(ctx context.Context, userID s
 	// Revoke the oldest tokens
 	now := time.Now()
 	err = r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("id IN ?", tokenIDs).
 		Updates(map[string]interface{}{
 			"is_revoked": true,
@@ -283,7 +283,7 @@ func (r *AuthRepository) RevokeOldestTokensForUser(ctx context.Context, userID s
 func (r *AuthRepository) DeleteExpiredRefreshTokens(ctx context.Context) error {
 	err := r.db.WithContext(ctx).
 		Where("expires_at < ?", time.Now()).
-		Delete(&model.RefreshToken{}).Error
+		Delete(&domain.RefreshToken{}).Error
 
 	if err != nil {
 		return fmt.Errorf("failed to delete expired refresh tokens: %w", err)
@@ -295,7 +295,7 @@ func (r *AuthRepository) DeleteExpiredRefreshTokens(ctx context.Context) error {
 func (r *AuthRepository) DeleteRevokedRefreshTokens(ctx context.Context, olderThan time.Time) error {
 	err := r.db.WithContext(ctx).
 		Where("is_revoked = true AND revoked_at < ?", olderThan).
-		Delete(&model.RefreshToken{}).Error
+		Delete(&domain.RefreshToken{}).Error
 
 	if err != nil {
 		return fmt.Errorf("failed to delete revoked refresh tokens: %w", err)
@@ -325,7 +325,7 @@ func (r *AuthRepository) CleanupUserTokens(ctx context.Context, userID string, m
 func (r *AuthRepository) UpdateLastUsedAt(ctx context.Context, tokenID string) error {
 	now := time.Now()
 	result := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("id = ?", tokenID).
 		Update("last_used_at", now)
 
@@ -346,7 +346,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 
 	// Total tokens
 	err := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ?", userID).
 		Count(&stats.TotalTokens).Error
 	if err != nil {
@@ -355,7 +355,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 
 	// Active tokens
 	err = r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, now).
 		Count(&stats.ActiveTokens).Error
 	if err != nil {
@@ -364,7 +364,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 
 	// Revoked tokens
 	err = r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ? AND is_revoked = true", userID).
 		Count(&stats.RevokedTokens).Error
 	if err != nil {
@@ -373,7 +373,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 
 	// Expired tokens
 	err = r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ? AND is_revoked = false AND expires_at <= ?", userID, now).
 		Count(&stats.ExpiredTokens).Error
 	if err != nil {
@@ -383,7 +383,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 	// Last used at
 	var lastUsed time.Time
 	err = r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("user_id = ?", userID).
 		Select("MAX(last_used_at)").
 		Scan(&lastUsed).Error
@@ -399,7 +399,7 @@ func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) 
 
 // Batch operations
 
-func (r *AuthRepository) SaveRefreshTokens(ctx context.Context, tokens []*model.RefreshToken) error {
+func (r *AuthRepository) SaveRefreshTokens(ctx context.Context, tokens []*domain.RefreshToken) error {
 	if len(tokens) == 0 {
 		return nil
 	}
@@ -421,7 +421,7 @@ func (r *AuthRepository) RevokeRefreshTokens(ctx context.Context, tokenIDs []str
 
 	now := time.Now()
 	err := r.db.WithContext(ctx).
-		Model(&model.RefreshToken{}).
+		Model(&domain.RefreshToken{}).
 		Where("id IN ?", tokenIDs).
 		Updates(map[string]interface{}{
 			"is_revoked": true,

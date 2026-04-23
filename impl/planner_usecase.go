@@ -36,7 +36,7 @@ func (u *PlannerUsecase) UpdatePlanner(userID uuid.UUID, req usecase.PlannerUpda
 		return nil, apperr.Internal(err)
 	}
 	if item == nil {
-		item = &model.StudyPlanner{UserID: userID, TenantID: uuid.Nil}
+		item = &domain.StudyPlanner{UserID: userID, TenantID: uuid.Nil}
 	}
 	item.FocusArea = req.FocusArea
 	item.WeeklyTarget = req.WeeklyTarget
@@ -48,7 +48,7 @@ func (u *PlannerUsecase) UpdatePlanner(userID uuid.UUID, req usecase.PlannerUpda
 	return mapPlanner(item), nil
 }
 
-func mapPlanner(item *model.StudyPlanner) *usecase.Planner {
+func mapPlanner(item *domain.StudyPlanner) *usecase.Planner {
 	var tasks []string
 	_ = json.Unmarshal(item.Tasks, &tasks)
 	return &usecase.Planner{FocusArea: item.FocusArea, WeeklyTarget: item.WeeklyTarget, Tasks: tasks}

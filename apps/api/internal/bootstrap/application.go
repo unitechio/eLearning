@@ -16,7 +16,7 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/http/route"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	repoimpl "github.com/unitechio/eLearning/apps/api/internal/repository/impl"
-	svcimpl "github.com/unitechio/eLearning/apps/api/internal/service/impl"
+	svcimpl "github.com/unitechio/eLearning/apps/api/internal/usecase/impl"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
 )
 

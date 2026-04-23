@@ -1,6 +1,3 @@
-//go:build legacy
-// +build legacy
-
 package repository
 
 import (
@@ -8,6 +5,7 @@ import (
 	"time"
 
 	"einfra/api/internal/domain"
+
 	"gorm.io/gorm"
 )
 

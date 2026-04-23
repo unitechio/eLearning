@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/unitechio/eLearning/apps/api/internal/model"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -17,8 +17,8 @@ func NewEmailRepository(db *gorm.DB) *EmailRepository {
 	return &EmailRepository{db: db}
 }
 
-func (r *EmailRepository) SaveEmailLog(ctx context.Context, log *model.EmailLog) error {
-	emailLog := &model.EmailLog{
+func (r *EmailRepository) SaveEmailLog(ctx context.Context, log *domain.EmailLog) error {
+	emailLog := &domain.EmailLog{
 		ID:       log.ID,
 		To:       log.To,
 		CC:       log.CC,
@@ -28,7 +28,7 @@ func (r *EmailRepository) SaveEmailLog(ctx context.Context, log *model.EmailLog)
 		Template: log.Template,
 		// Status:    string(log.Status),
 		Error: log.Error,
-		// Metadata:  model.JSONB(log.Metadata),
+		// Metadata:  domain.JSONB(log.Metadata),
 		SentAt:    log.SentAt,
 		CreatedAt: log.CreatedAt,
 		UpdatedAt: log.UpdatedAt,
@@ -43,8 +43,8 @@ func (r *EmailRepository) SaveEmailLog(ctx context.Context, log *model.EmailLog)
 }
 
 // GetEmailLog retrieves an email log by ID
-func (r *EmailRepository) GetEmailLog(ctx context.Context, id string) (*model.EmailLog, error) {
-	var emailLog model.EmailLog
+func (r *EmailRepository) GetEmailLog(ctx context.Context, id string) (*domain.EmailLog, error) {
+	var emailLog domain.EmailLog
 
 	result := r.db.WithContext(ctx).First(&emailLog, "id = ?", id)
 	if result.Error != nil {
@@ -58,10 +58,10 @@ func (r *EmailRepository) GetEmailLog(ctx context.Context, id string) (*model.Em
 }
 
 // ListEmailLogs retrieves email logs with filters
-func (r *EmailRepository) ListEmailLogs(ctx context.Context, filter model.EmailLogFilter) ([]*model.EmailLog, error) {
-	var emailLogs []model.EmailLog
+func (r *EmailRepository) ListEmailLogs(ctx context.Context, filter domain.EmailLogFilter) ([]*domain.EmailLog, error) {
+	var emailLogs []domain.EmailLog
 
-	query := r.db.WithContext(ctx).Model(&model.EmailLog{})
+	query := r.db.WithContext(ctx).Model(&domain.EmailLog{})
 
 	// Apply filters
 	if filter.Status != "" {
@@ -107,7 +107,7 @@ func (r *EmailRepository) ListEmailLogs(ctx context.Context, filter model.EmailL
 	}
 
 	// Convert to model model
-	logs := make([]*model.EmailLog, len(emailLogs))
+	logs := make([]*domain.EmailLog, len(emailLogs))
 	for i, log := range emailLogs {
 		logs[i] = r.tomodelEmailLog(&log)
 	}
@@ -116,7 +116,7 @@ func (r *EmailRepository) ListEmailLogs(ctx context.Context, filter model.EmailL
 }
 
 // UpdateEmailStatus updates the status of an email log
-func (r *EmailRepository) UpdateEmailStatus(ctx context.Context, id string, status model.EmailStatus, errorMsg string) error {
+func (r *EmailRepository) UpdateEmailStatus(ctx context.Context, id string, status domain.EmailStatus, errorMsg string) error {
 	updates := map[string]interface{}{
 		"status":     status,
 		"error":      errorMsg,
@@ -124,11 +124,11 @@ func (r *EmailRepository) UpdateEmailStatus(ctx context.Context, id string, stat
 	}
 
 	// If status is sent or delivered, update sent_at
-	if status == model.EmailStatusSent || status == model.EmailStatusDelivered {
+	if status == domain.EmailStatusSent || status == domain.EmailStatusDelivered {
 		updates["sent_at"] = time.Now()
 	}
 
-	result := r.db.WithContext(ctx).Model(&model.EmailLog{}).
+	result := r.db.WithContext(ctx).Model(&domain.EmailLog{}).
 		Where("id = ?", id).
 		Updates(updates)
 
@@ -144,8 +144,8 @@ func (r *EmailRepository) UpdateEmailStatus(ctx context.Context, id string, stat
 }
 
 // GetEmailLogsByStatus retrieves email logs by status
-func (r *EmailRepository) GetEmailLogsByStatus(ctx context.Context, status model.EmailStatus, limit int) ([]*model.EmailLog, error) {
-	filter := model.EmailLogFilter{
+func (r *EmailRepository) GetEmailLogsByStatus(ctx context.Context, status domain.EmailStatus, limit int) ([]*domain.EmailLog, error) {
+	filter := domain.EmailLogFilter{
 		Status: status,
 		Limit:  limit,
 	}
@@ -153,8 +153,8 @@ func (r *EmailRepository) GetEmailLogsByStatus(ctx context.Context, status model
 }
 
 // GetEmailLogsByRecipient retrieves email logs by recipient
-func (r *EmailRepository) GetEmailLogsByRecipient(ctx context.Context, recipient string, limit int) ([]*model.EmailLog, error) {
-	filter := model.EmailLogFilter{
+func (r *EmailRepository) GetEmailLogsByRecipient(ctx context.Context, recipient string, limit int) ([]*domain.EmailLog, error) {
+	filter := domain.EmailLogFilter{
 		To:    recipient,
 		Limit: limit,
 	}
@@ -162,8 +162,8 @@ func (r *EmailRepository) GetEmailLogsByRecipient(ctx context.Context, recipient
 }
 
 // GetEmailLogsByTemplate retrieves email logs by template
-func (r *EmailRepository) GetEmailLogsByTemplate(ctx context.Context, templateName string, limit int) ([]*model.EmailLog, error) {
-	filter := model.EmailLogFilter{
+func (r *EmailRepository) GetEmailLogsByTemplate(ctx context.Context, templateName string, limit int) ([]*domain.EmailLog, error) {
+	filter := domain.EmailLogFilter{
 		Template: templateName,
 		Limit:    limit,
 	}
@@ -171,8 +171,8 @@ func (r *EmailRepository) GetEmailLogsByTemplate(ctx context.Context, templateNa
 }
 
 // GetEmailLogsByDateRange retrieves email logs within date range
-func (r *EmailRepository) GetEmailLogsByDateRange(ctx context.Context, from, to time.Time, limit int) ([]*model.EmailLog, error) {
-	filter := model.EmailLogFilter{
+func (r *EmailRepository) GetEmailLogsByDateRange(ctx context.Context, from, to time.Time, limit int) ([]*domain.EmailLog, error) {
+	filter := domain.EmailLogFilter{
 		DateFrom: &from,
 		DateTo:   &to,
 		Limit:    limit,
@@ -181,10 +181,10 @@ func (r *EmailRepository) GetEmailLogsByDateRange(ctx context.Context, from, to 
 }
 
 // CountEmailLogs counts email logs with filters
-func (r *EmailRepository) CountEmailLogs(ctx context.Context, filter model.EmailLogFilter) (int64, error) {
+func (r *EmailRepository) CountEmailLogs(ctx context.Context, filter domain.EmailLogFilter) (int64, error) {
 	var count int64
 
-	query := r.db.WithContext(ctx).Model(&model.EmailLog{})
+	query := r.db.WithContext(ctx).Model(&domain.EmailLog{})
 
 	if filter.Status != "" {
 		query = query.Where("status = ?", filter.Status)
@@ -220,7 +220,7 @@ func (r *EmailRepository) DeleteOldEmailLogs(ctx context.Context, olderThan time
 
 	result := r.db.WithContext(ctx).
 		Where("created_at < ?", cutoffTime).
-		Delete(&model.EmailLog{})
+		Delete(&domain.EmailLog{})
 
 	if result.Error != nil {
 		return 0, fmt.Errorf("failed to delete old email logs: %w", result.Error)
@@ -241,29 +241,29 @@ func (r *EmailRepository) GetEmailStats(ctx context.Context, from, to time.Time)
 	}
 
 	// Get total count
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
 		Where("created_at BETWEEN ? AND ?", from, to).
 		Count(&stats.Total)
 
 	// Get counts by status
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
-		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, model.EmailStatusSent).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
+		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, domain.EmailStatusSent).
 		Count(&stats.Sent)
 
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
-		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, model.EmailStatusFailed).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
+		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, domain.EmailStatusFailed).
 		Count(&stats.Failed)
 
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
-		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, model.EmailStatusPending).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
+		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, domain.EmailStatusPending).
 		Count(&stats.Pending)
 
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
-		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, model.EmailStatusDelivered).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
+		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, domain.EmailStatusDelivered).
 		Count(&stats.Delivered)
 
-	r.db.WithContext(ctx).Model(&model.EmailLog{}).
-		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, model.EmailStatusBounced).
+	r.db.WithContext(ctx).Model(&domain.EmailLog{}).
+		Where("created_at BETWEEN ? AND ? AND status = ?", from, to, domain.EmailStatusBounced).
 		Count(&stats.Bounced)
 
 	result := map[string]interface{}{
@@ -286,13 +286,13 @@ func (r *EmailRepository) GetEmailStats(ctx context.Context, from, to time.Time)
 }
 
 // Helper method to convert model to model
-func (r *EmailRepository) tomodelEmailLog(log *model.EmailLog) *model.EmailLog {
+func (r *EmailRepository) tomodelEmailLog(log *domain.EmailLog) *domain.EmailLog {
 	var sentAt time.Time
 	// if log.SentAt != nil {
 	// 	sentAt = *log.SentAt
 	// }
 
-	return &model.EmailLog{
+	return &domain.EmailLog{
 		ID:        log.ID,
 		To:        []string(log.To),
 		CC:        []string(log.CC),
@@ -300,7 +300,7 @@ func (r *EmailRepository) tomodelEmailLog(log *model.EmailLog) *model.EmailLog {
 		From:      log.From,
 		Subject:   log.Subject,
 		Template:  log.Template,
-		Status:    model.EmailStatus(log.Status),
+		Status:    domain.EmailStatus(log.Status),
 		Error:     log.Error,
 		Metadata:  map[string]interface{}(log.Metadata),
 		SentAt:    sentAt,

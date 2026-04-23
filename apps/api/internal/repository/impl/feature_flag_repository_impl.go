@@ -2,8 +2,8 @@ package impl
 
 import (
 	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
-
 )
 
 type FeatureFlagRepository struct {
@@ -14,7 +14,7 @@ func NewFeatureFlagRepository(db *gorm.DB) *FeatureFlagRepository {
 	return &FeatureFlagRepository{DB: db}
 }
 
-func (r *FeatureFlagRepository) Create(flag *model.FeatureFlag) (*model.FeatureFlag, error) {
+func (r *FeatureFlagRepository) Create(flag *domain.FeatureFlag) (*domain.FeatureFlag, error) {
 	flag.ID = uuid.New().String()
 	if err := r.DB.Create(flag).Error; err != nil {
 		return nil, err
@@ -22,32 +22,32 @@ func (r *FeatureFlagRepository) Create(flag *model.FeatureFlag) (*model.FeatureF
 	return flag, nil
 }
 
-func (r *FeatureFlagRepository) GetByName(name string) (*model.FeatureFlag, error) {
-	var flag model.FeatureFlag
+func (r *FeatureFlagRepository) GetByName(name string) (*domain.FeatureFlag, error) {
+	var flag domain.FeatureFlag
 	if err := r.DB.Where("name = ?", name).First(&flag).Error; err != nil {
 		return nil, err
 	}
 	return &flag, nil
 }
 
-func (r *FeatureFlagRepository) GetByKey(key string) (*model.FeatureFlag, error) {
-	var flag model.FeatureFlag
+func (r *FeatureFlagRepository) GetByKey(key string) (*domain.FeatureFlag, error) {
+	var flag domain.FeatureFlag
 	if err := r.DB.Where("key = ?", key).First(&flag).Error; err != nil {
 		return nil, err
 	}
 	return &flag, nil
 }
 
-func (r *FeatureFlagRepository) GetAll() ([]*model.FeatureFlag, error) {
-	var flags []*model.FeatureFlag
+func (r *FeatureFlagRepository) GetAll() ([]*domain.FeatureFlag, error) {
+	var flags []*domain.FeatureFlag
 	if err := r.DB.Find(&flags).Error; err != nil {
 		return nil, err
 	}
 	return flags, nil
 }
 
-func (r *FeatureFlagRepository) GetByCategory(category string) ([]*model.FeatureFlag, error) {
-	var flags []*model.FeatureFlag
+func (r *FeatureFlagRepository) GetByCategory(category string) ([]*domain.FeatureFlag, error) {
+	var flags []*domain.FeatureFlag
 	if err := r.DB.Where("category = ?", category).Find(&flags).Error; err != nil {
 		return nil, err
 	}
@@ -55,15 +55,15 @@ func (r *FeatureFlagRepository) GetByCategory(category string) ([]*model.Feature
 }
 
 // GetByTier retrieves all features available for a specific license tier
-func (r *FeatureFlagRepository) GetByTier(tier model.LicenseTier) ([]*model.FeatureFlag, error) {
-	var flags []*model.FeatureFlag
+func (r *FeatureFlagRepository) GetByTier(tier domain.LicenseTier) ([]*domain.FeatureFlag, error) {
+	var flags []*domain.FeatureFlag
 
 	// Tier hierarchy: Free < Pro < Enterprise < Custom
-	tierOrder := map[model.LicenseTier]int{
-		model.TierFree:       1,
-		model.TierPro:        2,
-		model.TierEnterprise: 3,
-		model.TierCustom:     4,
+	tierOrder := map[domain.LicenseTier]int{
+		domain.TierFree:       1,
+		domain.TierPro:        2,
+		domain.TierEnterprise: 3,
+		domain.TierCustom:     4,
 	}
 
 	currentTierLevel := tierOrder[tier]
@@ -86,7 +86,7 @@ func (r *FeatureFlagRepository) GetByTier(tier model.LicenseTier) ([]*model.Feat
 	return flags, nil
 }
 
-func (r *FeatureFlagRepository) Update(flag *model.FeatureFlag) (*model.FeatureFlag, error) {
+func (r *FeatureFlagRepository) Update(flag *domain.FeatureFlag) (*domain.FeatureFlag, error) {
 	if err := r.DB.Save(flag).Error; err != nil {
 		return nil, err
 	}
@@ -94,5 +94,5 @@ func (r *FeatureFlagRepository) Update(flag *model.FeatureFlag) (*model.FeatureF
 }
 
 func (r *FeatureFlagRepository) Delete(id string) error {
-	return r.DB.Delete(&model.FeatureFlag{}, "id = ?", id).Error
+	return r.DB.Delete(&domain.FeatureFlag{}, "id = ?", id).Error
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"einfra/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type LoginAttemptRepository interface {
