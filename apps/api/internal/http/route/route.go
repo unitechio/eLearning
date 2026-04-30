@@ -41,6 +41,7 @@ type Handlers struct {
 	Authorization    *handler.AuthorizationHandler
 	Role             *handler.RoleHandler
 	Permission       *handler.PermissionHandler
+	Menu             *handler.MenuHandler
 	Realtime         *handler.RealtimeHandler
 }
 
@@ -88,6 +89,17 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				users.PUT("/settings", h.UserSettings.Update)
 				users.PATCH("/settings", h.UserSettings.Patch)
 				users.POST("/settings/reset", h.UserSettings.Reset)
+			}
+
+			menus := r.Group("/menus")
+			{
+				menus.POST("", h.Menu.Create)
+				menus.GET("", h.Menu.GetAll)
+				menus.GET("/tree", h.Menu.GetTreeMenu)
+				menus.GET("/:id", h.Menu.GetByID)
+				menus.PUT("/:id", h.Menu.Update)
+				menus.DELETE("/:id", h.Menu.Delete)
+				menus.GET("/user/:userId", h.Menu.GetByUser)
 			}
 
 			courses := protected.Group("/courses")

@@ -34,16 +34,16 @@ services:
       - db
       - redis
 
-  web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
-    depends_on:
-      - api
+  # web:
+  #   build:
+  #     context: ./apps/web
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://localhost:8080
+  #   depends_on:
+  #     - api
 
 volumes:
   pgdata:

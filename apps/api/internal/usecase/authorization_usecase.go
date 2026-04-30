@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"einfra/api/internal/domain"
-	"einfra/api/internal/modules/auth/infrastructure"
 	_settings "einfra/api/internal/modules/server/infrastructure/settings_repo"
 )
 

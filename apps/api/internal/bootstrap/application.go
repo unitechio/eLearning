@@ -96,7 +96,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	featureFlagSvc := svcimpl.NewFeatureFlagUsecase(featureFlagRepo)
 	systemSettingSvc := usecase.NewSystemSettingUsecase(systemSettingRepo)
 	licenseSvc := svcimpl.NewLicenseUsecase(licenseRepo)
-	auditSvc := usecase.NewAuditUsecase(auditRepo)
+	auditSvc := svcimpl.NewAuditUsecase(auditRepo)
 	emailSvc := svcimpl.NewEmailUsecase(emailRepo)
 	userSettingsSvc := svcimpl.NewUserSettingsUsecase(userSettingsRepo)
 
