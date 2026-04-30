@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
-	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -73,7 +72,7 @@ func (r *LicenseRepository) GetAll() ([]*domain.License, error) {
 }
 
 // GetByTier retrieves all licenses of a specific tier
-func (r *LicenseRepository) GetByTier(tier dto.LicenseTier) ([]*domain.License, error) {
+func (r *LicenseRepository) GetByTier(tier domain.LicenseTier) ([]*domain.License, error) {
 	var licenses []*domain.License
 	if err := r.db.Where("tier = ? AND deleted_at IS NULL", tier).Order("created_at DESC").Find(&licenses).Error; err != nil {
 		return nil, err
@@ -133,5 +132,6 @@ func (r *LicenseRepository) ResetMonthlyUsage(licenseID string) error {
 		Where("id = ?", licenseID).
 		Updates(map[string]interface{}{
 			"current_api_calls": 0,
+			"current_users":     0,
 		}).Error
 }

@@ -1,745 +1,98 @@
 definitions:
-  dto.AIChatRequest:
+  domain.AuditAction:
+    enum:
+    - create
+    - read
+    - update
+    - delete
+    - login
+    - logout
+    - export
+    - import
+    type: string
+    x-enum-varnames:
+    - AuditActionCreate
+    - AuditActionRead
+    - AuditActionUpdate
+    - AuditActionDelete
+    - AuditActionLogin
+    - AuditActionLogout
+    - AuditActionExport
+    - AuditActionImport
+  domain.AuditLog:
     properties:
-      domain:
-        type: string
-      message:
-        type: string
-    required:
-    - message
-    type: object
-  dto.AIQuestionRequest:
-    properties:
-      domain:
-        type: string
-      topic:
-        type: string
-    required:
-    - domain
-    - topic
-    type: object
-  dto.AIStreamRequest:
-    properties:
-      context:
-        type: string
-      message:
-        type: string
-    required:
-    - message
-    type: object
-  dto.AIUsageSnapshot:
-    properties:
-      token_usage:
-        type: integer
-      total_requests:
-        type: integer
-    type: object
-  dto.Achievement:
-    properties:
-      code:
-        type: string
-      description:
-        type: string
-      title:
-        type: string
-      unlocked:
-        type: boolean
-    type: object
-  dto.Activity:
-    properties:
-      domain:
-        type: string
-      id:
-        type: string
-      instructions:
-        type: string
-      status:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-    type: object
-  dto.AddXPRequest:
-    properties:
-      amount:
-        type: integer
-      reason:
-        type: string
-    required:
-    - amount
-    - reason
-    type: object
-  dto.AdminUser:
-    properties:
-      email:
-        type: string
-      id:
-        type: string
-      roles:
-        items:
-          type: string
-        type: array
-      status:
-        type: string
-    type: object
-  dto.AnalyticsSnapshot:
-    properties:
-      active_users:
-        type: integer
-      total_activities:
-        type: integer
-      total_courses:
-        type: integer
-      total_users:
-        type: integer
-    type: object
-  dto.BillingHistoryItem:
-    properties:
-      amount:
-        type: number
+      action:
+        $ref: '#/definitions/domain.AuditAction'
       created_at:
-        type: string
-      id:
-        type: string
-      plan_name:
-        type: string
-      status:
-        type: string
-    type: object
-  dto.BillingPlan:
-    properties:
-      currency:
+        description: Start time
         type: string
       description:
         type: string
-      id:
-        type: string
-      name:
-        type: string
-      price:
-        type: number
-    type: object
-  dto.Course:
-    properties:
-      description:
-        type: string
-      domain:
+      duration:
+        description: Request duration in milliseconds
+        type: integer
+      finished_at:
+        description: Finish time
         type: string
       id:
-        type: string
-      level:
-        type: string
-      status:
-        type: string
-      title:
-        type: string
-    type: object
-  dto.CourseModule:
-    properties:
-      course_id:
-        type: string
-      id:
-        type: string
-      order:
         type: integer
-      title:
+      ip_address:
         type: string
-    type: object
-  dto.DailyActivityPoint:
-    properties:
-      completed_labs:
+      metadata:
+        description: Additional metadata
+        type: string
+      method:
+        description: HTTP method
+        type: string
+      new_values:
+        description: JSON of new values (for updates)
+        type: string
+      old_values:
+        description: JSON of old values (for updates)
+        type: string
+      path:
+        description: Request path
+        type: string
+      request_body:
+        description: Full request body (CLOB)
+        type: string
+      resource:
+        description: e.g., "users", "posts"
+        type: string
+      resource_id:
         type: integer
-      date:
+      response_body:
+        description: Full response body (CLOB)
         type: string
-      time_spent:
+      status_code:
         type: integer
-      xp:
-        type: integer
-    type: object
-  dto.DictionaryLookupResponse:
-    properties:
-      audio:
-        type: string
-      collocation:
-        type: string
-      example:
-        type: string
-      ipa:
-        type: string
-      meaning:
-        type: string
-      saved:
-        type: boolean
-      word:
-        type: string
-      word_type:
-        type: string
-    type: object
-  dto.DictionarySaveRequest:
-    properties:
-      word:
-        type: string
-    required:
-    - word
-    type: object
-  dto.ForgotPasswordRequest:
-    properties:
-      email:
-        type: string
-    required:
-    - email
-    type: object
-  dto.GamificationProfile:
-    properties:
-      achievement_pct:
-        type: integer
-      current_badge:
-        type: string
-      current_streak:
-        type: integer
-      level:
-        type: integer
-      longest_streak:
-        type: integer
-      next_level_at_xp:
-        type: integer
-      total_xp:
-        type: integer
-    type: object
-  dto.HeatmapPoint:
-    properties:
-      count:
-        type: integer
-      date:
-        type: string
-    type: object
-  dto.ImprovementInsight:
-    properties:
-      metric:
-        type: string
-      trend:
-        type: string
-      value:
-        type: number
-    type: object
-  dto.LeaderboardEntry:
-    properties:
-      display_name:
-        type: string
-      is_current:
-        type: boolean
-      rank:
-        type: integer
-      time_spent:
-        type: integer
-      user_id:
-        type: string
-      xp:
-        type: integer
-    type: object
-  dto.LearningPattern:
-    properties:
-      preferred_days:
-        items:
-          type: string
-        type: array
-      preferred_time:
-        type: string
-      strongest_mode:
-        type: string
-    type: object
-  dto.Lesson:
-    properties:
-      content:
-        type: string
-      id:
-        type: string
-      module_id:
-        type: string
-      order:
-        type: integer
-      title:
-        type: string
-    type: object
-  dto.ListeningLesson:
-    properties:
-      audio_url:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      title:
-        type: string
-    type: object
-  dto.ListeningSubmissionRequest:
-    properties:
-      answers:
-        items:
-          type: string
-        type: array
-    required:
-    - answers
-    type: object
-  dto.NotificationItem:
-    properties:
-      category:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      is_read:
-        type: boolean
-      message:
-        type: string
-      title:
-        type: string
-    type: object
-  dto.Planner:
-    properties:
-      focus_area:
-        type: string
-      tasks:
-        items:
-          type: string
-        type: array
-      weekly_target:
-        type: integer
-    type: object
-  dto.PlannerUpdateRequest:
-    properties:
-      focus_area:
-        type: string
-      tasks:
-        items:
-          type: string
-        type: array
-      weekly_target:
-        type: integer
-    type: object
-  dto.PracticeModesResponse:
-    properties:
-      modes:
-        items:
-          type: string
-        type: array
-    type: object
-  dto.PracticeSessionItem:
-    properties:
-      expected_text:
-        type: string
-      feedback:
-        type: string
-      id:
-        type: string
-      mode:
-        type: string
-      prompt:
-        type: string
-      score:
-        type: number
-      started_at:
-        type: string
-      status:
-        type: string
-      sub_mode:
-        type: string
-      submitted_at:
-        type: string
-    type: object
-  dto.PracticeStartRequest:
-    properties:
-      mode:
-        type: string
-      prompt:
-        type: string
-      sub_mode:
-        type: string
-    type: object
-  dto.PracticeSubmitRequest:
-    properties:
-      answer:
-        type: string
-      session_id:
-        type: string
-    required:
-    - answer
-    - session_id
-    type: object
-  dto.PremiumFeature:
-    properties:
-      code:
-        type: string
-      description:
-        type: string
-      title:
-        type: string
-      unlocked:
-        type: boolean
-    type: object
-  dto.PremiumUnlockRequest:
-    properties:
-      feature_code:
-        type: string
-    required:
-    - feature_code
-    type: object
-  dto.ProgressSnapshot:
-    properties:
-      current_streak:
-        type: integer
-      overall_completion:
-        type: number
-      weekly_minutes:
-        type: integer
-    type: object
-  dto.PronunciationAnalyzeSentenceRequest:
-    properties:
-      sentence:
-        type: string
-    required:
-    - sentence
-    type: object
-  dto.PronunciationAnalyzeWordRequest:
-    properties:
-      word:
-        type: string
-    required:
-    - word
-    type: object
-  dto.PronunciationHistoryItem:
-    properties:
-      accuracy:
-        type: number
-      created_at:
-        type: string
-      feedback:
-        type: string
-      id:
-        type: string
-      kind:
-        type: string
-      source:
-        type: string
-    type: object
-  dto.PronunciationRequest:
-    properties:
-      text:
-        type: string
-    required:
-    - text
-    type: object
-  dto.PronunciationResult:
-    properties:
-      accuracy:
-        type: number
-      feedback:
-        type: string
-    type: object
-  dto.ReadingLookupRequest:
-    properties:
-      context:
-        type: string
-      word:
-        type: string
-    required:
-    - word
-    type: object
-  dto.ReadingSaveWordRequest:
-    properties:
-      word:
-        type: string
-    required:
-    - word
-    type: object
-  dto.RecommendationItem:
-    properties:
-      description:
-        type: string
-      ref_id:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-    type: object
-  dto.ResetPasswordRequest:
-    properties:
-      new_password:
-        minLength: 6
-        type: string
-      token:
-        type: string
-    required:
-    - new_password
-    - token
-    type: object
-  dto.SpeakingSession:
-    properties:
-      id:
-        type: string
-      started_at:
-        type: string
-      status:
-        type: string
-      stopped_at:
-        type: string
-    type: object
-  dto.Submission:
-    properties:
-      activity_id:
-        type: string
-      answer:
-        type: string
-      feedback:
-        type: string
-      id:
-        type: string
-      score:
-        type: number
-      status:
+      user:
+        allOf:
+        - $ref: '#/definitions/domain.User'
+        description: Relationships
+      user_agent:
         type: string
       user_id:
-        type: string
-    type: object
-  dto.SubmitActivityRequest:
-    properties:
-      answer:
-        type: string
-    required:
-    - answer
-    type: object
-  dto.SubscribeRequest:
-    properties:
-      plan_id:
-        type: string
-    required:
-    - plan_id
-    type: object
-  dto.TimeSpentSnapshot:
-    properties:
-      minutes_month:
-        type: integer
-      minutes_today:
-        type: integer
-      minutes_week:
         type: integer
     type: object
-  dto.TokenRefreshRequest:
+  domain.AuditStatistics:
     properties:
-      refresh_token:
-        type: string
-    required:
-    - refresh_token
-    type: object
-  dto.UpdateUserStatusRequest:
-    properties:
-      status:
-        type: string
-    required:
-    - status
-    type: object
-  dto.UpdateWordRequest:
-    properties:
-      definition:
-        type: string
-      example:
-        type: string
-      level:
-        type: string
-      part_of_speech:
-        type: string
-      phonetic:
-        type: string
-      word:
-        type: string
-    required:
-    - definition
-    - word
-    type: object
-  dto.UpsertActivityRequest:
-    properties:
-      domain:
-        type: string
-      instructions:
-        type: string
-      status:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-    required:
-    - domain
-    - title
-    - type
-    type: object
-  dto.UpsertCourseRequest:
-    properties:
-      description:
-        type: string
-      domain:
-        type: string
-      level:
-        type: string
-      status:
-        type: string
-      title:
-        type: string
-    required:
-    - domain
-    - title
-    type: object
-  dto.UpsertLessonRequest:
-    properties:
-      content:
-        type: string
-      module_id:
-        type: string
-      order:
+      action_breakdown:
+        additionalProperties:
+          type: integer
+        type: object
+      failed_actions:
         type: integer
-      title:
-        type: string
-    required:
-    - module_id
-    - title
-    type: object
-  dto.UpsertModuleRequest:
-    properties:
-      course_id:
-        type: string
-      order:
+      resource_breakdown:
+        additionalProperties:
+          type: integer
+        type: object
+      successful_actions:
         type: integer
-      title:
-        type: string
-    required:
-    - course_id
-    - title
-    type: object
-  dto.UserActivityItem:
-    properties:
-      description:
-        type: string
-      id:
-        type: string
-      occurred_at:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-    type: object
-  dto.UserProgress:
-    properties:
-      completed_lessons:
+      total_logs:
         type: integer
-      completion_rate:
-        type: number
-      course_id:
-        type: string
-      course_title:
-        type: string
-      last_activity_at:
-        type: string
-      total_lessons:
+      unique_users:
         type: integer
-    type: object
-  dto.UserStats:
-    properties:
-      average_score:
-        type: number
-      completed_courses:
-        type: integer
-      current_streak:
-        type: integer
-      total_study_minutes:
-        type: integer
-    type: object
-  dto.VerifyEmailRequest:
-    properties:
-      code:
-        type: string
-      email:
-        type: string
-    required:
-    - code
-    - email
-    type: object
-  dto.VocabularyHistoryItem:
-    properties:
-      id:
-        type: string
-      result:
-        type: string
-      reviewed_at:
-        type: string
-      word_id:
-        type: string
-    type: object
-  dto.VocabularySetAddWordRequest:
-    properties:
-      word_id:
-        type: string
-    required:
-    - word_id
-    type: object
-  dto.VocabularySetItem:
-    properties:
-      description:
-        type: string
-      domain:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      words:
-        items:
-          type: string
-        type: array
-    type: object
-  dto.VocabularySetRequest:
-    properties:
-      description:
-        type: string
-      domain:
-        type: string
-      name:
-        type: string
-    required:
-    - name
-    type: object
-  dto.WeakPoint:
-    properties:
-      area:
-        type: string
-      note:
-        type: string
-      score:
-        type: number
-    type: object
-  dto.WritingEvaluationRequest:
-    properties:
-      prompt:
-        type: string
-      text:
-        type: string
-    required:
-    - prompt
-    - text
-    type: object
-  dto.XPHistoryItem:
-    properties:
-      amount:
-        type: integer
-      created_at:
-        type: string
-      id:
-        type: string
-      reason:
-        type: string
     type: object
   domain.Category:
     properties:
@@ -846,6 +199,221 @@ definitions:
         type: array
       updated_at:
         type: string
+    type: object
+  domain.EmailLog:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      error:
+        type: string
+      from:
+        type: string
+      id:
+        type: integer
+      metadata:
+        type: string
+      sent_at:
+        type: string
+      status:
+        description: pending, sent, failed
+        type: string
+      subject:
+        type: string
+      template:
+        allOf:
+        - $ref: '#/definitions/domain.EmailTemplate'
+        description: Relationships
+      template_id:
+        type: integer
+      to:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.EmailTemplate:
+    properties:
+      body:
+        type: string
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      subject:
+        type: string
+      type:
+        description: html, text
+        type: string
+      updated_at:
+        type: string
+      variables:
+        description: Available template variables
+        type: string
+    type: object
+  domain.Environment:
+    properties:
+      color:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      slug:
+        type: string
+      sort_order:
+        type: integer
+      type:
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  domain.FeatureFlag:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      required_tier:
+        $ref: '#/definitions/domain.LicenseTier'
+      updated_at:
+        type: string
+    type: object
+  domain.License:
+    properties:
+      activated_at:
+        type: string
+      contact_email:
+        type: string
+      created_at:
+        description: Audit
+        type: string
+      current_api_calls:
+        type: integer
+      current_storage:
+        type: integer
+      current_users:
+        description: Usage Tracking
+        type: integer
+      deleted_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      issued_at:
+        description: Time
+        type: string
+      license_key:
+        type: string
+      max_api_calls:
+        type: integer
+      max_storage:
+        type: integer
+      max_users:
+        description: License Limits
+        type: integer
+      metadata:
+        description: Metadata
+        type: object
+      notes:
+        type: string
+      organization_id:
+        description: Organization Info
+        type: string
+      organization_name:
+        type: string
+      status:
+        type: string
+      suspended_at:
+        type: string
+      tier:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.LicenseActivationRequest:
+    properties:
+      contactEmail:
+        type: string
+      licenseKey:
+        type: string
+      organizationID:
+        type: string
+      organizationName:
+        type: string
+    type: object
+  domain.LicenseLimits:
+    properties:
+      current_api_calls:
+        type: integer
+      current_storage:
+        type: integer
+      current_users:
+        type: integer
+      max_api_calls:
+        type: integer
+      max_storage:
+        type: integer
+      max_users:
+        type: integer
+    type: object
+  domain.LicenseTier:
+    enum:
+    - free
+    - starter
+    - pro
+    - enterprise
+    type: string
+    x-enum-varnames:
+    - LicenseTierFree
+    - LicenseTierStarter
+    - LicenseTierPro
+    - LicenseTierEnterprise
+  domain.LicenseValidationResponse:
+    properties:
+      days_left:
+        type: integer
+      expires_at:
+        type: string
+      license:
+        $ref: '#/definitions/domain.License'
+      limits:
+        $ref: '#/definitions/domain.LicenseLimits'
+      message:
+        type: string
+      status:
+        type: string
+      tier:
+        type: string
+      valid:
+        type: boolean
     type: object
   domain.Media:
     properties:
@@ -1161,6 +729,32 @@ definitions:
       updated_at:
         type: string
     type: object
+  domain.SystemSetting:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_editable:
+        description: Can be edited via UI
+        type: boolean
+      is_public:
+        description: Can be accessed without authentication
+        type: boolean
+      key:
+        type: string
+      type:
+        description: string, number, boolean, json
+        type: string
+      updated_at:
+        type: string
+      value:
+        type: string
+    type: object
   domain.TranslatableContent:
     additionalProperties:
       type: string
@@ -1222,6 +816,61 @@ definitions:
       two_factor_enabled:
         type: boolean
       updated_at:
+        type: string
+    type: object
+  domain.UserSettingsUpdate:
+    properties:
+      beta_features:
+        type: boolean
+      compact_mode:
+        type: boolean
+      currency:
+        type: string
+      date_format:
+        type: string
+      default_dashboard:
+        type: string
+      default_page_size:
+        type: integer
+      desktop_notifications:
+        type: boolean
+      developer_mode:
+        type: boolean
+      digest_frequency:
+        type: string
+      email_notifications:
+        type: boolean
+      font_family:
+        type: string
+      font_size:
+        type: string
+      high_contrast:
+        type: boolean
+      language:
+        type: string
+      notification_level:
+        type: string
+      notification_sound:
+        type: boolean
+      push_notifications:
+        type: boolean
+      reduce_motion:
+        type: boolean
+      show_online_status:
+        type: boolean
+      sidebar:
+        type: string
+      sidebar_collapsed:
+        type: boolean
+      table_density:
+        type: string
+      theme:
+        type: string
+      time_format:
+        type: string
+      timezone:
+        type: string
+      widget_layout:
         type: string
     type: object
   domain.UserStatus:
@@ -1305,6 +954,1120 @@ definitions:
       word_count:
         type: integer
     type: object
+  dto.AIChatRequest:
+    properties:
+      domain:
+        type: string
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  dto.AIQuestionRequest:
+    properties:
+      domain:
+        type: string
+      topic:
+        type: string
+    required:
+    - domain
+    - topic
+    type: object
+  dto.AIStreamRequest:
+    properties:
+      context:
+        type: string
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  dto.AIUsageSnapshot:
+    properties:
+      token_usage:
+        type: integer
+      total_requests:
+        type: integer
+    type: object
+  dto.AccessProfile:
+    properties:
+      email:
+        type: string
+      features:
+        items:
+          type: string
+        type: array
+      is_admin:
+        type: boolean
+      is_instructor:
+        type: boolean
+      is_premium:
+        type: boolean
+      permissions:
+        items:
+          type: string
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
+      tenant_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.Achievement:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      unlocked:
+        type: boolean
+    type: object
+  dto.Activity:
+    properties:
+      domain:
+        type: string
+      id:
+        type: string
+      instructions:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      visibility:
+        type: string
+    type: object
+  dto.AddXPRequest:
+    properties:
+      amount:
+        type: integer
+      reason:
+        type: string
+    required:
+    - amount
+    - reason
+    type: object
+  dto.AdminBillingPlan:
+    properties:
+      billing_cycle:
+        type: string
+      code:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dto.AdminBillingSubscription:
+    properties:
+      cancelled_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      is_premium:
+        type: boolean
+      plan_id:
+        type: string
+      plan_name:
+        type: string
+      started_at:
+        type: string
+      status:
+        type: string
+      user_email:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.AdminUser:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+    type: object
+  dto.AnalyticsSnapshot:
+    properties:
+      active_users:
+        type: integer
+      total_activities:
+        type: integer
+      total_courses:
+        type: integer
+      total_users:
+        type: integer
+    type: object
+  dto.AuthResponse:
+    properties:
+      refresh_token:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+    type: object
+  dto.AuthorizationPermissionAssignmentRequest:
+    properties:
+      permission_ids:
+        items:
+          type: integer
+        minItems: 1
+        type: array
+      user_id:
+        type: string
+    required:
+    - permission_ids
+    - user_id
+    type: object
+  dto.AuthorizationRoleAssignmentRequest:
+    properties:
+      role_id:
+        type: integer
+      user_id:
+        type: string
+    required:
+    - role_id
+    - user_id
+    type: object
+  dto.BillingHistoryItem:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      id:
+        type: string
+      plan_name:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.BillingPlan:
+    properties:
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dto.Course:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      level:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      visibility:
+        type: string
+    type: object
+  dto.CourseModule:
+    properties:
+      course_id:
+        type: string
+      id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.CreateBillingPlanRequest:
+    properties:
+      billing_cycle:
+        type: string
+      code:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - code
+    - name
+    - price
+    type: object
+  dto.DailyActivityPoint:
+    properties:
+      completed_labs:
+        type: integer
+      date:
+        type: string
+      time_spent:
+        type: integer
+      xp:
+        type: integer
+    type: object
+  dto.DictionaryLookupResponse:
+    properties:
+      audio:
+        type: string
+      collocation:
+        type: string
+      example:
+        type: string
+      ipa:
+        type: string
+      meaning:
+        type: string
+      saved:
+        type: boolean
+      word:
+        type: string
+      word_type:
+        type: string
+    type: object
+  dto.DictionarySaveRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dto.GamificationProfile:
+    properties:
+      achievement_pct:
+        type: integer
+      current_badge:
+        type: string
+      current_streak:
+        type: integer
+      level:
+        type: integer
+      longest_streak:
+        type: integer
+      next_level_at_xp:
+        type: integer
+      total_xp:
+        type: integer
+    type: object
+  dto.GrantPremiumRequest:
+    properties:
+      plan_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - plan_id
+    - user_id
+    type: object
+  dto.HeatmapPoint:
+    properties:
+      count:
+        type: integer
+      date:
+        type: string
+    type: object
+  dto.ImprovementInsight:
+    properties:
+      metric:
+        type: string
+      trend:
+        type: string
+      value:
+        type: number
+    type: object
+  dto.LeaderboardEntry:
+    properties:
+      display_name:
+        type: string
+      is_current:
+        type: boolean
+      rank:
+        type: integer
+      time_spent:
+        type: integer
+      user_id:
+        type: string
+      xp:
+        type: integer
+    type: object
+  dto.LearningPattern:
+    properties:
+      preferred_days:
+        items:
+          type: string
+        type: array
+      preferred_time:
+        type: string
+      strongest_mode:
+        type: string
+    type: object
+  dto.Lesson:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      module_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    type: object
+  dto.ListeningLesson:
+    properties:
+      audio_url:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ListeningSubmissionRequest:
+    properties:
+      answers:
+        items:
+          type: string
+        type: array
+    required:
+    - answers
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.NotificationItem:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      message:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.Planner:
+    properties:
+      focus_area:
+        type: string
+      tasks:
+        items:
+          type: string
+        type: array
+      weekly_target:
+        type: integer
+    type: object
+  dto.PlannerUpdateRequest:
+    properties:
+      focus_area:
+        type: string
+      tasks:
+        items:
+          type: string
+        type: array
+      weekly_target:
+        type: integer
+    type: object
+  dto.PracticeModesResponse:
+    properties:
+      modes:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.PracticeSessionItem:
+    properties:
+      expected_text:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      mode:
+        type: string
+      prompt:
+        type: string
+      score:
+        type: number
+      started_at:
+        type: string
+      status:
+        type: string
+      sub_mode:
+        type: string
+      submitted_at:
+        type: string
+    type: object
+  dto.PracticeStartRequest:
+    properties:
+      mode:
+        type: string
+      prompt:
+        type: string
+      sub_mode:
+        type: string
+    type: object
+  dto.PracticeSubmitRequest:
+    properties:
+      answer:
+        type: string
+      session_id:
+        type: string
+    required:
+    - answer
+    - session_id
+    type: object
+  dto.PremiumFeature:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      title:
+        type: string
+      unlocked:
+        type: boolean
+    type: object
+  dto.PremiumUnlockRequest:
+    properties:
+      feature_code:
+        type: string
+    required:
+    - feature_code
+    type: object
+  dto.ProgressSnapshot:
+    properties:
+      current_streak:
+        type: integer
+      overall_completion:
+        type: number
+      weekly_minutes:
+        type: integer
+    type: object
+  dto.PronunciationAnalyzeSentenceRequest:
+    properties:
+      sentence:
+        type: string
+    required:
+    - sentence
+    type: object
+  dto.PronunciationAnalyzeWordRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.PronunciationHistoryItem:
+    properties:
+      accuracy:
+        type: number
+      created_at:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      kind:
+        type: string
+      source:
+        type: string
+    type: object
+  dto.PronunciationRequest:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  dto.PronunciationResult:
+    properties:
+      accuracy:
+        type: number
+      feedback:
+        type: string
+    type: object
+  dto.ReadingLookupRequest:
+    properties:
+      context:
+        type: string
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.ReadingSaveWordRequest:
+    properties:
+      word:
+        type: string
+    required:
+    - word
+    type: object
+  dto.RecommendationItem:
+    properties:
+      description:
+        type: string
+      ref_id:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  dto.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  dto.SpeakingSession:
+    properties:
+      id:
+        type: string
+      started_at:
+        type: string
+      status:
+        type: string
+      stopped_at:
+        type: string
+    type: object
+  dto.Submission:
+    properties:
+      activity_id:
+        type: string
+      answer:
+        type: string
+      feedback:
+        type: string
+      id:
+        type: string
+      score:
+        type: number
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.SubmitActivityRequest:
+    properties:
+      answer:
+        type: string
+    required:
+    - answer
+    type: object
+  dto.SubscribeRequest:
+    properties:
+      plan_id:
+        type: string
+    required:
+    - plan_id
+    type: object
+  dto.TimeSpentSnapshot:
+    properties:
+      minutes_month:
+        type: integer
+      minutes_today:
+        type: integer
+      minutes_week:
+        type: integer
+    type: object
+  dto.TokenRefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.UpdateBillingPlanRequest:
+    properties:
+      billing_cycle:
+        type: string
+      code:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - code
+    - name
+    - price
+    type: object
+  dto.UpdateSubscriptionStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  dto.UpdateUserStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  dto.UpdateWordRequest:
+    properties:
+      definition:
+        type: string
+      example:
+        type: string
+      level:
+        type: string
+      part_of_speech:
+        type: string
+      phonetic:
+        type: string
+      word:
+        type: string
+    required:
+    - definition
+    - word
+    type: object
+  dto.UpsertActivityRequest:
+    properties:
+      domain:
+        type: string
+      instructions:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      visibility:
+        type: string
+    required:
+    - domain
+    - title
+    - type
+    type: object
+  dto.UpsertCourseRequest:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      level:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      visibility:
+        type: string
+    required:
+    - domain
+    - title
+    type: object
+  dto.UpsertLessonRequest:
+    properties:
+      content:
+        type: string
+      module_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    required:
+    - module_id
+    - title
+    type: object
+  dto.UpsertModuleRequest:
+    properties:
+      course_id:
+        type: string
+      order:
+        type: integer
+      title:
+        type: string
+    required:
+    - course_id
+    - title
+    type: object
+  dto.UserActivityItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      occurred_at:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.UserProgress:
+    properties:
+      completed_lessons:
+        type: integer
+      completion_rate:
+        type: number
+      course_id:
+        type: string
+      course_title:
+        type: string
+      last_activity_at:
+        type: string
+      total_lessons:
+        type: integer
+    type: object
+  dto.UserStats:
+    properties:
+      average_score:
+        type: number
+      completed_courses:
+        type: integer
+      current_streak:
+        type: integer
+      total_study_minutes:
+        type: integer
+    type: object
+  dto.VerifyEmailRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  dto.VocabularyHistoryItem:
+    properties:
+      id:
+        type: string
+      result:
+        type: string
+      reviewed_at:
+        type: string
+      word_id:
+        type: string
+    type: object
+  dto.VocabularySetAddWordRequest:
+    properties:
+      word_id:
+        type: string
+    required:
+    - word_id
+    type: object
+  dto.VocabularySetItem:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      words:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.VocabularySetRequest:
+    properties:
+      description:
+        type: string
+      domain:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.WeakPoint:
+    properties:
+      area:
+        type: string
+      note:
+        type: string
+      score:
+        type: number
+    type: object
+  dto.WritingEvaluationRequest:
+    properties:
+      prompt:
+        type: string
+      text:
+        type: string
+    required:
+    - prompt
+    - text
+    type: object
+  dto.XPHistoryItem:
+    properties:
+      amount:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: string
+      reason:
+        type: string
+    type: object
+  handler.AssignPermissionsRequest:
+    properties:
+      permission_ids:
+        items:
+          type: string
+        type: array
+    required:
+    - permission_ids
+    type: object
+  handler.AttachmentRequest:
+    properties:
+      content:
+        type: string
+      content_id:
+        type: string
+      content_type:
+        type: string
+      filename:
+        type: string
+      inline:
+        type: boolean
+    required:
+    - content
+    - content_type
+    - filename
+    type: object
+  handler.CreateLicenseRequest:
+    properties:
+      contact_email:
+        type: string
+      duration_days:
+        type: integer
+      organization_id:
+        type: string
+      organization_name:
+        type: string
+      tier:
+        type: string
+    required:
+    - tier
+    type: object
+  handler.ScheduleEmailRequest:
+    properties:
+      email:
+        $ref: '#/definitions/handler.SendEmailRequest'
+      send_at:
+        type: string
+    required:
+    - email
+    - send_at
+    type: object
+  handler.SendBulkEmailRequest:
+    properties:
+      emails:
+        items:
+          $ref: '#/definitions/handler.SendEmailRequest'
+        minItems: 1
+        type: array
+    required:
+    - emails
+    type: object
+  handler.SendEmailRequest:
+    properties:
+      bcc:
+        items:
+          type: string
+        type: array
+      body:
+        type: string
+      cc:
+        items:
+          type: string
+        type: array
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      html_body:
+        type: string
+      priority:
+        type: string
+      reply_to:
+        type: string
+      subject:
+        type: string
+      to:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - subject
+    - to
+    type: object
+  handler.SendEmailWithAttachmentRequest:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/handler.AttachmentRequest'
+        minItems: 1
+        type: array
+      bcc:
+        items:
+          type: string
+        type: array
+      body:
+        type: string
+      cc:
+        items:
+          type: string
+        type: array
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      html_body:
+        type: string
+      priority:
+        type: string
+      reply_to:
+        type: string
+      subject:
+        type: string
+      to:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - attachments
+    - subject
+    - to
+    type: object
+  handler.SendTemplateEmailRequest:
+    properties:
+      bcc:
+        items:
+          type: string
+        type: array
+      cc:
+        items:
+          type: string
+        type: array
+      data:
+        additionalProperties: true
+        type: object
+      template_name:
+        type: string
+      to:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - data
+    - template_name
+    - to
+    type: object
+  handler.UpgradeLicenseRequest:
+    properties:
+      new_tier:
+        type: string
+    required:
+    - new_tier
+    type: object
+  handler.ValidateEmailRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   response.Envelope:
     properties:
       data: {}
@@ -1342,7 +2105,7 @@ definitions:
       total_pages:
         type: integer
     type: object
-  service.AnalyzeResult:
+  usecase.AnalyzeResult:
     properties:
       feedback:
         type: string
@@ -1353,14 +2116,7 @@ definitions:
       transcript:
         type: string
     type: object
-  service.AuthResponse:
-    properties:
-      token:
-        type: string
-      user:
-        $ref: '#/definitions/domain.User'
-    type: object
-  service.CreateWordRequest:
+  usecase.CreateWordRequest:
     properties:
       definition:
         type: string
@@ -1380,39 +2136,7 @@ definitions:
     - definition
     - word
     type: object
-  service.LoginRequest:
-    properties:
-      email:
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  service.RegisterRequest:
-    properties:
-      email:
-        type: string
-      first_name:
-        maxLength: 100
-        minLength: 2
-        type: string
-      last_name:
-        maxLength: 100
-        minLength: 2
-        type: string
-      password:
-        minLength: 6
-        type: string
-    required:
-    - email
-    - first_name
-    - last_name
-    - password
-    type: object
-  service.ReviewRequest:
+  usecase.ReviewRequest:
     properties:
       correct:
         type: boolean
@@ -1421,7 +2145,7 @@ definitions:
     required:
     - word_id
     type: object
-  service.SubmitRequest:
+  usecase.SubmitRequest:
     properties:
       prompt:
         type: string
@@ -1432,7 +2156,7 @@ definitions:
     - prompt
     - response
     type: object
-  service.UpdateProfileRequest:
+  usecase.UpdateProfileRequest:
     properties:
       first_name:
         maxLength: 100
@@ -1759,6 +2483,272 @@ paths:
       summary: Get admin analytics
       tags:
       - admin
+  /admin/billing/plans:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by plan name or code
+        in: query
+        name: q
+        type: string
+      - description: Filter by currency
+        in: query
+        name: currency
+        type: string
+      - description: Filter by active
+        in: query
+        name: active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AdminBillingPlan'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List admin billing plans
+      tags:
+      - admin-billing
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Plan payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBillingPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingPlan'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create billing plan
+      tags:
+      - admin-billing
+  /admin/billing/plans/{id}:
+    delete:
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete billing plan
+      tags:
+      - admin-billing
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Plan payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBillingPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingPlan'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update billing plan
+      tags:
+      - admin-billing
+  /admin/billing/subscriptions:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Search by user email or plan name
+        in: query
+        name: q
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AdminBillingSubscription'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List subscriptions
+      tags:
+      - admin-billing
+  /admin/billing/subscriptions/{id}:
+    get:
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingSubscription'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get subscription
+      tags:
+      - admin-billing
+  /admin/billing/subscriptions/{id}/cancel:
+    post:
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingSubscription'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Cancel subscription
+      tags:
+      - admin-billing
+  /admin/billing/subscriptions/{id}/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSubscriptionStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingSubscription'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update subscription status
+      tags:
+      - admin-billing
+  /admin/billing/subscriptions/grant-premium:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Grant premium payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GrantPremiumRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdminBillingSubscription'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Grant premium subscription
+      tags:
+      - admin-billing
   /admin/courses:
     get:
       parameters:
@@ -1880,6 +2870,96 @@ paths:
       summary: Update admin course
       tags:
       - admin
+  /admin/licenses:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.License'
+                  type: array
+              type: object
+      summary: List licenses
+      tags:
+      - licenses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create license payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateLicenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.License'
+              type: object
+      summary: Create license
+      tags:
+      - licenses
+  /admin/licenses/{license_key}/reactivate:
+    post:
+      parameters:
+      - description: License key
+        in: path
+        name: license_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Reactivate license
+      tags:
+      - licenses
+  /admin/licenses/{license_key}/suspend:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: License key
+        in: path
+        name: license_key
+        required: true
+        type: string
+      - description: Suspend payload
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Suspend license
+      tags:
+      - licenses
   /admin/users:
     get:
       parameters:
@@ -2173,6 +3253,309 @@ paths:
       summary: Get weak points analytics
       tags:
       - analytics
+  /audit/cleanup:
+    post:
+      parameters:
+      - description: Retention period in days
+        in: query
+        name: retention_days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Cleanup old audit logs
+      tags:
+      - audit
+  /audit/export:
+    get:
+      parameters:
+      - description: Export format
+        in: query
+        name: format
+        type: string
+      - description: Filter by user ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      - description: Filter by resource
+        in: query
+        name: resource
+        type: string
+      - description: Filter by resource ID
+        in: query
+        name: resource_id
+        type: integer
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Export audit logs
+      tags:
+      - audit
+  /audit/logs:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by user ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      - description: Filter by resource
+        in: query
+        name: resource
+        type: string
+      - description: Filter by resource ID
+        in: query
+        name: resource_id
+        type: integer
+      - description: Filter by IP address
+        in: query
+        name: ip_address
+        type: string
+      - description: Filter by HTTP method
+        in: query
+        name: method
+        type: string
+      - description: Filter by path
+        in: query
+        name: path
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      - description: Sort field
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.AuditLog'
+                  type: array
+              type: object
+      summary: List audit logs
+      tags:
+      - audit
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Audit log payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AuditLog'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuditLog'
+              type: object
+      summary: Create audit log entry
+      tags:
+      - audit
+  /audit/logs/{id}:
+    get:
+      parameters:
+      - description: Audit log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuditLog'
+              type: object
+      summary: Get audit log
+      tags:
+      - audit
+  /audit/resources/{resource}/{resource_id}/logs:
+    get:
+      parameters:
+      - description: Resource
+        in: path
+        name: resource
+        required: true
+        type: string
+      - description: Resource ID
+        in: path
+        name: resource_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.AuditLog'
+                  type: array
+              type: object
+      summary: List resource audit logs
+      tags:
+      - audit
+  /audit/statistics:
+    get:
+      parameters:
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuditStatistics'
+              type: object
+      summary: Get audit statistics
+      tags:
+      - audit
+  /audit/users/{user_id}/logs:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      - description: Filter by resource
+        in: query
+        name: resource
+        type: string
+      - description: Start date (RFC3339)
+        in: query
+        name: start_date
+        type: string
+      - description: End date (RFC3339)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.AuditLog'
+                  type: array
+              type: object
+      summary: List user audit logs
+      tags:
+      - audit
   /auth/forgot-password:
     post:
       consumes:
@@ -2208,7 +3591,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.LoginRequest'
+          $ref: '#/definitions/dto.LoginRequest'
       produces:
       - application/json
       responses:
@@ -2219,7 +3602,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/service.AuthResponse'
+                  $ref: '#/definitions/dto.AuthResponse'
               type: object
         "400":
           description: Bad Request
@@ -2285,7 +3668,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.RegisterRequest'
+          $ref: '#/definitions/dto.RegisterRequest'
       produces:
       - application/json
       responses:
@@ -2296,7 +3679,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/service.AuthResponse'
+                  $ref: '#/definitions/dto.AuthResponse'
               type: object
         "400":
           description: Bad Request
@@ -2359,6 +3742,23 @@ paths:
       summary: Verify email address
       tags:
       - auth
+  /authorization/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AccessProfile'
+              type: object
+      summary: Get current access profile
+      tags:
+      - authorization
   /billing/history:
     get:
       parameters:
@@ -2745,6 +4145,499 @@ paths:
       summary: Save dictionary word
       tags:
       - dictionary
+  /emails/logs:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Status
+        in: query
+        name: status
+        type: string
+      - description: Sender
+        in: query
+        name: from
+        type: string
+      - description: Recipient
+        in: query
+        name: to
+        type: string
+      - description: Template name
+        in: query
+        name: template
+        type: string
+      - description: Date from (RFC3339)
+        in: query
+        name: date_from
+        type: string
+      - description: Date to (RFC3339)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.EmailLog'
+                  type: array
+              type: object
+      summary: List email logs
+      tags:
+      - emails
+  /emails/logs/{id}:
+    get:
+      parameters:
+      - description: Email log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.EmailLog'
+              type: object
+      summary: Get email log
+      tags:
+      - emails
+  /emails/logs/{id}/status:
+    get:
+      parameters:
+      - description: Email log ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Get email status
+      tags:
+      - emails
+  /emails/schedule:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Schedule payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ScheduleEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Schedule email
+      tags:
+      - emails
+  /emails/send:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SendEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Send email
+      tags:
+      - emails
+  /emails/send-bulk:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bulk payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SendBulkEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Send bulk emails
+      tags:
+      - emails
+  /emails/send-template:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Template payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SendTemplateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Send template email
+      tags:
+      - emails
+  /emails/send-with-attachment:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email attachment payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SendEmailWithAttachmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Send email with attachments
+      tags:
+      - emails
+  /emails/validate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email validation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ValidateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Validate email
+      tags:
+      - emails
+  /environments:
+    get:
+      parameters:
+      - description: Search by name
+        in: query
+        name: name
+        type: string
+      - description: Filter by active flag
+        in: query
+        name: is_active
+        type: boolean
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Environment'
+                  type: array
+              type: object
+      summary: List environments
+      tags:
+      - environments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Environment payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Environment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Environment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Create environment
+      tags:
+      - environments
+  /environments/{id}:
+    delete:
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Delete environment
+      tags:
+      - environments
+    get:
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Environment'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Get environment
+      tags:
+      - environments
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Environment payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Environment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Environment'
+              type: object
+      summary: Update environment
+      tags:
+      - environments
+  /feature-flags:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.FeatureFlag'
+                  type: array
+              type: object
+      summary: List feature flags
+      tags:
+      - feature-flags
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Feature flag payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FeatureFlag'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FeatureFlag'
+              type: object
+      summary: Create feature flag
+      tags:
+      - feature-flags
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Feature flag payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FeatureFlag'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FeatureFlag'
+              type: object
+      summary: Update feature flag
+      tags:
+      - feature-flags
+  /feature-flags/{id}:
+    delete:
+      parameters:
+      - description: Feature flag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Delete feature flag
+      tags:
+      - feature-flags
+  /feature-flags/category/{category}:
+    get:
+      parameters:
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.FeatureFlag'
+                  type: array
+              type: object
+      summary: List feature flags by category
+      tags:
+      - feature-flags
+  /feature-flags/name/{name}:
+    get:
+      parameters:
+      - description: Feature flag name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FeatureFlag'
+              type: object
+      summary: Get feature flag by name
+      tags:
+      - feature-flags
   /gamification/achievements:
     get:
       produces:
@@ -2993,6 +4886,115 @@ paths:
       summary: Update lesson
       tags:
       - lessons
+  /licenses/activate:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Activation payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LicenseActivationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LicenseValidationResponse'
+              type: object
+      summary: Activate license
+      tags:
+      - licenses
+  /licenses/current:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.License'
+              type: object
+      summary: Get current license
+      tags:
+      - licenses
+  /licenses/upgrade:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Upgrade payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpgradeLicenseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.License'
+              type: object
+      summary: Upgrade license
+      tags:
+      - licenses
+  /licenses/usage:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LicenseLimits'
+              type: object
+      summary: Get license usage
+      tags:
+      - licenses
+  /licenses/validate:
+    get:
+      parameters:
+      - description: License key
+        in: query
+        name: license_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.LicenseValidationResponse'
+              type: object
+      summary: Validate license
+      tags:
+      - licenses
   /listening/{id}:
     get:
       parameters:
@@ -3257,6 +5259,260 @@ paths:
       summary: Mark notification as read
       tags:
       - notifications
+  /permissions:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by resource
+        in: query
+        name: resource
+        type: string
+      - description: Filter by action
+        in: query
+        name: action
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Permission'
+                  type: array
+              type: object
+      summary: List permissions
+      tags:
+      - permissions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Permission payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Permission'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Permission'
+              type: object
+      summary: Create permission
+      tags:
+      - permissions
+  /permissions/{id}:
+    delete:
+      parameters:
+      - description: Permission ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Delete permission
+      tags:
+      - permissions
+    get:
+      parameters:
+      - description: Permission ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Permission'
+              type: object
+      summary: Get permission
+      tags:
+      - permissions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Permission ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Permission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Permission'
+              type: object
+      summary: Update permission
+      tags:
+      - permissions
+  /permissions/assign-role:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role assignment payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthorizationRoleAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Assign role to user
+      tags:
+      - authorization
+  /permissions/cleanup:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Cleanup expired authorization grants
+      tags:
+      - authorization
+  /permissions/environment-roles/{id}:
+    delete:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Remove role from user
+      tags:
+      - authorization
+  /permissions/grant:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Permission assignment payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthorizationPermissionAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Grant direct permissions to user
+      tags:
+      - authorization
+  /permissions/resource/{resource}:
+    get:
+      parameters:
+      - description: Resource
+        in: path
+        name: resource
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Permission'
+                  type: array
+              type: object
+      summary: List permissions by resource
+      tags:
+      - permissions
+  /permissions/revoke:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Permission revoke payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthorizationPermissionAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Revoke direct permissions from user
+      tags:
+      - authorization
   /planner:
     get:
       produces:
@@ -3808,6 +6064,182 @@ paths:
       summary: Get next recommended lesson
       tags:
       - recommendations
+  /resources/{resource_type}/{resource_id}/permissions:
+    get:
+      parameters:
+      - description: Resource type
+        in: path
+        name: resource_type
+        required: true
+        type: string
+      - description: Resource identifier
+        in: path
+        name: resource_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: List available permissions for a resource
+      tags:
+      - authorization
+  /roles:
+    get:
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by active state
+        in: query
+        name: is_active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Role'
+                  type: array
+              type: object
+      summary: List roles
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Role'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Role'
+              type: object
+      summary: Create role
+      tags:
+      - roles
+  /roles/{id}:
+    delete:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Delete role
+      tags:
+      - roles
+    get:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Role'
+              type: object
+      summary: Get role
+      tags:
+      - roles
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Role'
+              type: object
+      summary: Update role
+      tags:
+      - roles
+  /roles/{id}/permissions:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permissions payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AssignPermissionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Assign permissions to role
+      tags:
+      - roles
   /speaking/analyze:
     post:
       consumes:
@@ -3828,7 +6260,7 @@ paths:
             - $ref: '#/definitions/response.Envelope'
             - properties:
                 data:
-                  $ref: '#/definitions/service.AnalyzeResult'
+                  $ref: '#/definitions/usecase.AnalyzeResult'
               type: object
         "400":
           description: Bad Request
@@ -3963,6 +6395,169 @@ paths:
       summary: Get submission by id
       tags:
       - submissions
+  /system-settings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.SystemSetting'
+                  type: array
+              type: object
+      summary: List system settings
+      tags:
+      - system-settings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: System setting payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SystemSetting'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.SystemSetting'
+              type: object
+      summary: Create system setting
+      tags:
+      - system-settings
+  /system-settings/{id}:
+    delete:
+      parameters:
+      - description: Setting ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      summary: Delete system setting
+      tags:
+      - system-settings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Setting ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: System setting payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.SystemSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.SystemSetting'
+              type: object
+      summary: Update system setting
+      tags:
+      - system-settings
+  /system-settings/category/{category}:
+    get:
+      parameters:
+      - description: Category
+        in: path
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.SystemSetting'
+                  type: array
+              type: object
+      summary: List system settings by category
+      tags:
+      - system-settings
+  /system-settings/key/{key}:
+    get:
+      parameters:
+      - description: Setting key
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.SystemSetting'
+              type: object
+      summary: Get system setting by key
+      tags:
+      - system-settings
+  /users/{user_id}/permissions:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Envelope'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AccessProfile'
+              type: object
+      summary: Get user access profile
+      tags:
+      - authorization
   /users/activities:
     get:
       parameters:
@@ -4041,7 +6636,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.UpdateProfileRequest'
+          $ref: '#/definitions/usecase.UpdateProfileRequest'
       produces:
       - application/json
       responses:
@@ -4092,6 +6687,78 @@ paths:
       summary: Get current user course progress
       tags:
       - users
+  /users/settings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Get current user settings
+      tags:
+      - user-settings
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: User settings patch payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserSettingsUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Patch current user settings
+      tags:
+      - user-settings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User settings update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserSettingsUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Update current user settings
+      tags:
+      - user-settings
+  /users/settings/reset:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Envelope'
+      security:
+      - BearerAuth: []
+      summary: Reset current user settings
+      tags:
+      - user-settings
   /users/stats:
     get:
       produces:
@@ -4311,7 +6978,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.ReviewRequest'
+          $ref: '#/definitions/usecase.ReviewRequest'
       produces:
       - application/json
       responses:
@@ -4347,7 +7014,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.ReviewRequest'
+          $ref: '#/definitions/usecase.ReviewRequest'
       produces:
       - application/json
       responses:
@@ -4432,7 +7099,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.CreateWordRequest'
+          $ref: '#/definitions/usecase.CreateWordRequest'
       produces:
       - application/json
       responses:
@@ -4658,7 +7325,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SubmitRequest'
+          $ref: '#/definitions/usecase.SubmitRequest'
       produces:
       - application/json
       responses:
@@ -4731,7 +7398,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SubmitRequest'
+          $ref: '#/definitions/usecase.SubmitRequest'
       produces:
       - application/json
       responses:

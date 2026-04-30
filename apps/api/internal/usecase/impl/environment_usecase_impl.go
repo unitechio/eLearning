@@ -40,7 +40,7 @@ func (u *EnvironmentUsecase) ListEnvironments(ctx context.Context, filter domain
 }
 
 func (u *EnvironmentUsecase) UpdateEnvironment(ctx context.Context, env *domain.Environment) error {
-	existing, err := u.envRepo.GetByID(ctx, env.ID)
+	existing, err := u.envRepo.GetByID(ctx, fmt.Sprintf("%d", env.ID))
 	if err != nil {
 		return fmt.Errorf("environment not found")
 	}

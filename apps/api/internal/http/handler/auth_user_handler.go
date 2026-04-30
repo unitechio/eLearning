@@ -3,8 +3,25 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type AuthWorkflowHandler struct {
+	svc usecase.AuthUsecase
+}
+
+type UserInsightsHandler struct {
+	svc usecase.UserInsightsService
+}
+
+func NewAuthWorkflowHandler(svc usecase.AuthUsecase) *AuthWorkflowHandler {
+	return &AuthWorkflowHandler{svc: svc}
+}
+
+func NewUserInsightsHandler(svc usecase.UserInsightsService) *UserInsightsHandler {
+	return &UserInsightsHandler{svc: svc}
+}
 
 // Refresh godoc
 // @Summary      Refresh access token
@@ -17,11 +34,10 @@ import (
 // @Router       /auth/refresh [post]
 func (h *AuthWorkflowHandler) Refresh(c *gin.Context) {
 	var req dto.TokenRefreshRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	res, err := h.svc.Refresh(req)
+	res, err := h.svc.RefreshToken(requestContext(c), req.RefreshToken)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -38,12 +54,15 @@ func (h *AuthWorkflowHandler) Refresh(c *gin.Context) {
 // @Failure      401  {object}  response.Envelope
 // @Router       /auth/logout [post]
 func (h *AuthWorkflowHandler) Logout(c *gin.Context) {
-	userID, ok := currentUserID(c)
-	if !ok {
-		response.Fail(c, 401, "unauthorized")
+	if _, ok := currentUserIDOrAbort(c); !ok {
 		return
 	}
-	if err := h.svc.Logout(userID); err != nil {
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		response.Fail(c, 401, "authorization header is missing")
+		return
+	}
+	if err := h.svc.Logout(requestContext(c), token); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -61,11 +80,10 @@ func (h *AuthWorkflowHandler) Logout(c *gin.Context) {
 // @Router       /auth/verify-email [post]
 func (h *AuthWorkflowHandler) VerifyEmail(c *gin.Context) {
 	var req dto.VerifyEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	if err := h.svc.VerifyEmail(req); err != nil {
+	if err := h.svc.VerifyEmail(requestContext(c), req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -83,11 +101,10 @@ func (h *AuthWorkflowHandler) VerifyEmail(c *gin.Context) {
 // @Router       /auth/forgot-password [post]
 func (h *AuthWorkflowHandler) ForgotPassword(c *gin.Context) {
 	var req dto.ForgotPasswordRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	if err := h.svc.ForgotPassword(req); err != nil {
+	if err := h.svc.RequestPasswordReset(requestContext(c), req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -105,11 +122,10 @@ func (h *AuthWorkflowHandler) ForgotPassword(c *gin.Context) {
 // @Router       /auth/reset-password [post]
 func (h *AuthWorkflowHandler) ResetPassword(c *gin.Context) {
 	var req dto.ResetPasswordRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	if err := h.svc.ResetPassword(req); err != nil {
+	if err := h.svc.ResetPassword(requestContext(c), req); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -125,12 +141,11 @@ func (h *AuthWorkflowHandler) ResetPassword(c *gin.Context) {
 // @Failure      401  {object}  response.Envelope
 // @Router       /users/progress [get]
 func (h *UserInsightsHandler) GetProgress(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetProgress(userID)
+	items, err := h.svc.GetProgress(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -147,12 +162,11 @@ func (h *UserInsightsHandler) GetProgress(c *gin.Context) {
 // @Failure      401  {object}  response.Envelope
 // @Router       /users/stats [get]
 func (h *UserInsightsHandler) GetStats(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	stats, err := h.svc.GetStats(userID)
+	stats, err := h.svc.GetStats(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -174,16 +188,14 @@ func (h *UserInsightsHandler) GetStats(c *gin.Context) {
 // @Router       /users/activities [get]
 func (h *UserInsightsHandler) GetActivities(c *gin.Context) {
 	var query dto.UserActivityListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.GetActivities(userID, query)
+	res, err := h.svc.GetActivities(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return

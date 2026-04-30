@@ -3,10 +3,10 @@ package impl
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
-	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"gorm.io/gorm"
 )
 
@@ -36,10 +36,11 @@ func (r *AuditLogRepository) GetByID(ctx context.Context, id string) (*domain.Au
 	return &log, nil
 }
 
-func (r *AuditLogRepository) List(ctx context.Context, filter dto.AuditFilter) ([]*domain.AuditLog, int64, error) {
+func (r *AuditLogRepository) List(ctx context.Context, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	var logs []*domain.AuditLog
 	var total int64
 
+	filter = filter.Normalize()
 	query := r.db.WithContext(ctx).Model(&domain.AuditLog{})
 
 	query = r.applyFilters(query, filter)
@@ -69,13 +70,19 @@ func (r *AuditLogRepository) List(ctx context.Context, filter dto.AuditFilter) (
 }
 
 func (r *AuditLogRepository) GetByUserID(ctx context.Context, userID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
-	filter.UserID = &userID
+	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
+		value := uint(id)
+		filter.UserID = &value
+	}
 	return r.List(ctx, filter)
 }
 
 func (r *AuditLogRepository) GetByResource(ctx context.Context, resource, resourceID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Resource = resource
-	filter.ResourceID = resourceID
+	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
+		value := uint(id)
+		filter.ResourceID = &value
+	}
 	return r.List(ctx, filter)
 }
 
@@ -110,7 +117,7 @@ func (r *AuditLogRepository) GetStatistics(ctx context.Context, startDate, endDa
 
 	r.db.WithContext(ctx).
 		Model(&domain.AuditLog{}).
-		Where("created_at BETWEEN ? AND ? AND success = true", startDate, endDate).
+		Where("created_at BETWEEN ? AND ? AND status_code >= ? AND status_code < ?", startDate, endDate, 200, 400).
 		Count(&stats.SuccessfulActions)
 
 	stats.FailedActions = stats.TotalLogs - stats.SuccessfulActions
@@ -159,10 +166,6 @@ func (r *AuditLogRepository) applyFilters(query *gorm.DB, filter domain.AuditFil
 		query = query.Where("user_id = ?", *filter.UserID)
 	}
 
-	if filter.Username != "" {
-		query = query.Where("username ILIKE ?", "%"+filter.Username+"%")
-	}
-
 	if filter.Action != nil {
 		query = query.Where("action = ?", *filter.Action)
 	}
@@ -171,16 +174,20 @@ func (r *AuditLogRepository) applyFilters(query *gorm.DB, filter domain.AuditFil
 		query = query.Where("resource = ?", filter.Resource)
 	}
 
-	if filter.ResourceID != "" {
-		query = query.Where("resource_id = ?", filter.ResourceID)
+	if filter.ResourceID != nil {
+		query = query.Where("resource_id = ?", *filter.ResourceID)
 	}
 
 	if filter.IPAddress != "" {
 		query = query.Where("ip_address = ?", filter.IPAddress)
 	}
 
-	if filter.Success != nil {
-		query = query.Where("success = ?", *filter.Success)
+	if filter.Method != "" {
+		query = query.Where("method = ?", filter.Method)
+	}
+
+	if filter.Path != "" {
+		query = query.Where("path ILIKE ?", "%"+filter.Path+"%")
 	}
 
 	if filter.StartDate != nil {

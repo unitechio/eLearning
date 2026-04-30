@@ -10,6 +10,7 @@ import (
 type Activity struct {
 	UUIDModel
 	TenantID      uuid.UUID  `json:"tenant_id" gorm:"type:uuid;not null;index"`
+	CreatedBy     uuid.UUID  `json:"created_by" gorm:"type:uuid;not null;index"`
 	CourseID      *uuid.UUID `json:"course_id,omitempty" gorm:"type:uuid;index"`
 	LessonID      *uuid.UUID `json:"lesson_id,omitempty" gorm:"type:uuid;index"`
 	Title         string     `json:"title" gorm:"type:varchar(255);not null"`
@@ -17,6 +18,7 @@ type Activity struct {
 	Domain        string     `json:"domain" gorm:"type:varchar(50);not null;index"`
 	Instructions  string     `json:"instructions" gorm:"type:text"`
 	Status        string     `json:"status" gorm:"type:varchar(50);default:'draft';index"`
+	Visibility    string     `json:"visibility" gorm:"type:varchar(20);default:'private';index"`
 	MaxScore      float64    `json:"max_score" gorm:"default:100"`
 	ExpectedInput string     `json:"expected_input" gorm:"type:varchar(50);default:'text'"`
 }

@@ -1,28 +1,22 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
 	"encoding/base64"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/domain"
-	"einfra/api/internal/usecase"
-	"einfra/api/pkg/errorx"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 type EmailHandler struct {
-	emailUsecase service.EmailUsecase
+	svc usecase.EmailUsecase
 }
 
-func NewEmailHandler(emailUsecase service.EmailUsecase) *EmailHandler {
-	return &EmailHandler{
-		emailUsecase: emailUsecase,
-	}
+func NewEmailHandler(svc usecase.EmailUsecase) *EmailHandler {
+	return &EmailHandler{svc: svc}
 }
 
 type SendEmailRequest struct {
@@ -33,7 +27,7 @@ type SendEmailRequest struct {
 	Body     string            `json:"body"`
 	HTMLBody string            `json:"html_body"`
 	ReplyTo  string            `json:"reply_to"`
-	Priority string            `json:"priority"` // "high", "normal", "low"
+	Priority string            `json:"priority"`
 	Headers  map[string]string `json:"headers"`
 }
 
@@ -56,7 +50,7 @@ type SendEmailWithAttachmentRequest struct {
 
 type AttachmentRequest struct {
 	Filename    string `json:"filename" binding:"required"`
-	Content     string `json:"content" binding:"required"` // Base64 encoded
+	Content     string `json:"content" binding:"required"`
 	ContentType string `json:"content_type" binding:"required"`
 	Inline      bool   `json:"inline"`
 	ContentID   string `json:"content_id"`
@@ -71,182 +65,135 @@ type ValidateEmailRequest struct {
 	Email string `json:"email" binding:"required"`
 }
 
-// Handlers
-
-// SendEmail handles sending simple emails
-// @Summary Send Email
-// @Description Send a simple text or HTML email
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body SendEmailRequest true "Email data"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Failure 500 {object} errorx.Error
-// @Router /emails/send [post]
+// SendEmail godoc
+// @Summary      Send email
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.SendEmailRequest  true  "Email payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/send [post]
 func (h *EmailHandler) SendEmail(c *gin.Context) {
 	var req SendEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	ctx := c.Request.Context()
 	var err error
-
 	if req.HTMLBody != "" {
-		err = h.emailservice.SendHTMLEmail(ctx, req.To, req.Subject, req.HTMLBody)
+		err = h.svc.SendHTMLEmail(requestContext(c), req.To, req.Subject, req.HTMLBody)
 	} else {
-		err = h.emailservice.SendEmail(ctx, req.To, req.Subject, req.Body)
+		err = h.svc.SendEmail(requestContext(c), req.To, req.Subject, req.Body)
 	}
-
 	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
+	response.OK(c, "email sent", gin.H{"to": req.To})
 }
 
-// SendTemplateEmail handles sending template-based emails
-// @Summary Send Template Email
-// @Description Send an email using a template
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body SendTemplateEmailRequest true "Template email data"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Failure 500 {object} errorx.Error
-// @Router /emails/send-template [post]
+// SendTemplateEmail godoc
+// @Summary      Send template email
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.SendTemplateEmailRequest  true  "Template payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/send-template [post]
 func (h *EmailHandler) SendTemplateEmail(c *gin.Context) {
 	var req SendTemplateEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	ctx := c.Request.Context()
-	err := h.emailservice.SendEmailWithTemplate(ctx, req.To, req.TemplateName, req.Data)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
+	if err := h.svc.SendEmailWithTemplate(requestContext(c), req.To, req.TemplateName, req.Data); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Template email sent successfully"})
+	response.OK(c, "template email sent", gin.H{"to": req.To, "template_name": req.TemplateName})
 }
 
-// SendBulkEmail handles sending bulk emails
-// @Summary Send Bulk Emails
-// @Description Send multiple emails in bulk
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body SendBulkEmailRequest true "Bulk email data"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Failure 500 {object} errorx.Error
-// @Router /emails/send-bulk [post]
+// SendBulkEmail godoc
+// @Summary      Send bulk emails
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.SendBulkEmailRequest  true  "Bulk payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/send-bulk [post]
 func (h *EmailHandler) SendBulkEmail(c *gin.Context) {
 	var req SendBulkEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	ctx := c.Request.Context()
-	emails := make([]domain.EmailData, len(req.Emails))
-
-	for i, emailReq := range req.Emails {
-		emails[i] = domain.EmailData{
-			To:       emailReq.To,
-			CC:       emailReq.CC,
-			BCC:      emailReq.BCC,
-			Subject:  emailReq.Subject,
-			Body:     emailReq.Body,
-			HTMLBody: emailReq.HTMLBody,
-			ReplyTo:  emailReq.ReplyTo,
-			Headers:  emailReq.Headers,
-		}
+	emails := make([]domain.EmailData, 0, len(req.Emails))
+	for _, item := range req.Emails {
+		emails = append(emails, domain.EmailData{
+			To:       item.To,
+			CC:       item.CC,
+			BCC:      item.BCC,
+			Subject:  item.Subject,
+			Body:     item.Body,
+			HTMLBody: item.HTMLBody,
+			ReplyTo:  item.ReplyTo,
+			Headers:  item.Headers,
+			Priority: domain.EmailPriority(item.Priority),
+		})
 	}
-
-	err := h.emailservice.SendBulkEmail(ctx, emails)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
+	if err := h.svc.SendBulkEmail(requestContext(c), emails); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Bulk emails sent successfully",
-		"count":   len(emails),
-	})
+	response.OK(c, "bulk emails sent", gin.H{"count": len(emails)})
 }
 
-// SendEmailWithAttachment handles sending emails with attachments
-// @Summary Send Email with Attachment
-// @Description Send an email with attachments
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body SendEmailWithAttachmentRequest true "Email with attachment data"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Failure 500 {object} errorx.Error
-// @Router /emails/send-with-attachment [post]
+// SendEmailWithAttachment godoc
+// @Summary      Send email with attachments
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.SendEmailWithAttachmentRequest  true  "Email attachment payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/send-with-attachment [post]
 func (h *EmailHandler) SendEmailWithAttachment(c *gin.Context) {
 	var req SendEmailWithAttachmentRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	// Convert attachments
-	attachments := make([]domain.EmailAttachment, len(req.Attachments))
-	for i, att := range req.Attachments {
-		content, err := base64.StdEncoding.DecodeString(att.Content)
+	attachments := make([]domain.EmailAttachment, 0, len(req.Attachments))
+	for _, item := range req.Attachments {
+		content, err := base64.StdEncoding.DecodeString(item.Content)
 		if err != nil {
-			c.Error(errorx.New(http.StatusBadRequest, "Invalid attachment content (base64)"))
+			response.Fail(c, 400, "invalid attachment content")
 			return
 		}
-
-		attachments[i] = domain.EmailAttachment{
-			Filename:    att.Filename,
+		attachments = append(attachments, domain.EmailAttachment{
+			Filename:    item.Filename,
 			Content:     content,
-			ContentType: att.ContentType,
-			Inline:      att.Inline,
-			ContentID:   att.ContentID,
-		}
+			ContentType: item.ContentType,
+			Inline:      item.Inline,
+			ContentID:   item.ContentID,
+		})
 	}
-
-	ctx := c.Request.Context()
-	err := h.emailservice.SendEmailWithAttachment(ctx, req.To, req.Subject, req.Body, attachments)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
+	if err := h.svc.SendEmailWithAttachment(requestContext(c), req.To, req.Subject, req.Body, attachments); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Email with attachments sent successfully"})
+	response.OK(c, "email with attachments sent", gin.H{"to": req.To, "attachments": len(attachments)})
 }
 
-// ScheduleEmail handles scheduling emails
-// @Summary Schedule Email
-// @Description Schedule an email to be sent at a later time
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body ScheduleEmailRequest true "Schedule email data"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Failure 500 {object} errorx.Error
-// @Router /emails/schedule [post]
+// ScheduleEmail godoc
+// @Summary      Schedule email
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.ScheduleEmailRequest  true  "Schedule payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/schedule [post]
 func (h *EmailHandler) ScheduleEmail(c *gin.Context) {
 	var req ScheduleEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	emailData := domain.EmailData{
+	data := domain.EmailData{
 		To:       req.Email.To,
 		CC:       req.Email.CC,
 		BCC:      req.Email.BCC,
@@ -255,160 +202,151 @@ func (h *EmailHandler) ScheduleEmail(c *gin.Context) {
 		HTMLBody: req.Email.HTMLBody,
 		ReplyTo:  req.Email.ReplyTo,
 		Headers:  req.Email.Headers,
+		Priority: domain.EmailPriority(req.Email.Priority),
 	}
-
-	ctx := c.Request.Context()
-	err := h.emailservice.ScheduleEmail(ctx, req.SendAt, emailData)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
+	if err := h.svc.ScheduleEmail(requestContext(c), req.SendAt, data); err != nil {
+		_ = c.Error(err)
 		return
 	}
+	response.OK(c, "email scheduled", gin.H{"send_at": req.SendAt})
+}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Email scheduled successfully",
-		"send_at": req.SendAt,
+// GetEmailLogs godoc
+// @Summary      List email logs
+// @Tags         emails
+// @Produce      json
+// @Param        page       query     int     false  "Page number"
+// @Param        page_size  query     int     false  "Page size"
+// @Param        status     query     string  false  "Status"
+// @Param        from       query     string  false  "Sender"
+// @Param        to         query     string  false  "Recipient"
+// @Param        template   query     string  false  "Template name"
+// @Param        date_from  query     string  false  "Date from (RFC3339)"
+// @Param        date_to    query     string  false  "Date to (RFC3339)"
+// @Success      200        {object}  response.Envelope{data=[]domain.EmailLog}
+// @Router       /emails/logs [get]
+func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
+	filter, ok := parseEmailLogFilter(c)
+	if !ok {
+		return
+	}
+	items, err := h.svc.ListEmailLogs(requestContext(c), filter)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	meta := response.Meta{
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
+		TotalItems: int64(len(items)),
+		TotalPages: calcTotalPages(int64(len(items)), filter.PageSize),
+	}
+	response.OKWithMeta(c, "email logs fetched", items, &meta)
+}
+
+// GetEmailLog godoc
+// @Summary      Get email log
+// @Tags         emails
+// @Produce      json
+// @Param        id   path      string  true  "Email log ID"
+// @Success      200  {object}  response.Envelope{data=domain.EmailLog}
+// @Router       /emails/logs/{id} [get]
+func (h *EmailHandler) GetEmailLog(c *gin.Context) {
+	item, err := h.svc.GetEmailLog(requestContext(c), c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "email log fetched", item)
+}
+
+// GetEmailStatus godoc
+// @Summary      Get email status
+// @Tags         emails
+// @Produce      json
+// @Param        id   path      string  true  "Email log ID"
+// @Success      200  {object}  response.Envelope
+// @Router       /emails/logs/{id}/status [get]
+func (h *EmailHandler) GetEmailStatus(c *gin.Context) {
+	status, err := h.svc.GetEmailStatus(requestContext(c), c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "email status fetched", gin.H{"status": status})
+}
+
+// ValidateEmail godoc
+// @Summary      Validate email
+// @Tags         emails
+// @Accept       json
+// @Produce      json
+// @Param        body  body      handler.ValidateEmailRequest  true  "Email validation payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /emails/validate [post]
+func (h *EmailHandler) ValidateEmail(c *gin.Context) {
+	var req ValidateEmailRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	response.OK(c, "email validated", gin.H{
+		"email":    req.Email,
+		"is_valid": h.svc.ValidateEmail(req.Email),
 	})
 }
 
-// GetEmailLogs retrieves email logs
-// @Summary Get Email Logs
-// @Description Retrieve email logs with filtering
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param status query string false "Status"
-// @Param from query string false "From"
-// @Param to query string false "To"
-// @Param template query string false "Template"
-// @Param limit query int false "Limit"
-// @Param offset query int false "Offset"
-// @Param date_from query string false "Date From (RFC3339)"
-// @Param date_to query string false "Date To (RFC3339)"
-// @Success 200 {object} gin.H
-// @Failure 500 {object} errorx.Error
-// @Router /emails/logs [get]
-func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
+func parseEmailLogFilter(c *gin.Context) (domain.EmailLogFilter, bool) {
 	filter := domain.EmailLogFilter{
+		Page:     1,
+		PageSize: 20,
 		Status:   domain.EmailStatus(c.Query("status")),
 		From:     c.Query("from"),
 		To:       c.Query("to"),
 		Template: c.Query("template"),
 	}
 
-	if limitStr := c.Query("limit"); limitStr != "" {
-		limit, _ := strconv.Atoi(limitStr)
-		filter.Limit = limit
-	} else {
-		filter.Limit = 20
-	}
-
-	if offsetStr := c.Query("offset"); offsetStr != "" {
-		offset, _ := strconv.Atoi(offsetStr)
-		filter.Offset = offset
-	}
-
-	if dateFromStr := c.Query("date_from"); dateFromStr != "" {
-		dateFrom, err := time.Parse(time.RFC3339, dateFromStr)
-		if err == nil {
-			filter.DateFrom = &dateFrom
+	if raw := c.Query("page"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < 1 {
+			response.Fail(c, 400, "invalid page")
+			return domain.EmailLogFilter{}, false
 		}
+		filter.Page = value
 	}
 
-	if dateToStr := c.Query("date_to"); dateToStr != "" {
-		dateTo, err := time.Parse(time.RFC3339, dateToStr)
-		if err == nil {
-			filter.DateTo = &dateTo
+	if raw := c.Query("page_size"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < 1 || value > 100 {
+			response.Fail(c, 400, "invalid page_size")
+			return domain.EmailLogFilter{}, false
 		}
+		filter.PageSize = value
 	}
 
-	ctx := c.Request.Context()
-	logs, err := h.emailservice.ListEmailLogs(ctx, filter)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, err.Error()))
-		return
+	if raw := c.Query("date_from"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid date_from")
+			return domain.EmailLogFilter{}, false
+		}
+		filter.DateFrom = &value
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Email logs retrieved successfully",
-		"logs":    logs,
-		"count":   len(logs),
-	})
+	if raw := c.Query("date_to"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid date_to")
+			return domain.EmailLogFilter{}, false
+		}
+		filter.DateTo = &value
+	}
+
+	return filter.Normalize(), true
 }
 
-// GetEmailLog retrieves a specific email log
-// @Summary Get Email Log
-// @Description Retrieve a specific email log by ID
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param id path string true "Log ID"
-// @Success 200 {object} domain.EmailLog
-// @Failure 404 {object} errorx.Error
-// @Router /emails/logs/{id} [get]
-func (h *EmailHandler) GetEmailLog(c *gin.Context) {
-	id := c.Param("id")
-
-	ctx := c.Request.Context()
-	log, err := h.emailservice.GetEmailLog(ctx, id)
-	if err != nil {
-		c.Error(errorx.New(http.StatusNotFound, err.Error()))
-		return
+func calcTotalPages(total int64, pageSize int) int {
+	if pageSize < 1 {
+		pageSize = 20
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Email log retrieved successfully",
-		"data":    log,
-	})
-}
-
-// GetEmailStatus retrieves the status of an email
-// @Summary Get Email Status
-// @Description Retrieve the status of a specific email by ID
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param id path string true "Log ID"
-// @Success 200 {object} gin.H
-// @Failure 404 {object} errorx.Error
-// @Router /emails/logs/{id}/status [get]
-func (h *EmailHandler) GetEmailStatus(c *gin.Context) {
-	id := c.Param("id")
-
-	ctx := c.Request.Context()
-	status, err := h.emailservice.GetEmailStatus(ctx, id)
-	if err != nil {
-		c.Error(errorx.New(http.StatusNotFound, err.Error()))
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Email status retrieved successfully",
-		"status":  status,
-	})
-}
-
-// ValidateEmail validates an email address
-// @Summary Validate Email
-// @Description Validate an email address format
-// @Tags emails
-// @Accept json
-// @Produce json
-// @Param request body ValidateEmailRequest true "Validation request"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} errorx.Error
-// @Router /emails/validate [post]
-func (h *EmailHandler) ValidateEmail(c *gin.Context) {
-	var req ValidateEmailRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
-		return
-	}
-
-	isValid := h.emailservice.ValidateEmail(req.Email)
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":  "Email validated",
-		"email":    req.Email,
-		"is_valid": isValid,
-	})
+	return int((total + int64(pageSize) - 1) / int64(pageSize))
 }

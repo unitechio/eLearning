@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"sort"
 	"strings"
 	"time"
@@ -73,7 +74,7 @@ func (s *EngagementUsecase) GetHeatmap(userID uuid.UUID, query dto.HeatmapQuery)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-	submissions, err := s.activityRepo.ListSubmissionsByUser(userID, repository.ActivitySubmissionUserFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1000}})
+	submissions, err := s.activityRepo.ListSubmissionsByUser(context.Background(), userID, repository.ActivitySubmissionUserFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1000}})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}

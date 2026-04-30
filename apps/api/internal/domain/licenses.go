@@ -1,10 +1,30 @@
 package domain
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+type LicenseTier string
+
+const (
+	LicenseTierFree       LicenseTier = "free"
+	LicenseTierStarter    LicenseTier = "starter"
+	LicenseTierPro        LicenseTier = "pro"
+	LicenseTierEnterprise LicenseTier = "enterprise"
+)
+
+type LicenseStatus string
+
+const (
+	LicenseStatusActive    LicenseStatus = "active"
+	LicenseStatusSuspended LicenseStatus = "suspended"
+	LicenseStatusRevoked   LicenseStatus = "revoked"
+	LicenseStatusExpired   LicenseStatus = "expired"
 )
 
 type License struct {
@@ -35,7 +55,7 @@ type License struct {
 	SuspendedAt *time.Time `json:"suspended_at,omitempty"`
 
 	// Metadata
-	Metadata json.RawMessage `gorm:"type:jsonb" json:"metadata"`
+	Metadata json.RawMessage `gorm:"type:jsonb" json:"metadata" swaggertype:"object"`
 	Notes    *string         `gorm:"type:text" json:"notes,omitempty"`
 
 	// Audit
@@ -49,6 +69,69 @@ type LicenseUsageLog struct {
 	LicenseID  uuid.UUID       `gorm:"type:uuid;not null;index:idx_license_usage_license" json:"license_id"`
 	UsageType  string          `gorm:"type:varchar(50);not null;index:idx_license_usage_type" json:"usage_type"`
 	Count      int             `gorm:"default:1" json:"count"`
-	Metadata   json.RawMessage `gorm:"type:jsonb" json:"metadata"`
+	Metadata   json.RawMessage `gorm:"type:jsonb" json:"metadata" swaggertype:"object"`
 	RecordedAt time.Time       `gorm:"autoCreateTime;index:idx_license_usage_recorded" json:"recorded_at"`
+}
+
+type LicenseActivationRequest struct {
+	LicenseKey       string
+	OrganizationID   *uuid.UUID
+	OrganizationName *string
+	ContactEmail     *string
+}
+
+type LicenseLimits struct {
+	MaxUsers        int `json:"max_users"`
+	CurrentUsers    int `json:"current_users"`
+	MaxAPICalls     int `json:"max_api_calls"`
+	CurrentAPICalls int `json:"current_api_calls"`
+	MaxStorage      int `json:"max_storage"`
+	CurrentStorage  int `json:"current_storage"`
+}
+
+type LicenseValidationResponse struct {
+	Valid     bool          `json:"valid"`
+	Message   string        `json:"message"`
+	License   *License      `json:"license,omitempty"`
+	Tier      string        `json:"tier"`
+	Status    string        `json:"status"`
+	ExpiresAt *time.Time    `json:"expires_at,omitempty"`
+	DaysLeft  int           `json:"days_left"`
+	Limits    LicenseLimits `json:"limits"`
+}
+
+func GenerateLicenseKey() (string, error) {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	return "lic_" + hex.EncodeToString(buf), nil
+}
+
+func GetTierLimits(tier LicenseTier) (maxUsers, maxAPICalls, maxStorage int) {
+	switch tier {
+	case LicenseTierEnterprise:
+		return 1000, 1000000, 5000
+	case LicenseTierPro:
+		return 250, 250000, 1000
+	case LicenseTierStarter:
+		return 50, 50000, 200
+	default:
+		return 5, 5000, 10
+	}
+}
+
+func (l *License) IsExpired() bool {
+	return l.ExpiresAt != nil && time.Now().After(*l.ExpiresAt)
+}
+
+func (l *License) IsValid() bool {
+	return LicenseStatus(l.Status) == LicenseStatusActive && !l.IsExpired()
+}
+
+func (l *License) CanMakeAPICall() bool {
+	if l.MaxAPICalls <= 0 {
+		return true
+	}
+	return l.CurrentAPICalls < l.MaxAPICalls
 }

@@ -1,7 +1,7 @@
-import { useSpeakingStore } from "@/hooks/use-speaking";
+import { useSpeakingStore } from "@/features/speaking/stores/use-speaking-store";
 import { Mic, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/shared/lib/utils";
+import { Badge } from "@/shared/components/ui/badge";
 import { useIELTSScoring } from "../api";
 
 export function RecordingWorkspace() {

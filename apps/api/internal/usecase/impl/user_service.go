@@ -28,8 +28,8 @@ func (s *UserUsecase) GetByID(ctx context.Context, id uuid.UUID) (*domain.User, 
 	return user, nil
 }
 
-func (s *UserUsecase) UpdateProfile(id uuid.UUID, req service.UpdateProfileRequest) (*domain.User, error) {
-	user, err := s.repo.FindByID(id)
+func (s *UserUsecase) UpdateProfile(ctx context.Context, id uuid.UUID, req usecase.UpdateProfileRequest) (*domain.User, error) {
+	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("user", id.String())
@@ -44,7 +44,7 @@ func (s *UserUsecase) UpdateProfile(id uuid.UUID, req service.UpdateProfileReque
 		user.LastName = req.LastName
 	}
 
-	if err := s.repo.Update(user); err != nil {
+	if err := s.repo.Update(ctx, user); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return user, nil

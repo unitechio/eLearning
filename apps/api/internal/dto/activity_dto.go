@@ -7,6 +7,7 @@ type Activity struct {
 	Domain       string `json:"domain"`
 	Instructions string `json:"instructions"`
 	Status       string `json:"status"`
+	Visibility   string `json:"visibility"`
 }
 
 type UpsertActivityRequest struct {
@@ -15,6 +16,7 @@ type UpsertActivityRequest struct {
 	Domain       string `json:"domain" binding:"required"`
 	Instructions string `json:"instructions"`
 	Status       string `json:"status"`
+	Visibility   string `json:"visibility"`
 }
 
 type SubmitActivityRequest struct {

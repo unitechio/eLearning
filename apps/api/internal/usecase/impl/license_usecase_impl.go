@@ -1,10 +1,12 @@
 package impl
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 )
@@ -14,7 +16,7 @@ type LicenseUsecase struct {
 }
 
 // NewLicenseUsecase creates a new instance of LicenseUsecase
-func NewLicenseUsecase(repo domain.LicenseRepository) *LicenseUsecase {
+func NewLicenseUsecase(repo repository.LicenseRepository) *LicenseUsecase {
 	return &LicenseUsecase{repo: repo}
 }
 
@@ -36,15 +38,32 @@ func (u *LicenseUsecase) CreateLicense(tier domain.LicenseTier, orgID, orgName, 
 		expiresAt = &expiry
 	}
 
+	var organizationID *uuid.UUID
+	if orgID != "" {
+		parsedID, err := uuid.Parse(orgID)
+		if err != nil {
+			return nil, fmt.Errorf("invalid organization id: %w", err)
+		}
+		organizationID = &parsedID
+	}
+	var organizationName *string
+	if orgName != "" {
+		organizationName = &orgName
+	}
+	var email *string
+	if contactEmail != "" {
+		email = &contactEmail
+	}
+
 	license := &domain.License{
 		LicenseKey:       licenseKey,
-		Tier:             tier,
-		Status:           domain.LicenseStatusActive,
-		OrganizationID:   orgID,
-		OrganizationName: orgName,
-		ContactEmail:     contactEmail,
+		Tier:             string(tier),
+		Status:           string(domain.LicenseStatusActive),
+		OrganizationID:   organizationID,
+		OrganizationName: organizationName,
+		ContactEmail:     email,
 		MaxUsers:         maxUsers,
-		MaxAPICall:       maxAPICalls,
+		MaxAPICalls:      maxAPICalls,
 		MaxStorage:       maxStorage,
 		IssuedAt:         time.Now(),
 		ExpiresAt:        expiresAt,
@@ -183,11 +202,12 @@ func (u *LicenseUsecase) TrackUserLogin(licenseKey string, userID string) error 
 	}
 
 	// Log usage
+	metadata, _ := json.Marshal(map[string]string{"user_id": userID})
 	return u.repo.LogUsage(&domain.LicenseUsageLog{
 		LicenseID:  license.ID,
 		UsageType:  "user_login",
 		Count:      1,
-		Metadata:   fmt.Sprintf(`{"user_id":"%s"}`, userID),
+		Metadata:   metadata,
 		RecordedAt: time.Now(),
 	})
 }
@@ -214,7 +234,7 @@ func (u *LicenseUsecase) GetUsageStatistics(licenseKey string) (*domain.LicenseL
 	return &domain.LicenseLimits{
 		MaxUsers:        license.MaxUsers,
 		CurrentUsers:    license.CurrentUsers,
-		MaxAPICalls:     license.MaxAPICall,
+		MaxAPICalls:     license.MaxAPICalls,
 		CurrentAPICalls: license.CurrentAPICalls,
 		MaxStorage:      license.MaxStorage,
 		CurrentStorage:  license.CurrentStorage,
@@ -228,7 +248,7 @@ func (u *LicenseUsecase) ResetMonthlyUsage(licenseKey string) error {
 		return err
 	}
 
-	return u.repo.ResetMonthlyUsage(license.ID)
+	return u.repo.ResetMonthlyUsage(license.ID.String())
 }
 
 // UpgradeLicense upgrades a license to a higher tier
@@ -239,10 +259,10 @@ func (u *LicenseUsecase) UpgradeLicense(licenseKey string, newTier domain.Licens
 	}
 
 	// Update tier and limits
-	license.Tier = newTier
+	license.Tier = string(newTier)
 	maxUsers, maxAPICalls, maxStorage := domain.GetTierLimits(newTier)
 	license.MaxUsers = maxUsers
-	license.MaxAPICall = maxAPICalls
+	license.MaxAPICalls = maxAPICalls
 	license.MaxStorage = maxStorage
 
 	return u.repo.Update(license)
@@ -261,9 +281,9 @@ func (u *LicenseUsecase) SuspendLicense(licenseKey string, reason string) error 
 	}
 
 	now := time.Now()
-	license.Status = domain.LicenseStatusSuspended
+	license.Status = string(domain.LicenseStatusSuspended)
 	license.SuspendedAt = &now
-	license.Notes = reason
+	license.Notes = &reason
 
 	_, err = u.repo.Update(license)
 	return err
@@ -276,8 +296,8 @@ func (u *LicenseUsecase) RevokeLicense(licenseKey string, reason string) error {
 		return err
 	}
 
-	license.Status = domain.LicenseStatusRevoked
-	license.Notes = reason
+	license.Status = string(domain.LicenseStatusRevoked)
+	license.Notes = &reason
 
 	_, err = u.repo.Update(license)
 	return err
@@ -290,7 +310,7 @@ func (u *LicenseUsecase) ReactivateLicense(licenseKey string) error {
 		return err
 	}
 
-	license.Status = domain.LicenseStatusActive
+	license.Status = string(domain.LicenseStatusActive)
 	license.SuspendedAt = nil
 
 	_, err = u.repo.Update(license)
@@ -308,7 +328,7 @@ func (u *LicenseUsecase) buildValidationResponse(license *domain.License) *domai
 		Limits: domain.LicenseLimits{
 			MaxUsers:        license.MaxUsers,
 			CurrentUsers:    license.CurrentUsers,
-			MaxAPICalls:     license.MaxAPICall,
+			MaxAPICalls:     license.MaxAPICalls,
 			CurrentAPICalls: license.CurrentAPICalls,
 			MaxStorage:      license.MaxStorage,
 			CurrentStorage:  license.CurrentStorage,
@@ -327,7 +347,7 @@ func (u *LicenseUsecase) buildValidationResponse(license *domain.License) *domai
 		}
 	}
 
-	if license.Status != domain.LicenseStatusActive {
+	if license.Status != string(domain.LicenseStatusActive) {
 		response.Valid = false
 		response.Message = fmt.Sprintf("License is %s", license.Status)
 	}

@@ -1,2 +1,2 @@
-export * from './AppRoutes';
+export * from './appRoutes';
 export * from './routeConfig';

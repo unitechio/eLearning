@@ -1,9 +1,12 @@
 package impl
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
 	"github.com/unitechio/eLearning/apps/api/pkg/apperr"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
@@ -14,11 +17,12 @@ type WritingUsecase struct {
 	llm  ai.LLMService
 }
 
-func NewWritingService(repo repository.WritingRepository, llm ai.LLMUsecase) *WritingUsecase {
+func NewWritingService(repo repository.WritingRepository, llm ai.LLMService) *WritingUsecase {
 	return &WritingUsecase{repo: repo, llm: llm}
 }
 
-func (s *WritingUsecase) Submit(userID uuid.UUID, req service.SubmitRequest) (*domain.WritingSubmission, error) {
+func (s *WritingUsecase) Submit(ctx context.Context, userID uuid.UUID, req usecase.SubmitRequest) (*domain.WritingSubmission, error) {
+	_ = ctx
 	wc := wordCount(req.Response)
 	if wc < 50 {
 		return nil, apperr.BadRequest("response must be at least 50 words")
@@ -43,7 +47,8 @@ func (s *WritingUsecase) Submit(userID uuid.UUID, req service.SubmitRequest) (*d
 	return submission, nil
 }
 
-func (s *WritingUsecase) GetHistory(userID uuid.UUID, page, pageSize int) (*service.HistoryResponse, error) {
+func (s *WritingUsecase) GetHistory(ctx context.Context, userID uuid.UUID, page, pageSize int) (*usecase.HistoryResponse, error) {
+	_ = ctx
 	if page < 1 {
 		page = 1
 	}
@@ -62,7 +67,7 @@ func (s *WritingUsecase) GetHistory(userID uuid.UUID, page, pageSize int) (*serv
 		totalPages++
 	}
 
-	return &service.HistoryResponse{
+	return &usecase.HistoryResponse{
 		Items: items,
 		Meta: response.Meta{
 			Page:       page,
@@ -73,7 +78,8 @@ func (s *WritingUsecase) GetHistory(userID uuid.UUID, page, pageSize int) (*serv
 	}, nil
 }
 
-func (s *WritingUsecase) GetSubmissionByID(userID, submissionID uuid.UUID) (*domain.WritingSubmission, error) {
+func (s *WritingUsecase) GetSubmissionByID(ctx context.Context, userID, submissionID uuid.UUID) (*domain.WritingSubmission, error) {
+	_ = ctx
 	item, err := s.repo.FindSubmissionByIDForUser(submissionID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {

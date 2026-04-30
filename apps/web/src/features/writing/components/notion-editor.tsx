@@ -1,8 +1,8 @@
 "use client";
 
-import { useWritingStore } from "@/hooks/use-writing";
+import { useWritingStore } from "@/features/writing/stores/use-writing-store";
 import { GripVertical } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/components/ui/badge";
 
 export function NotionEditor() {
   const { textContent, setTextContent } = useWritingStore();

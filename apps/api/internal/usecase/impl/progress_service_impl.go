@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,7 +29,8 @@ func NewProgressService(progressRepo repository.ProgressRepository) *ProgressUse
 	return &ProgressUsecase{progressRepo: progressRepo}
 }
 
-func (s *UserInsightsUsecase) GetProgress(userID uuid.UUID) ([]dto.UserProgress, error) {
+func (s *UserInsightsUsecase) GetProgress(ctx context.Context, userID uuid.UUID) ([]dto.UserProgress, error) {
+	_ = ctx
 	items, err := s.progressRepo.ListCourseProgressByUser(userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -55,7 +57,8 @@ func (s *UserInsightsUsecase) GetProgress(userID uuid.UUID) ([]dto.UserProgress,
 	return res, nil
 }
 
-func (s *UserInsightsUsecase) GetStats(userID uuid.UUID) (*dto.UserStats, error) {
+func (s *UserInsightsUsecase) GetStats(ctx context.Context, userID uuid.UUID) (*dto.UserStats, error) {
+	_ = ctx
 	avg, err := s.progressRepo.GetAverageScoreByUser(userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -76,13 +79,13 @@ func (s *UserInsightsUsecase) GetStats(userID uuid.UUID) (*dto.UserStats, error)
 	}, nil
 }
 
-func (s *UserInsightsUsecase) GetActivities(userID uuid.UUID, query dto.UserActivityListQuery) (*dto.PageResult[dto.UserActivityItem], error) {
+func (s *UserInsightsUsecase) GetActivities(ctx context.Context, userID uuid.UUID, query dto.UserActivityListQuery) (*dto.PageResult[dto.UserActivityItem], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	progressItems, err := s.progressRepo.ListRecentProgressByUser(userID, 100)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-	submissions, err := s.activityRepo.ListSubmissionsByUser(userID, repository.ActivitySubmissionUserFilter{
+	submissions, err := s.activityRepo.ListSubmissionsByUser(ctx, userID, repository.ActivitySubmissionUserFilter{
 		Pagination: repository.Pagination{Page: 1, PageSize: 100},
 	})
 	if err != nil {
@@ -130,7 +133,8 @@ func (s *UserInsightsUsecase) GetActivities(userID uuid.UUID, query dto.UserActi
 	return &dto.PageResult[dto.UserActivityItem]{Items: filtered[start:end], Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *ProgressUsecase) GetOverall(userID uuid.UUID) (*dto.ProgressSnapshot, error) {
+func (s *ProgressUsecase) GetOverall(ctx context.Context, userID uuid.UUID) (*dto.ProgressSnapshot, error) {
+	_ = ctx
 	items, err := s.progressRepo.ListCourseProgressByUser(userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -148,7 +152,8 @@ func (s *ProgressUsecase) GetOverall(userID uuid.UUID) (*dto.ProgressSnapshot, e
 	return &dto.ProgressSnapshot{OverallCompletion: overall, CurrentStreak: minInt(len(items), 30), WeeklyMinutes: len(items) * 45}, nil
 }
 
-func (s *ProgressUsecase) GetCourseProgress(userID uuid.UUID, courseID string) (map[string]any, error) {
+func (s *ProgressUsecase) GetCourseProgress(ctx context.Context, userID uuid.UUID, courseID string) (map[string]any, error) {
+	_ = ctx
 	id, err := uuid.Parse(courseID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid course id")
@@ -174,7 +179,8 @@ func (s *ProgressUsecase) GetCourseProgress(userID uuid.UUID, courseID string) (
 	}, nil
 }
 
-func (s *ProgressUsecase) GetActivityProgress(userID uuid.UUID, activityID string) (map[string]any, error) {
+func (s *ProgressUsecase) GetActivityProgress(ctx context.Context, userID uuid.UUID, activityID string) (map[string]any, error) {
+	_ = ctx
 	return map[string]any{"activity_id": activityID, "user_id": userID.String(), "status": "tracked", "progress_percent": 100, "attempts": strconv.Itoa(1)}, nil
 }
 

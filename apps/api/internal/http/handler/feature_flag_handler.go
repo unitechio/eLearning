@@ -1,101 +1,120 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
-	"net/http"
-
-	"einfra/api/internal/domain"
-
 	"github.com/gin-gonic/gin"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-// FeatureFlagHandler handles HTTP requests related to feature flags.
 type FeatureFlagHandler struct {
-	uc service.FeatureFlagUsecase
+	svc usecase.FeatureFlagUsecase
 }
 
-// NewFeatureFlagHandler creates a new instance of FeatureFlagHandler.
-func NewFeatureFlagHandler(uc service.FeatureFlagUsecase) *FeatureFlagHandler {
-	return &FeatureFlagHandler{uc: uc}
+func NewFeatureFlagHandler(svc usecase.FeatureFlagUsecase) *FeatureFlagHandler {
+	return &FeatureFlagHandler{svc: svc}
 }
 
+// CreateFeatureFlag godoc
+// @Summary      Create feature flag
+// @Tags         feature-flags
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.FeatureFlag  true  "Feature flag payload"
+// @Success      201   {object}  response.Envelope{data=domain.FeatureFlag}
+// @Router       /feature-flags [post]
 func (h *FeatureFlagHandler) CreateFeatureFlag(c *gin.Context) {
-	var flag domain.FeatureFlag
-	if err := c.ShouldBindJSON(&flag); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req domain.FeatureFlag
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	createdFlag, err := h.uc.CreateFeatureFlag(&flag)
+	item, err := h.svc.CreateFeatureFlag(&req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusCreated, createdFlag)
+	response.Created(c, "feature flag created", item)
 }
 
-// GetFeatureFlagByName handles the retrieval of a feature flag by its name.
+// GetFeatureFlagByName godoc
+// @Summary      Get feature flag by name
+// @Tags         feature-flags
+// @Produce      json
+// @Param        name  path      string  true  "Feature flag name"
+// @Success      200   {object}  response.Envelope{data=domain.FeatureFlag}
+// @Router       /feature-flags/name/{name} [get]
 func (h *FeatureFlagHandler) GetFeatureFlagByName(c *gin.Context) {
-	name := c.Param("name")
-	flag, err := h.uc.GetFeatureFlagByName(name)
+	item, err := h.svc.GetFeatureFlagByName(c.Param("name"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "feature flag not found"})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, flag)
+	response.OK(c, "feature flag fetched", item)
 }
 
-// GetAllFeatureFlags handles the retrieval of all feature flags.
+// GetAllFeatureFlags godoc
+// @Summary      List feature flags
+// @Tags         feature-flags
+// @Produce      json
+// @Success      200  {object}  response.Envelope{data=[]domain.FeatureFlag}
+// @Router       /feature-flags [get]
 func (h *FeatureFlagHandler) GetAllFeatureFlags(c *gin.Context) {
-	flags, err := h.uc.GetAllFeatureFlags()
+	items, err := h.svc.GetAllFeatureFlags()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, flags)
+	response.OK(c, "feature flags fetched", items)
 }
 
-// GetFeatureFlagsByCategory handles the retrieval of all feature flags of a specific category.
+// GetFeatureFlagsByCategory godoc
+// @Summary      List feature flags by category
+// @Tags         feature-flags
+// @Produce      json
+// @Param        category  path      string  true  "Category"
+// @Success      200       {object}  response.Envelope{data=[]domain.FeatureFlag}
+// @Router       /feature-flags/category/{category} [get]
 func (h *FeatureFlagHandler) GetFeatureFlagsByCategory(c *gin.Context) {
-	category := c.Param("category")
-	flags, err := h.uc.GetFeatureFlagsByCategory(category)
+	items, err := h.svc.GetFeatureFlagsByCategory(c.Param("category"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, flags)
+	response.OK(c, "feature flags fetched", items)
 }
 
-// UpdateFeatureFlag handles the update of an existing feature flag.
+// UpdateFeatureFlag godoc
+// @Summary      Update feature flag
+// @Tags         feature-flags
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.FeatureFlag  true  "Feature flag payload"
+// @Success      200   {object}  response.Envelope{data=domain.FeatureFlag}
+// @Router       /feature-flags [put]
 func (h *FeatureFlagHandler) UpdateFeatureFlag(c *gin.Context) {
-	var flag domain.FeatureFlag
-	if err := c.ShouldBindJSON(&flag); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req domain.FeatureFlag
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	updatedFlag, err := h.uc.UpdateFeatureFlag(&flag)
+	item, err := h.svc.UpdateFeatureFlag(&req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, updatedFlag)
+	response.OK(c, "feature flag updated", item)
 }
 
-// DeleteFeatureFlag handles the deletion of a feature flag by its ID.
+// DeleteFeatureFlag godoc
+// @Summary      Delete feature flag
+// @Tags         feature-flags
+// @Produce      json
+// @Param        id   path      string  true  "Feature flag ID"
+// @Success      200  {object}  response.Envelope
+// @Router       /feature-flags/{id} [delete]
 func (h *FeatureFlagHandler) DeleteFeatureFlag(c *gin.Context) {
-	id := c.Param("id")
-	if err := h.uc.DeleteFeatureFlag(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := h.svc.DeleteFeatureFlag(c.Param("id")); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusNoContent, nil)
+	response.OK(c, "feature flag deleted", gin.H{"deleted": true})
 }

@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
@@ -15,7 +17,8 @@ func NewListeningService(repo repository.ListeningRepository) *ListeningUsecase 
 	return &ListeningUsecase{repo: repo}
 }
 
-func (s *ListeningUsecase) ListLessons(query dto.ListeningLessonListQuery) (*dto.PageResult[dto.ListeningLesson], error) {
+func (s *ListeningUsecase) ListLessons(ctx context.Context, query dto.ListeningLessonListQuery) (*dto.PageResult[dto.ListeningLesson], error) {
+	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, total, err := s.repo.ListLessons(repository.ListeningLessonListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
@@ -37,7 +40,8 @@ func (s *ListeningUsecase) ListLessons(query dto.ListeningLessonListQuery) (*dto
 	return &dto.PageResult[dto.ListeningLesson]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *ListeningUsecase) GetLesson(id string) (*dto.ListeningLesson, error) {
+func (s *ListeningUsecase) GetLesson(ctx context.Context, id string) (*dto.ListeningLesson, error) {
+	_ = ctx
 	lessonID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid listening lesson id")
@@ -52,7 +56,8 @@ func (s *ListeningUsecase) GetLesson(id string) (*dto.ListeningLesson, error) {
 	return &dto.ListeningLesson{ID: item.ID.String(), Title: item.Title, Description: item.Description, AudioURL: item.AudioURL}, nil
 }
 
-func (s *ListeningUsecase) SubmitLesson(id string, req dto.ListeningSubmissionRequest) (map[string]any, error) {
+func (s *ListeningUsecase) SubmitLesson(ctx context.Context, id string, req dto.ListeningSubmissionRequest) (map[string]any, error) {
+	_ = ctx
 	lessonID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid listening lesson id")

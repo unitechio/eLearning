@@ -3,8 +3,25 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type AdminHandler struct {
+	adminSvc usecase.AdminService
+}
+
+type BillingHandler struct {
+	svc usecase.BillingService
+}
+
+func NewAdminHandler(adminSvc usecase.AdminService) *AdminHandler {
+	return &AdminHandler{adminSvc: adminSvc}
+}
+
+func NewBillingHandler(svc usecase.BillingService) *BillingHandler {
+	return &BillingHandler{svc: svc}
+}
 
 // ListUsers godoc
 // @Summary      List admin users
@@ -215,9 +232,8 @@ func (h *BillingHandler) Subscribe(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 	item, err := h.svc.Subscribe(userID, req)
@@ -245,9 +261,8 @@ func (h *BillingHandler) History(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 	res, err := h.svc.ListBillingHistory(userID, query)
@@ -256,4 +271,198 @@ func (h *BillingHandler) History(c *gin.Context) {
 		return
 	}
 	response.OKWithMeta(c, "billing history fetched", res.Items, &res.Meta)
+}
+
+// AdminPlans godoc
+// @Summary      List admin billing plans
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page       query     int     false  "Page number"
+// @Param        page_size  query     int     false  "Page size"
+// @Param        q          query     string  false  "Search by plan name or code"
+// @Param        currency   query     string  false  "Filter by currency"
+// @Param        active     query     bool    false  "Filter by active"
+// @Success      200  {object}  response.Envelope{data=[]dto.AdminBillingPlan}
+// @Router       /admin/billing/plans [get]
+func (h *BillingHandler) AdminPlans(c *gin.Context) {
+	var query dto.AdminBillingPlanListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	res, err := h.svc.ListAdminPlans(query)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OKWithMeta(c, "admin billing plans fetched", res.Items, &res.Meta)
+}
+
+// CreatePlan godoc
+// @Summary      Create billing plan
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.CreateBillingPlanRequest  true  "Plan payload"
+// @Success      201   {object}  response.Envelope{data=dto.AdminBillingPlan}
+// @Router       /admin/billing/plans [post]
+func (h *BillingHandler) CreatePlan(c *gin.Context) {
+	var req dto.CreateBillingPlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.CreatePlan(req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "billing plan created", item)
+}
+
+// UpdatePlan godoc
+// @Summary      Update billing plan
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                        true  "Plan ID"
+// @Param        body  body      dto.UpdateBillingPlanRequest  true  "Plan payload"
+// @Success      200   {object}  response.Envelope{data=dto.AdminBillingPlan}
+// @Router       /admin/billing/plans/{id} [put]
+func (h *BillingHandler) UpdatePlan(c *gin.Context) {
+	var req dto.UpdateBillingPlanRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.UpdatePlan(c.Param("id"), req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "billing plan updated", item)
+}
+
+// DeletePlan godoc
+// @Summary      Delete billing plan
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Param        id  path  string  true  "Plan ID"
+// @Success      204
+// @Router       /admin/billing/plans/{id} [delete]
+func (h *BillingHandler) DeletePlan(c *gin.Context) {
+	if err := h.svc.DeletePlan(c.Param("id")); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.NoContent(c)
+}
+
+// AdminSubscriptions godoc
+// @Summary      List subscriptions
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page       query     int     false  "Page number"
+// @Param        page_size  query     int     false  "Page size"
+// @Param        q          query     string  false  "Search by user email or plan name"
+// @Param        status     query     string  false  "Filter by status"
+// @Success      200  {object}  response.Envelope{data=[]dto.AdminBillingSubscription}
+// @Router       /admin/billing/subscriptions [get]
+func (h *BillingHandler) AdminSubscriptions(c *gin.Context) {
+	var query dto.AdminBillingSubscriptionListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	res, err := h.svc.ListSubscriptions(query)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OKWithMeta(c, "billing subscriptions fetched", res.Items, &res.Meta)
+}
+
+// GetSubscription godoc
+// @Summary      Get subscription
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  string  true  "Subscription ID"
+// @Success      200  {object}  response.Envelope{data=dto.AdminBillingSubscription}
+// @Router       /admin/billing/subscriptions/{id} [get]
+func (h *BillingHandler) GetSubscription(c *gin.Context) {
+	item, err := h.svc.GetSubscription(c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "billing subscription fetched", item)
+}
+
+// UpdateSubscriptionStatus godoc
+// @Summary      Update subscription status
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                              true  "Subscription ID"
+// @Param        body  body      dto.UpdateSubscriptionStatusRequest true  "Status payload"
+// @Success      200   {object}  response.Envelope{data=dto.AdminBillingSubscription}
+// @Router       /admin/billing/subscriptions/{id}/status [put]
+func (h *BillingHandler) UpdateSubscriptionStatus(c *gin.Context) {
+	var req dto.UpdateSubscriptionStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.UpdateSubscriptionStatus(c.Param("id"), req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "subscription status updated", item)
+}
+
+// CancelSubscription godoc
+// @Summary      Cancel subscription
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  string  true  "Subscription ID"
+// @Success      200  {object}  response.Envelope{data=dto.AdminBillingSubscription}
+// @Router       /admin/billing/subscriptions/{id}/cancel [post]
+func (h *BillingHandler) CancelSubscription(c *gin.Context) {
+	item, err := h.svc.CancelSubscription(c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "subscription cancelled", item)
+}
+
+// GrantPremium godoc
+// @Summary      Grant premium subscription
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.GrantPremiumRequest  true  "Grant premium payload"
+// @Success      200   {object}  response.Envelope{data=dto.AdminBillingSubscription}
+// @Router       /admin/billing/subscriptions/grant-premium [post]
+func (h *BillingHandler) GrantPremium(c *gin.Context) {
+	var req dto.GrantPremiumRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.GrantPremium(req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "premium granted", item)
 }

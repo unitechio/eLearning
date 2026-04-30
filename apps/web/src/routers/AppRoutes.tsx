@@ -12,8 +12,8 @@ export function AppRoutes() {
   return (
     <Suspense 
       fallback={
-        <div className="h-screen w-screen flex items-center justify-center bg-slate-50 text-primary font-bold">
-          Lumina Academy...
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-1 overflow-hidden bg-transparent">
+          <div className="h-full w-1/3 animate-pulse rounded-r-full bg-primary/70"></div>
         </div>
       }
     >

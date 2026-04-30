@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"strings"
 	"time"
 
@@ -18,7 +19,8 @@ func NewVocabularyExtrasService(repo repository.VocabularyRepository) *Vocabular
 	return &VocabularyExtrasUsecase{repo: repo}
 }
 
-func (s *VocabularyExtrasUsecase) UpdateWord(id string, req dto.UpdateWordRequest) (map[string]any, error) {
+func (s *VocabularyExtrasUsecase) UpdateWord(ctx context.Context, id string, req dto.UpdateWordRequest) (map[string]any, error) {
+	_ = ctx
 	wordID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid word id")
@@ -50,7 +52,8 @@ func (s *VocabularyExtrasUsecase) UpdateWord(id string, req dto.UpdateWordReques
 	}, nil
 }
 
-func (s *VocabularyExtrasUsecase) DeleteWord(id string) error {
+func (s *VocabularyExtrasUsecase) DeleteWord(ctx context.Context, id string) error {
+	_ = ctx
 	wordID, err := uuid.Parse(id)
 	if err != nil {
 		return apperr.BadRequest("invalid word id")
@@ -61,7 +64,8 @@ func (s *VocabularyExtrasUsecase) DeleteWord(id string) error {
 	return nil
 }
 
-func (s *VocabularyExtrasUsecase) ListVocabularyHistory(userID uuid.UUID, query dto.VocabularyHistoryQuery) (*dto.PageResult[dto.VocabularyHistoryItem], error) {
+func (s *VocabularyExtrasUsecase) ListVocabularyHistory(ctx context.Context, userID uuid.UUID, query dto.VocabularyHistoryQuery) (*dto.PageResult[dto.VocabularyHistoryItem], error) {
+	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, err := s.repo.ListProgressHistoryByUser(userID, 100)
 	if err != nil {

@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"strings"
 
 	"github.com/google/uuid"
@@ -16,33 +17,36 @@ func NewActivityRepository(db *gorm.DB) *ActivityRepository {
 	return &ActivityRepository{db: db}
 }
 
-func (r *ActivityRepository) CreateActivity(activity *domain.Activity) error {
-	return r.db.Create(activity).Error
+func (r *ActivityRepository) CreateActivity(ctx context.Context, activity *domain.Activity) error {
+	return r.db.WithContext(ctx).Create(activity).Error
 }
-func (r *ActivityRepository) FindActivityByID(id uuid.UUID) (*domain.Activity, error) {
+func (r *ActivityRepository) FindActivityByID(ctx context.Context, id uuid.UUID) (*domain.Activity, error) {
 	var item domain.Activity
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *ActivityRepository) UpdateActivity(activity *domain.Activity) error {
-	return r.db.Save(activity).Error
+func (r *ActivityRepository) UpdateActivity(ctx context.Context, activity *domain.Activity) error {
+	return r.db.WithContext(ctx).Save(activity).Error
 }
 
-func (r *ActivityRepository) DeleteActivity(id uuid.UUID) error {
-	return r.db.Delete(&domain.Activity{}, "id = ?", id).Error
+func (r *ActivityRepository) DeleteActivity(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.Activity{}, "id = ?", id).Error
 }
 
-func (r *ActivityRepository) CreateSubmission(submission *domain.ActivitySubmission) error {
-	return r.db.Create(submission).Error
+func (r *ActivityRepository) CreateSubmission(ctx context.Context, submission *domain.ActivitySubmission) error {
+	return r.db.WithContext(ctx).Create(submission).Error
 }
 
-func (r *ActivityRepository) ListSubmissionsByActivity(activityID uuid.UUID, filter repository.ActivitySubmissionListFilter) ([]domain.ActivitySubmission, int64, error) {
+func (r *ActivityRepository) ListSubmissionsByActivity(ctx context.Context, activityID uuid.UUID, filter repository.ActivitySubmissionListFilter) ([]domain.ActivitySubmission, int64, error) {
 	var items []domain.ActivitySubmission
 	var total int64
-	q := r.db.Model(&domain.ActivitySubmission{}).Where("activity_id = ?", activityID)
+	q := r.db.WithContext(ctx).Model(&domain.ActivitySubmission{}).Where("activity_id = ?", activityID)
+	if filter.TenantID != uuid.Nil {
+		q = q.Where("tenant_id = ?", filter.TenantID)
+	}
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(answer) like ? or lower(feedback) like ?", like, like)
@@ -57,9 +61,12 @@ func (r *ActivityRepository) ListSubmissionsByActivity(activityID uuid.UUID, fil
 	return items, total, err
 }
 
-func (r *ActivityRepository) ListSubmissionsByUser(userID uuid.UUID, filter repository.ActivitySubmissionUserFilter) ([]domain.ActivitySubmission, error) {
+func (r *ActivityRepository) ListSubmissionsByUser(ctx context.Context, userID uuid.UUID, filter repository.ActivitySubmissionUserFilter) ([]domain.ActivitySubmission, error) {
 	var items []domain.ActivitySubmission
-	q := r.db.Where("user_id = ?", userID)
+	q := r.db.WithContext(ctx).Where("user_id = ?", userID)
+	if filter.TenantID != uuid.Nil {
+		q = q.Where("tenant_id = ?", filter.TenantID)
+	}
 	if filter.Status != "" {
 		q = q.Where("status = ?", filter.Status)
 	}
@@ -67,9 +74,9 @@ func (r *ActivityRepository) ListSubmissionsByUser(userID uuid.UUID, filter repo
 	return items, err
 }
 
-func (r *ActivityRepository) FindSubmissionByID(id uuid.UUID) (*domain.ActivitySubmission, error) {
+func (r *ActivityRepository) FindSubmissionByID(ctx context.Context, id uuid.UUID) (*domain.ActivitySubmission, error) {
 	var item domain.ActivitySubmission
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil

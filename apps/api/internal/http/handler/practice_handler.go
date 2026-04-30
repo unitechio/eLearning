@@ -5,8 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type PracticeHandler struct {
+	svc usecase.PracticeService
+}
+
+func NewPracticeHandler(svc usecase.PracticeService) *PracticeHandler {
+	return &PracticeHandler{svc: svc}
+}
 
 // PracticeModes godoc
 // @Summary      Get practice modes
@@ -16,7 +25,7 @@ import (
 // @Success      200  {object}  response.Envelope{data=dto.PracticeModesResponse}
 // @Router       /practice/modes [get]
 func (h *PracticeHandler) PracticeModes(c *gin.Context) {
-	item, err := h.svc.GetModes()
+	item, err := h.svc.GetModes(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -56,7 +65,7 @@ func (h *PracticeHandler) PracticeStart(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.Start(userID, req)
+	item, err := h.svc.Start(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -86,7 +95,7 @@ func (h *PracticeHandler) PracticeSubmit(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.Submit(userID, req)
+	item, err := h.svc.Submit(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -114,7 +123,7 @@ func (h *PracticeHandler) AnalyzeWord(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.AnalyzeWord(userID, req)
+	item, err := h.svc.AnalyzeWord(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -142,7 +151,7 @@ func (h *PracticeHandler) AnalyzeSentence(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.AnalyzeSentence(userID, req)
+	item, err := h.svc.AnalyzeSentence(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -171,7 +180,7 @@ func (h *PracticeHandler) PronunciationHistory(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.ListPronunciationHistory(userID, query)
+	res, err := h.svc.ListPronunciationHistory(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -198,7 +207,7 @@ func (h *PracticeHandler) DictionaryLookup(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.LookupDictionary(userID, query.Word)
+	item, err := h.svc.LookupDictionary(requestContext(c), userID, query.Word)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -226,7 +235,7 @@ func (h *PracticeHandler) DictionarySave(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.SaveDictionaryWord(userID, req)
+	item, err := h.svc.SaveDictionaryWord(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -256,7 +265,7 @@ func (h *PracticeHandler) DictionaryHistory(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.ListDictionaryHistory(userID, query)
+	res, err := h.svc.ListDictionaryHistory(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -284,7 +293,7 @@ func (h *PracticeHandler) ReadingLookup(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.ReadingLookup(userID, req)
+	item, err := h.svc.ReadingLookup(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -312,7 +321,7 @@ func (h *PracticeHandler) ReadingSaveWord(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.ReadingSaveWord(userID, req)
+	item, err := h.svc.ReadingSaveWord(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -342,7 +351,7 @@ func (h *PracticeHandler) VocabularySets(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.ListVocabularySets(userID, query)
+	res, err := h.svc.ListVocabularySets(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -370,7 +379,7 @@ func (h *PracticeHandler) CreateVocabularySet(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.CreateVocabularySet(userID, req)
+	item, err := h.svc.CreateVocabularySet(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -392,7 +401,7 @@ func (h *PracticeHandler) GetVocabularySet(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetVocabularySet(userID, c.Param("id"))
+	item, err := h.svc.GetVocabularySet(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -421,7 +430,7 @@ func (h *PracticeHandler) AddWordToSet(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.AddWordToSet(userID, c.Param("id"), req)
+	item, err := h.svc.AddWordToSet(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -449,7 +458,7 @@ func (h *PracticeHandler) StreamResponse(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.StreamResponse(userID, req)
+	item, err := h.svc.StreamResponse(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -477,7 +486,7 @@ func (h *PracticeHandler) PronunciationFeedback(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.PronunciationFeedback(userID, req)
+	item, err := h.svc.PronunciationFeedback(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -505,7 +514,7 @@ func (h *PracticeHandler) ContextCorrection(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.ContextCorrection(userID, req)
+	item, err := h.svc.ContextCorrection(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

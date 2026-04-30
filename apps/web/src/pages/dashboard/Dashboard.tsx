@@ -1,8 +1,12 @@
 import React from "react";
 import { DailyPlan, StatsOverview, RecentAssessments } from "@/features/learning";
 import { Flame } from "lucide-react";
+import { useAuth } from "@/features/auth";
 
 export function DashboardPage() {
+  const { user } = useAuth();
+  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Learner";
+
   return (
     <div className="w-full flex-1 p-8 max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
       {/* Hero / Welcome Section */}
@@ -12,7 +16,7 @@ export function DashboardPage() {
             <Flame className="w-4 h-4 text-secondary fill-secondary" />
             <span className="text-xs font-black text-secondary uppercase tracking-widest leading-none">14 Day Streak</span>
           </div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-slate-50 leading-tight">Good morning, Alex.</h2>
+          <h2 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-slate-50 leading-tight">Good morning, {fullName}.</h2>
           <p className="text-on-surface-variant text-xl font-medium opacity-60 leading-relaxed">
             Your AI tutor has prepared a specialized <span className="text-primary font-bold">45-minute focus session</span> for your Reasoning & Essay Structure.
           </p>

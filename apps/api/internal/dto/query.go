@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/google/uuid"
+
 type Pagination struct {
 	Page     int
 	PageSize int
@@ -7,31 +9,36 @@ type Pagination struct {
 
 type CourseListFilter struct {
 	Pagination
-	Search string
-	Domain string
-	Level  string
-	Status string
+	TenantID uuid.UUID
+	Search   string
+	Domain   string
+	Level    string
+	Status   string
 }
 
 type UnitListFilter struct {
 	Pagination
-	Search string
+	TenantID uuid.UUID
+	Search   string
 }
 
 type LessonListFilter struct {
 	Pagination
-	Search string
+	TenantID uuid.UUID
+	Search   string
 }
 
 type ActivitySubmissionListFilter struct {
 	Pagination
-	Search string
-	Status string
+	TenantID uuid.UUID
+	Search   string
+	Status   string
 }
 
 type ActivitySubmissionUserFilter struct {
 	Pagination
-	Status string
+	TenantID uuid.UUID
+	Status   string
 }
 
 type NotificationListFilter struct {
@@ -48,6 +55,12 @@ type BillingPlanListFilter struct {
 }
 
 type BillingHistoryListFilter struct {
+	Pagination
+	Search string
+	Status string
+}
+
+type BillingSubscriptionListFilter struct {
 	Pagination
 	Search string
 	Status string

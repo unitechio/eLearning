@@ -1,160 +1,129 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
-	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/modules/server/application/settings_uc"
-	"einfra/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-// SystemSettingHandler handles HTTP requests related to system settings.
 type SystemSettingHandler struct {
-	uc *service.SystemSettingUsecase
+	svc *usecase.SystemSettingUsecase
 }
 
-// NewSystemSettingHandler creates a new instance of SystemSettingHandler.
-func NewSystemSettingHandler(uc *service.SystemSettingUsecase) *SystemSettingHandler {
-	return &SystemSettingHandler{uc: uc}
+func NewSystemSettingHandler(svc *usecase.SystemSettingUsecase) *SystemSettingHandler {
+	return &SystemSettingHandler{svc: svc}
 }
 
-// CreateSystemSetting handles the creation of a new system setting.
-// @Summary Create a new system setting
-// @Description Create a new system-wide configuration setting
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Param setting body domain.SystemSetting true "System Setting"
-// @Success 201 {object} domain.SystemSetting
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/system-settings [post]
+// CreateSystemSetting godoc
+// @Summary      Create system setting
+// @Tags         system-settings
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.SystemSetting  true  "System setting payload"
+// @Success      201   {object}  response.Envelope{data=domain.SystemSetting}
+// @Router       /system-settings [post]
 func (h *SystemSettingHandler) CreateSystemSetting(c *gin.Context) {
-	var setting domain.SystemSetting
-	if err := c.ShouldBindJSON(&setting); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req domain.SystemSetting
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	createdSetting, err := h.uc.CreateSystemSetting(&setting)
+	item, err := h.svc.CreateSystemSetting(requestContext(c), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusCreated, createdSetting)
+	response.Created(c, "system setting created", item)
 }
 
-// GetSystemSettingByKey handles the retrieval of a system setting by its key.
-// @Summary Get system setting by key
-// @Description Retrieve a system setting by its unique key
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Param key path string true "Setting Key"
-// @Success 200 {object} domain.SystemSetting
-// @Failure 404 {object} map[string]string
-// @Router /api/v1/system-settings/key/{key} [get]
+// GetSystemSettingByKey godoc
+// @Summary      Get system setting by key
+// @Tags         system-settings
+// @Produce      json
+// @Param        key  path      string  true  "Setting key"
+// @Success      200  {object}  response.Envelope{data=domain.SystemSetting}
+// @Router       /system-settings/key/{key} [get]
 func (h *SystemSettingHandler) GetSystemSettingByKey(c *gin.Context) {
-	key := c.Param("key")
-	setting, err := h.uc.GetSystemSettingByKey(key)
+	item, err := h.svc.GetSystemSettingByKey(requestContext(c), c.Param("key"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "system setting not found"})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, setting)
+	response.OK(c, "system setting fetched", item)
 }
 
-// GetAllSystemSettings handles the retrieval of all system settings.
-// @Summary Get all system settings
-// @Description Retrieve all system-wide configuration settings
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Success 200 {array} domain.SystemSetting
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/system-settings [get]
+// GetAllSystemSettings godoc
+// @Summary      List system settings
+// @Tags         system-settings
+// @Produce      json
+// @Success      200  {object}  response.Envelope{data=[]domain.SystemSetting}
+// @Router       /system-settings [get]
 func (h *SystemSettingHandler) GetAllSystemSettings(c *gin.Context) {
-	settings, err := h.uc.GetAllSystemSettings()
+	items, err := h.svc.GetAllSystemSettings(requestContext(c))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, settings)
+	response.OK(c, "system settings fetched", items)
 }
 
-// GetSystemSettingsByCategory handles the retrieval of all system settings of a specific category.
-// @Summary Get system settings by category
-// @Description Retrieve all system settings belonging to a specific category
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Param category path string true "Category"
-// @Success 200 {array} domain.SystemSetting
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/system-settings/category/{category} [get]
+// GetSystemSettingsByCategory godoc
+// @Summary      List system settings by category
+// @Tags         system-settings
+// @Produce      json
+// @Param        category  path      string  true  "Category"
+// @Success      200       {object}  response.Envelope{data=[]domain.SystemSetting}
+// @Router       /system-settings/category/{category} [get]
 func (h *SystemSettingHandler) GetSystemSettingsByCategory(c *gin.Context) {
-	category := c.Param("category")
-	settings, err := h.uc.GetSystemSettingsByCategory(category)
+	items, err := h.svc.GetSystemSettingsByCategory(requestContext(c), c.Param("category"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, settings)
+	response.OK(c, "system settings fetched", items)
 }
 
-// UpdateSystemSetting handles the update of an existing system setting.
-// @Summary Update system setting
-// @Description Update an existing system setting
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Param id path string true "Setting ID"
-// @Param setting body domain.SystemSetting true "System Setting"
-// @Success 200 {object} domain.SystemSetting
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/system-settings/{id} [put]
+// UpdateSystemSetting godoc
+// @Summary      Update system setting
+// @Tags         system-settings
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                true  "Setting ID"
+// @Param        body  body      domain.SystemSetting  true  "System setting payload"
+// @Success      200   {object}  response.Envelope{data=domain.SystemSetting}
+// @Router       /system-settings/{id} [put]
 func (h *SystemSettingHandler) UpdateSystemSetting(c *gin.Context) {
-	id := c.Param("id")
-	var setting domain.SystemSetting
-	if err := c.ShouldBindJSON(&setting); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req domain.SystemSetting
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	setting.ID = id
-
-	updatedSetting, err := h.uc.UpdateSystemSetting(&setting)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.Fail(c, 400, "invalid setting id")
 		return
 	}
-
-	c.JSON(http.StatusOK, updatedSetting)
+	req.ID = uint(id)
+	item, err := h.svc.UpdateSystemSetting(requestContext(c), &req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "system setting updated", item)
 }
 
-// DeleteSystemSetting handles the deletion of a system setting by its ID.
-// @Summary Delete system setting
-// @Description Delete a system setting by its ID
-// @Tags SystemSettings
-// @Accept json
-// @Produce json
-// @Param id path string true "Setting ID"
-// @Success 204
-// @Failure 500 {object} map[string]string
-// @Router /api/v1/system-settings/{id} [delete]
+// DeleteSystemSetting godoc
+// @Summary      Delete system setting
+// @Tags         system-settings
+// @Produce      json
+// @Param        id   path      string  true  "Setting ID"
+// @Success      200  {object}  response.Envelope
+// @Router       /system-settings/{id} [delete]
 func (h *SystemSettingHandler) DeleteSystemSetting(c *gin.Context) {
-	id := c.Param("id")
-	if err := h.uc.DeleteSystemSetting(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := h.svc.DeleteSystemSetting(requestContext(c), c.Param("id")); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusNoContent, nil)
+	response.OK(c, "system setting deleted", gin.H{"deleted": true})
 }

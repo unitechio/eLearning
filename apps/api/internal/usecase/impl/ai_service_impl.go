@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -15,11 +16,12 @@ type AIUsecase struct {
 	llm ai.LLMService
 }
 
-func NewAIService(llm ai.LLMUsecase) *AIUsecase {
+func NewAIService(llm ai.LLMService) *AIUsecase {
 	return &AIUsecase{llm: llm}
 }
 
-func (s *AIUsecase) Chat(req dto.AIChatRequest) (map[string]any, error) {
+func (s *AIUsecase) Chat(ctx context.Context, req dto.AIChatRequest) (map[string]any, error) {
+	_ = ctx
 	message := strings.TrimSpace(req.Message)
 	if message == "" {
 		return nil, apperr.BadRequest("message is required")
@@ -32,7 +34,8 @@ func (s *AIUsecase) Chat(req dto.AIChatRequest) (map[string]any, error) {
 	}, nil
 }
 
-func (s *AIUsecase) EvaluateWriting(req dto.WritingEvaluationRequest) (map[string]any, error) {
+func (s *AIUsecase) EvaluateWriting(ctx context.Context, req dto.WritingEvaluationRequest) (map[string]any, error) {
+	_ = ctx
 	eval, err := s.llm.EvaluateWriting(req.Prompt, req.Text)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -40,7 +43,8 @@ func (s *AIUsecase) EvaluateWriting(req dto.WritingEvaluationRequest) (map[strin
 	return map[string]any{"score": eval.Score, "feedback": eval.Feedback, "improved_answer": eval.ImprovedAnswer}, nil
 }
 
-func (s *AIUsecase) EvaluateSpeaking(req dto.AIChatRequest) (map[string]any, error) {
+func (s *AIUsecase) EvaluateSpeaking(ctx context.Context, req dto.AIChatRequest) (map[string]any, error) {
+	_ = ctx
 	eval, err := s.llm.EvaluateSpeaking(req.Message)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -48,7 +52,8 @@ func (s *AIUsecase) EvaluateSpeaking(req dto.AIChatRequest) (map[string]any, err
 	return map[string]any{"score": eval.Score, "feedback": eval.Feedback, "improved_answer": eval.ImprovedAnswer}, nil
 }
 
-func (s *AIUsecase) GenerateQuestion(req dto.AIQuestionRequest) (map[string]any, error) {
+func (s *AIUsecase) GenerateQuestion(ctx context.Context, req dto.AIQuestionRequest) (map[string]any, error) {
+	_ = ctx
 	question := fmt.Sprintf("In Academy English, explain %s using a %s perspective.", req.Topic, fallback(req.Domain, "english"))
 	return map[string]any{"domain": req.Domain, "topic": req.Topic, "question": question}, nil
 }

@@ -1,305 +1,209 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
-	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/domain"
-	"einfra/api/pkg/errorx"
+	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-// AuthorizationHandler handles authorization management HTTP requests
 type AuthorizationHandler struct {
-	authUsecase domain.AuthorizationUsecase
+	authzSvc usecase.AuthorizationService
+	permSvc  usecase.PermissionUsecase
 }
 
-// NewAuthorizationHandler creates a new authorization handler
-func NewAuthorizationHandler(authUsecase domain.AuthorizationUsecase) *AuthorizationHandler {
-	return &AuthorizationHandler{
-		authUsecase: authUsecase,
-	}
+func NewAuthorizationHandler(authzSvc usecase.AuthorizationService, permSvc usecase.PermissionUsecase) *AuthorizationHandler {
+	return &AuthorizationHandler{authzSvc: authzSvc, permSvc: permSvc}
 }
 
-// GrantResourcePermission grants a resource permission to a user
-// @Summary Grant resource permission
-// @Description Grant a user permission to perform specific actions on a resource
-// @Tags authorization
-// @Accept json
-// @Produce json
-// @Param request body domain.GrantPermissionRequest true "Grant permission request"
-// @Success 200 {object} map[string]interface{} "Permission granted successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request body"
-// @Failure 404 {object} map[string]interface{} "User, environment, or resource not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/permissions/grant [post]
-// @Security BearerAuth
-func (h *AuthorizationHandler) GrantResourcePermission(c *gin.Context) {
-	var req domain.GrantPermissionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	// Get the current user ID from context (who is granting the permission)
-	grantedBy, exists := c.Get("userID")
-	if !exists {
-		c.Error(errorx.New(errorx.CodeUnauthorized, "User not authenticated"))
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	grantedByStr, ok := grantedBy.(string)
+// GetMyAccessProfile godoc
+// @Summary      Get current access profile
+// @Tags         authorization
+// @Produce      json
+// @Success      200  {object}  response.Envelope{data=dto.AccessProfile}
+// @Router       /authorization/me [get]
+func (h *AuthorizationHandler) GetMyAccessProfile(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		c.Error(errorx.New(errorx.CodeInternalError, "Invalid user ID format"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
-
-	if err := h.authservice.GrantResourcePermission(c.Request.Context(), &req, grantedByStr); err != nil {
-		if errorx.GetCode(err) == errorx.CodeNotFound {
-			c.Error(err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to grant permission"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to grant permission"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Permission granted successfully",
-	})
-}
-
-// RevokeResourcePermission revokes a resource permission from a user
-// @Summary Revoke resource permission
-// @Description Revoke a previously granted resource permission
-// @Tags authorization
-// @Accept json
-// @Produce json
-// @Param request body domain.RevokePermissionRequest true "Revoke permission request"
-// @Success 200 {object} map[string]interface{} "Permission revoked successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request body"
-// @Failure 404 {object} map[string]interface{} "Permission not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/permissions/revoke [post]
-// @Security BearerAuth
-func (h *AuthorizationHandler) RevokeResourcePermission(c *gin.Context) {
-	var req domain.RevokePermissionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	// Get the current user ID from context (who is revoking the permission)
-	revokedBy, exists := c.Get("userID")
-	if !exists {
-		c.Error(errorx.New(errorx.CodeUnauthorized, "User not authenticated"))
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	revokedByStr, ok := revokedBy.(string)
-	if !ok {
-		c.Error(errorx.New(errorx.CodeInternalError, "Invalid user ID format"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
-		return
-	}
-
-	if err := h.authservice.RevokeResourcePermission(c.Request.Context(), &req, revokedByStr); err != nil {
-		if errorx.GetCode(err) == errorx.CodeNotFound {
-			c.Error(err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to revoke permission"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke permission"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Permission revoked successfully",
-	})
-}
-
-// AssignEnvironmentRole assigns a role to a user in a specific environment
-// @Summary Assign environment role
-// @Description Assign a role to a user for a specific environment or globally
-// @Tags authorization
-// @Accept json
-// @Produce json
-// @Param request body map[string]interface{} true "Assignment request with user_id, role_id, and optional environment_id"
-// @Success 200 {object} map[string]interface{} "Role assigned successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request body"
-// @Failure 404 {object} map[string]interface{} "User, role, or environment not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/permissions/assign-role [post]
-// @Security BearerAuth
-func (h *AuthorizationHandler) AssignEnvironmentRole(c *gin.Context) {
-	var req struct {
-		UserID        string  `json:"user_id" binding:"required"`
-		RoleID        string  `json:"role_id" binding:"required"`
-		EnvironmentID *string `json:"environment_id"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	// Get the current user ID from context (who is assigning the role)
-	assignedBy, exists := c.Get("userID")
-	if !exists {
-		c.Error(errorx.New(errorx.CodeUnauthorized, "User not authenticated"))
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
-		return
-	}
-
-	assignedByStr, ok := assignedBy.(string)
-	if !ok {
-		c.Error(errorx.New(errorx.CodeInternalError, "Invalid user ID format"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
-		return
-	}
-
-	if err := h.authservice.AssignEnvironmentRole(c.Request.Context(), req.UserID, req.RoleID, req.EnvironmentID, assignedByStr); err != nil {
-		if errorx.GetCode(err) == errorx.CodeNotFound {
-			c.Error(err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to assign role"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign role"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Role assigned successfully",
-	})
-}
-
-// RemoveEnvironmentRole removes an environment role assignment
-// @Summary Remove environment role
-// @Description Remove a user's role assignment for a specific environment
-// @Tags authorization
-// @Produce json
-// @Param id path string true "User Environment Role ID (UUID)"
-// @Success 200 {object} map[string]interface{} "Role removed successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid ID"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/permissions/environment-roles/{id} [delete]
-// @Security BearerAuth
-func (h *AuthorizationHandler) RemoveEnvironmentRole(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "Role assignment ID is required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Role assignment ID is required"})
-		return
-	}
-
-	if err := h.authservice.RemoveEnvironmentRole(c.Request.Context(), id); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to remove role"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove role"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Role removed successfully",
-	})
-}
-
-// GetUserPermissions retrieves all permissions for a user
-// @Summary Get user permissions
-// @Description Retrieve all permissions (global, environment-specific, and resource-specific) for a user
-// @Tags authorization
-// @Produce json
-// @Param user_id path string true "User ID (UUID)"
-// @Success 200 {object} map[string]interface{} "User permissions"
-// @Failure 400 {object} map[string]interface{} "Invalid user ID"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/users/{user_id}/permissions [get]
-// @Security BearerAuth
-func (h *AuthorizationHandler) GetUserPermissions(c *gin.Context) {
-	userID := c.Param("user_id")
-	if userID == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "User ID is required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
-		return
-	}
-
-	permissions, err := h.authservice.ListUserPermissions(c.Request.Context(), userID)
+	profile, err := h.authzSvc.GetAccessProfile(requestContext(c), userID)
 	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to retrieve permissions"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve permissions"})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Permissions retrieved successfully",
-		"permissions": permissions,
-	})
+	response.OK(c, "access profile fetched", profile)
 }
 
-// GetResourcePermissions retrieves all permissions for a specific resource
-// @Summary Get resource permissions
-// @Description Retrieve all user permissions for a specific resource
-// @Tags authorization
-// @Produce json
-// @Param resource_type path string true "Resource type (server, k8s_cluster, etc.)"
-// @Param resource_id path string true "Resource ID"
-// @Success 200 {object} map[string]interface{} "Resource permissions"
-// @Failure 400 {object} map[string]interface{} "Invalid parameters"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/resources/{resource_type}/{resource_id}/permissions [get]
-// @Security BearerAuth
+// GrantResourcePermission godoc
+// @Summary      Grant direct permissions to user
+// @Tags         authorization
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.AuthorizationPermissionAssignmentRequest  true  "Permission assignment payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /permissions/grant [post]
+func (h *AuthorizationHandler) GrantResourcePermission(c *gin.Context) {
+	actorID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.AuthorizationPermissionAssignmentRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	targetUserID, err := uuid.Parse(req.UserID)
+	if err != nil {
+		response.Fail(c, 400, "invalid user_id")
+		return
+	}
+	if err := h.authzSvc.GrantPermissions(requestContext(c), actorID, targetUserID, req.PermissionIDs); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "permissions granted", gin.H{"user_id": req.UserID, "permission_ids": req.PermissionIDs})
+}
+
+// RevokeResourcePermission godoc
+// @Summary      Revoke direct permissions from user
+// @Tags         authorization
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.AuthorizationPermissionAssignmentRequest  true  "Permission revoke payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /permissions/revoke [post]
+func (h *AuthorizationHandler) RevokeResourcePermission(c *gin.Context) {
+	actorID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.AuthorizationPermissionAssignmentRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	targetUserID, err := uuid.Parse(req.UserID)
+	if err != nil {
+		response.Fail(c, 400, "invalid user_id")
+		return
+	}
+	if err := h.authzSvc.RevokePermissions(requestContext(c), actorID, targetUserID, req.PermissionIDs); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "permissions revoked", gin.H{"user_id": req.UserID, "permission_ids": req.PermissionIDs})
+}
+
+// AssignEnvironmentRole godoc
+// @Summary      Assign role to user
+// @Tags         authorization
+// @Accept       json
+// @Produce      json
+// @Param        body  body      dto.AuthorizationRoleAssignmentRequest  true  "Role assignment payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /permissions/assign-role [post]
+func (h *AuthorizationHandler) AssignEnvironmentRole(c *gin.Context) {
+	actorID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.AuthorizationRoleAssignmentRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	targetUserID, err := uuid.Parse(req.UserID)
+	if err != nil {
+		response.Fail(c, 400, "invalid user_id")
+		return
+	}
+	if err := h.authzSvc.AssignRole(requestContext(c), actorID, targetUserID, req.RoleID); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "role assigned", gin.H{"user_id": req.UserID, "role_id": req.RoleID})
+}
+
+// RemoveEnvironmentRole godoc
+// @Summary      Remove role from user
+// @Tags         authorization
+// @Produce      json
+// @Param        id       path      int     true  "Role ID"
+// @Param        user_id  query     string  true  "User ID"
+// @Success      200      {object}  response.Envelope
+// @Router       /permissions/environment-roles/{id} [delete]
+func (h *AuthorizationHandler) RemoveEnvironmentRole(c *gin.Context) {
+	actorID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	roleIDValue, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Fail(c, 400, "invalid role id")
+		return
+	}
+	targetUserID, err := uuid.Parse(c.Query("user_id"))
+	if err != nil {
+		response.Fail(c, 400, "invalid user_id")
+		return
+	}
+	if err := h.authzSvc.RemoveRole(requestContext(c), actorID, targetUserID, uint(roleIDValue)); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "role removed", gin.H{"user_id": targetUserID.String(), "role_id": uint(roleIDValue)})
+}
+
+// GetUserPermissions godoc
+// @Summary      Get user access profile
+// @Tags         authorization
+// @Produce      json
+// @Param        user_id  path      string  true  "User ID"
+// @Success      200      {object}  response.Envelope{data=dto.AccessProfile}
+// @Router       /users/{user_id}/permissions [get]
+func (h *AuthorizationHandler) GetUserPermissions(c *gin.Context) {
+	userID, err := uuid.Parse(c.Param("user_id"))
+	if err != nil {
+		response.Fail(c, 400, "invalid user_id")
+		return
+	}
+	profile, err := h.authzSvc.GetAccessProfile(requestContext(c), userID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "user access profile fetched", profile)
+}
+
+// GetResourcePermissions godoc
+// @Summary      List available permissions for a resource
+// @Tags         authorization
+// @Produce      json
+// @Param        resource_type  path      string  true  "Resource type"
+// @Param        resource_id    path      string  true  "Resource identifier"
+// @Success      200            {object}  response.Envelope
+// @Router       /resources/{resource_type}/{resource_id}/permissions [get]
 func (h *AuthorizationHandler) GetResourcePermissions(c *gin.Context) {
 	resourceType := c.Param("resource_type")
-	resourceID := c.Param("resource_id")
-
-	if resourceType == "" || resourceID == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "Resource type and ID are required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Resource type and ID are required"})
-		return
-	}
-
-	permissions, err := h.authservice.ListResourcePermissions(c.Request.Context(), domain.ResourceType(resourceType), resourceID)
+	items, err := h.permSvc.GetByResource(requestContext(c), resourceType)
 	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to retrieve permissions"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve permissions"})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Permissions retrieved successfully",
-		"permissions": permissions,
+	response.OK(c, "resource permissions fetched", gin.H{
+		"resource_type": resourceType,
+		"resource_id":   c.Param("resource_id"),
+		"permissions":   items,
 	})
 }
 
-// CleanupExpiredPermissions removes expired resource permissions
-// @Summary Cleanup expired permissions
-// @Description Remove all resource permissions that have expired
-// @Tags authorization
-// @Produce json
-// @Success 200 {object} map[string]interface{} "Cleanup completed"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/permissions/cleanup [post]
-// @Security BearerAuth
+// CleanupExpiredPermissions godoc
+// @Summary      Cleanup expired authorization grants
+// @Tags         authorization
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /permissions/cleanup [post]
 func (h *AuthorizationHandler) CleanupExpiredPermissions(c *gin.Context) {
-	count, err := h.authservice.CleanupExpiredPermissions(c.Request.Context())
-	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to cleanup permissions"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cleanup permissions"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":       "Cleanup completed successfully",
-		"deleted_count": count,
-	})
+	response.OK(c, "no expiring authorization grants configured", gin.H{"deleted_count": 0})
 }

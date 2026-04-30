@@ -3,17 +3,12 @@ package impl
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
-)
-
-var (
-	ErrRefreshTokenNotFound = errors.New("refresh token not found")
-	ErrRefreshTokenExpired  = errors.New("refresh token expired")
-	ErrRefreshTokenRevoked  = errors.New("refresh token revoked")
 )
 
 type AuthRepository struct {
@@ -24,413 +19,225 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-// Basic CRUD operations
 func (r *AuthRepository) SaveRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
-	if err := r.db.WithContext(ctx).Create(token).Error; err != nil {
-		return fmt.Errorf("failed to save refresh token: %w", err)
-	}
-	return nil
+	return r.db.WithContext(ctx).Create(token).Error
 }
 
 func (r *AuthRepository) GetRefreshTokenByID(ctx context.Context, tokenID string) (*domain.RefreshToken, error) {
-	var refreshToken domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		First(&refreshToken, "id = ?", tokenID).Error
-
+	id, err := uuid.Parse(tokenID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrRefreshTokenNotFound
-		}
-		return nil, fmt.Errorf("failed to get refresh token by ID: %w", err)
+		return nil, err
 	}
-
+	var refreshToken domain.RefreshToken
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&refreshToken).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, repository.ErrRefreshTokenNotFound
+		}
+		return nil, err
+	}
 	return &refreshToken, nil
 }
 
 func (r *AuthRepository) GetRefreshTokenByToken(ctx context.Context, token string) (*domain.RefreshToken, error) {
 	var refreshToken domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		First(&refreshToken, "token = ?", token).Error
-
-	if err != nil {
+	if err := r.db.WithContext(ctx).Where("token = ?", token).First(&refreshToken).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrRefreshTokenNotFound
+			return nil, repository.ErrRefreshTokenNotFound
 		}
-		return nil, fmt.Errorf("failed to get refresh token: %w", err)
+		return nil, err
 	}
-
 	return &refreshToken, nil
 }
 
-func (r *AuthRepository) GetRefreshTokensByUserID(ctx context.Context, userID string) ([]*domain.RefreshToken, error) {
+func (r *AuthRepository) GetRefreshTokensByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.RefreshToken, error) {
 	var tokens []*domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		Where("user_id = ?", userID).
-		Order("created_at DESC").
-		Find(&tokens).Error
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get refresh tokens by user ID: %w", err)
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).Order("created_at DESC").Find(&tokens).Error; err != nil {
+		return nil, err
 	}
-
 	return tokens, nil
 }
 
 func (r *AuthRepository) UpdateRefreshToken(ctx context.Context, token *domain.RefreshToken) error {
-	result := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("id = ?", token.ID).
-		Updates(token)
-
+	result := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("id = ?", token.ID).Updates(token)
 	if result.Error != nil {
-		return fmt.Errorf("failed to update refresh token: %w", result.Error)
+		return result.Error
 	}
-
 	if result.RowsAffected == 0 {
-		return ErrRefreshTokenNotFound
+		return repository.ErrRefreshTokenNotFound
 	}
-
 	return nil
 }
 
 func (r *AuthRepository) DeleteRefreshToken(ctx context.Context, tokenID string) error {
-	result := r.db.WithContext(ctx).
-		Delete(&domain.RefreshToken{}, "id = ?", tokenID)
-
+	id, err := uuid.Parse(tokenID)
+	if err != nil {
+		return err
+	}
+	result := r.db.WithContext(ctx).Delete(&domain.RefreshToken{}, "id = ?", id)
 	if result.Error != nil {
-		return fmt.Errorf("failed to delete refresh token: %w", result.Error)
+		return result.Error
 	}
-
 	if result.RowsAffected == 0 {
-		return ErrRefreshTokenNotFound
+		return repository.ErrRefreshTokenNotFound
 	}
-
 	return nil
 }
 
-// Token validation and status
-
 func (r *AuthRepository) IsTokenValid(ctx context.Context, token string) (bool, error) {
-	var refreshToken domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		Select("id, expires_at, is_revoked").
-		First(&refreshToken, "token = ?", token).Error
-
+	refreshToken, err := r.GetRefreshTokenByToken(ctx, token)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, ErrRefreshTokenNotFound
-		}
-		return false, fmt.Errorf("failed to check token validity: %w", err)
+		return false, err
 	}
-
-	if refreshToken.IsRevoked {
-		return false, ErrRefreshTokenRevoked
+	if refreshToken.Revoked {
+		return false, repository.ErrRefreshTokenRevoked
 	}
-
-	if refreshToken.ExpiresAt.Before(time.Now()) {
-		return false, ErrRefreshTokenExpired
+	if refreshToken.IsExpired() {
+		return false, repository.ErrRefreshTokenExpired
 	}
-
 	return true, nil
 }
 
-func (r *AuthRepository) GetActiveRefreshTokensByUserID(ctx context.Context, userID string) ([]*domain.RefreshToken, error) {
+func (r *AuthRepository) GetActiveRefreshTokensByUserID(ctx context.Context, userID uuid.UUID) ([]*domain.RefreshToken, error) {
 	var tokens []*domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, time.Now()).
-		Order("created_at DESC").
-		Find(&tokens).Error
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to get active refresh tokens: %w", err)
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND revoked = false AND expires_at > ?", userID, time.Now()).Order("created_at DESC").Find(&tokens).Error; err != nil {
+		return nil, err
 	}
-
 	return tokens, nil
 }
 
-func (r *AuthRepository) GetUserTokenCount(ctx context.Context, userID string) (int64, error) {
+func (r *AuthRepository) GetUserTokenCount(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
-	err := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ?", userID).
-		Count(&count).Error
-
-	if err != nil {
-		return 0, fmt.Errorf("failed to get user token count: %w", err)
-	}
-
-	return count, nil
+	err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ?", userID).Count(&count).Error
+	return count, err
 }
 
-func (r *AuthRepository) GetActiveUserTokenCount(ctx context.Context, userID string) (int64, error) {
+func (r *AuthRepository) GetActiveUserTokenCount(ctx context.Context, userID uuid.UUID) (int64, error) {
 	var count int64
-	err := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, time.Now()).
-		Count(&count).Error
-
-	if err != nil {
-		return 0, fmt.Errorf("failed to get active user token count: %w", err)
-	}
-
-	return count, nil
+	err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ? AND revoked = false AND expires_at > ?", userID, time.Now()).Count(&count).Error
+	return count, err
 }
-
-// Token revocation
 
 func (r *AuthRepository) RevokeRefreshToken(ctx context.Context, tokenID string) error {
+	id, err := uuid.Parse(tokenID)
+	if err != nil {
+		return err
+	}
 	now := time.Now()
-	result := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("id = ?", tokenID).
-		Updates(map[string]interface{}{
-			"is_revoked": true,
-			"revoked_at": now,
-		})
-
+	result := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("id = ?", id).Updates(map[string]any{"revoked": true, "revoked_at": &now})
 	if result.Error != nil {
-		return fmt.Errorf("failed to revoke refresh token: %w", result.Error)
+		return result.Error
 	}
-
 	if result.RowsAffected == 0 {
-		return ErrRefreshTokenNotFound
+		return repository.ErrRefreshTokenNotFound
 	}
-
 	return nil
 }
 
 func (r *AuthRepository) RevokeRefreshTokenByToken(ctx context.Context, token string) error {
 	now := time.Now()
-	result := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("token = ?", token).
-		Updates(map[string]interface{}{
-			"is_revoked": true,
-			"revoked_at": now,
-		})
-
+	result := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("token = ?", token).Updates(map[string]any{"revoked": true, "revoked_at": &now})
 	if result.Error != nil {
-		return fmt.Errorf("failed to revoke refresh token by token: %w", result.Error)
+		return result.Error
 	}
-
 	if result.RowsAffected == 0 {
-		return ErrRefreshTokenNotFound
+		return repository.ErrRefreshTokenNotFound
 	}
-
 	return nil
 }
 
-func (r *AuthRepository) RevokeAllRefreshTokensForUser(ctx context.Context, userID string) error {
+func (r *AuthRepository) RevokeAllRefreshTokensForUser(ctx context.Context, userID uuid.UUID) error {
 	now := time.Now()
-	err := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = false", userID).
-		Updates(map[string]interface{}{
-			"is_revoked": true,
-			"revoked_at": now,
-		}).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to revoke all refresh tokens for user: %w", err)
-	}
-
-	return nil
+	return r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ? AND revoked = false", userID).Updates(map[string]any{"revoked": true, "revoked_at": &now}).Error
 }
 
-func (r *AuthRepository) RevokeOldestTokensForUser(ctx context.Context, userID string, keepCount int) error {
-	// Get all tokens ordered by creation date (newest first)
+func (r *AuthRepository) RevokeOldestTokensForUser(ctx context.Context, userID uuid.UUID, keepCount int) error {
 	var tokens []*domain.RefreshToken
-	err := r.db.WithContext(ctx).
-		Where("user_id = ? AND is_revoked = false", userID).
-		Order("created_at DESC").
-		Find(&tokens).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to get tokens for revocation: %w", err)
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND revoked = false", userID).Order("created_at DESC").Find(&tokens).Error; err != nil {
+		return err
 	}
-
-	// If we have fewer tokens than keepCount, nothing to revoke
 	if len(tokens) <= keepCount {
 		return nil
 	}
-
-	// Get token IDs to revoke (oldest ones)
-	tokensToRevoke := tokens[keepCount:]
-	tokenIDs := make([]string, len(tokensToRevoke))
-	for i, token := range tokensToRevoke {
-		tokenIDs[i] = token.ID
+	ids := make([]uint, 0, len(tokens)-keepCount)
+	for _, token := range tokens[keepCount:] {
+		ids = append(ids, token.ID)
 	}
-
-	// Revoke the oldest tokens
 	now := time.Now()
-	err = r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("id IN ?", tokenIDs).
-		Updates(map[string]interface{}{
-			"is_revoked": true,
-			"revoked_at": now,
-		}).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to revoke oldest tokens: %w", err)
-	}
-
-	return nil
+	return r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("id IN ?", ids).Updates(map[string]any{"revoked": true, "revoked_at": &now}).Error
 }
 
-// Token cleanup and maintenance
-
 func (r *AuthRepository) DeleteExpiredRefreshTokens(ctx context.Context) error {
-	err := r.db.WithContext(ctx).
-		Where("expires_at < ?", time.Now()).
-		Delete(&domain.RefreshToken{}).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to delete expired refresh tokens: %w", err)
-	}
-
-	return nil
+	return r.db.WithContext(ctx).Where("expires_at < ?", time.Now()).Delete(&domain.RefreshToken{}).Error
 }
 
 func (r *AuthRepository) DeleteRevokedRefreshTokens(ctx context.Context, olderThan time.Time) error {
-	err := r.db.WithContext(ctx).
-		Where("is_revoked = true AND revoked_at < ?", olderThan).
-		Delete(&domain.RefreshToken{}).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to delete revoked refresh tokens: %w", err)
-	}
-
-	return nil
+	return r.db.WithContext(ctx).Where("revoked = true AND revoked_at < ?", olderThan).Delete(&domain.RefreshToken{}).Error
 }
 
-func (r *AuthRepository) CleanupUserTokens(ctx context.Context, userID string, maxTokens int) error {
-	// Get count of active tokens
+func (r *AuthRepository) CleanupUserTokens(ctx context.Context, userID uuid.UUID, maxTokens int) error {
 	count, err := r.GetActiveUserTokenCount(ctx, userID)
-	if err != nil {
+	if err != nil || count <= int64(maxTokens) {
 		return err
 	}
-
-	// If under limit, no cleanup needed
-	if count <= int64(maxTokens) {
-		return nil
-	}
-
-	// Revoke oldest tokens to bring count down to maxTokens
 	return r.RevokeOldestTokensForUser(ctx, userID, maxTokens)
 }
 
-// Token usage tracking
-
 func (r *AuthRepository) UpdateLastUsedAt(ctx context.Context, tokenID string) error {
-	now := time.Now()
-	result := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("id = ?", tokenID).
-		Update("last_used_at", now)
-
+	id, err := uuid.Parse(tokenID)
+	if err != nil {
+		return err
+	}
+	result := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("id = ?", id).Update("updated_at", time.Now())
 	if result.Error != nil {
-		return fmt.Errorf("failed to update last used at: %w", result.Error)
+		return result.Error
 	}
-
 	if result.RowsAffected == 0 {
-		return ErrRefreshTokenNotFound
+		return repository.ErrRefreshTokenNotFound
 	}
-
 	return nil
 }
 
-func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID string) (*TokenUsageStats, error) {
-	var stats TokenUsageStats
+func (r *AuthRepository) GetTokenUsageStats(ctx context.Context, userID uuid.UUID) (*repository.TokenUsageStats, error) {
+	stats := &repository.TokenUsageStats{}
 	now := time.Now()
-
-	// Total tokens
-	err := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ?", userID).
-		Count(&stats.TotalTokens).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get total token count: %w", err)
+	if err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ?", userID).Count(&stats.TotalTokens).Error; err != nil {
+		return nil, err
 	}
-
-	// Active tokens
-	err = r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = false AND expires_at > ?", userID, now).
-		Count(&stats.ActiveTokens).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get active token count: %w", err)
+	if err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ? AND revoked = false AND expires_at > ?", userID, now).Count(&stats.ActiveTokens).Error; err != nil {
+		return nil, err
 	}
-
-	// Revoked tokens
-	err = r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = true", userID).
-		Count(&stats.RevokedTokens).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get revoked token count: %w", err)
+	if err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ? AND revoked = true", userID).Count(&stats.RevokedTokens).Error; err != nil {
+		return nil, err
 	}
-
-	// Expired tokens
-	err = r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = false AND expires_at <= ?", userID, now).
-		Count(&stats.ExpiredTokens).Error
-	if err != nil {
-		return nil, fmt.Errorf("failed to get expired token count: %w", err)
+	if err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ? AND revoked = false AND expires_at <= ?", userID, now).Count(&stats.ExpiredTokens).Error; err != nil {
+		return nil, err
 	}
-
-	// Last used at
-	var lastUsed time.Time
-	err = r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("user_id = ?", userID).
-		Select("MAX(last_used_at)").
-		Scan(&lastUsed).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("failed to get last used at: %w", err)
+	var lastUpdated time.Time
+	if err := r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("user_id = ?", userID).Select("MAX(updated_at)").Scan(&lastUpdated).Error; err == nil && !lastUpdated.IsZero() {
+		stats.LastUsedAt = &lastUpdated
 	}
-	if !lastUsed.IsZero() {
-		stats.LastUsedAt = &lastUsed
-	}
-
-	return &stats, nil
+	return stats, nil
 }
-
-// Batch operations
 
 func (r *AuthRepository) SaveRefreshTokens(ctx context.Context, tokens []*domain.RefreshToken) error {
 	if len(tokens) == 0 {
 		return nil
 	}
-
-	err := r.db.WithContext(ctx).
-		CreateInBatches(tokens, 100).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to save refresh tokens in batch: %w", err)
-	}
-
-	return nil
+	return r.db.WithContext(ctx).CreateInBatches(tokens, 100).Error
 }
 
 func (r *AuthRepository) RevokeRefreshTokens(ctx context.Context, tokenIDs []string) error {
 	if len(tokenIDs) == 0 {
 		return nil
 	}
-
-	now := time.Now()
-	err := r.db.WithContext(ctx).
-		Model(&domain.RefreshToken{}).
-		Where("id IN ?", tokenIDs).
-		Updates(map[string]interface{}{
-			"is_revoked": true,
-			"revoked_at": now,
-		}).Error
-
-	if err != nil {
-		return fmt.Errorf("failed to revoke refresh tokens in batch: %w", err)
+	ids := make([]uuid.UUID, 0, len(tokenIDs))
+	for _, raw := range tokenIDs {
+		id, err := uuid.Parse(raw)
+		if err != nil {
+			return err
+		}
+		ids = append(ids, id)
 	}
-
-	return nil
+	now := time.Now()
+	return r.db.WithContext(ctx).Model(&domain.RefreshToken{}).Where("id IN ?", ids).Updates(map[string]any{"revoked": true, "revoked_at": &now}).Error
 }

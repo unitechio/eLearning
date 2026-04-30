@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -19,15 +20,17 @@ type PracticeUsecase struct {
 	llm            ai.LLMService
 }
 
-func NewPracticeService(repo repository.PracticeRepository, vocabularyRepo repository.VocabularyRepository, llm ai.LLMUsecase) *PracticeUsecase {
+func NewPracticeService(repo repository.PracticeRepository, vocabularyRepo repository.VocabularyRepository, llm ai.LLMService) *PracticeUsecase {
 	return &PracticeUsecase{repo: repo, vocabularyRepo: vocabularyRepo, llm: llm}
 }
 
-func (s *PracticeUsecase) GetModes() (*dto.PracticeModesResponse, error) {
+func (s *PracticeUsecase) GetModes(ctx context.Context) (*dto.PracticeModesResponse, error) {
+	_ = ctx
 	return &dto.PracticeModesResponse{Modes: []string{"dictation", "shadowing", "speaking", "writing", "vocabulary"}}, nil
 }
 
-func (s *PracticeUsecase) Start(userID uuid.UUID, req dto.PracticeStartRequest) (*dto.PracticeSessionItem, error) {
+func (s *PracticeUsecase) Start(ctx context.Context, userID uuid.UUID, req dto.PracticeStartRequest) (*dto.PracticeSessionItem, error) {
+	_ = ctx
 	mode := strings.ToLower(strings.TrimSpace(req.Mode))
 	if mode == "" {
 		return nil, apperr.BadRequest("mode is required")
@@ -52,7 +55,8 @@ func (s *PracticeUsecase) Start(userID uuid.UUID, req dto.PracticeStartRequest) 
 	return mapPracticeSession(session), nil
 }
 
-func (s *PracticeUsecase) Submit(userID uuid.UUID, req dto.PracticeSubmitRequest) (*dto.PracticeSessionItem, error) {
+func (s *PracticeUsecase) Submit(ctx context.Context, userID uuid.UUID, req dto.PracticeSubmitRequest) (*dto.PracticeSessionItem, error) {
+	_ = ctx
 	sessionID, err := uuid.Parse(req.SessionID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid session id")
@@ -80,15 +84,16 @@ func (s *PracticeUsecase) Submit(userID uuid.UUID, req dto.PracticeSubmitRequest
 	return mapPracticeSession(session), nil
 }
 
-func (s *PracticeUsecase) AnalyzeWord(userID uuid.UUID, req dto.PronunciationAnalyzeWordRequest) (*dto.PronunciationHistoryItem, error) {
-	return s.savePronunciation(userID, "word", req.Word)
+func (s *PracticeUsecase) AnalyzeWord(ctx context.Context, userID uuid.UUID, req dto.PronunciationAnalyzeWordRequest) (*dto.PronunciationHistoryItem, error) {
+	return s.savePronunciation(ctx, userID, "word", req.Word)
 }
 
-func (s *PracticeUsecase) AnalyzeSentence(userID uuid.UUID, req dto.PronunciationAnalyzeSentenceRequest) (*dto.PronunciationHistoryItem, error) {
-	return s.savePronunciation(userID, "sentence", req.Sentence)
+func (s *PracticeUsecase) AnalyzeSentence(ctx context.Context, userID uuid.UUID, req dto.PronunciationAnalyzeSentenceRequest) (*dto.PronunciationHistoryItem, error) {
+	return s.savePronunciation(ctx, userID, "sentence", req.Sentence)
 }
 
-func (s *PracticeUsecase) ListPronunciationHistory(userID uuid.UUID, query dto.PronunciationHistoryQuery) (*dto.PageResult[dto.PronunciationHistoryItem], error) {
+func (s *PracticeUsecase) ListPronunciationHistory(ctx context.Context, userID uuid.UUID, query dto.PronunciationHistoryQuery) (*dto.PageResult[dto.PronunciationHistoryItem], error) {
+	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, total, err := s.repo.ListPronunciationHistory(userID, repository.PronunciationHistoryFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
@@ -111,7 +116,8 @@ func (s *PracticeUsecase) ListPronunciationHistory(userID uuid.UUID, query dto.P
 	return &dto.PageResult[dto.PronunciationHistoryItem]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *PracticeUsecase) LookupDictionary(userID uuid.UUID, word string) (*dto.DictionaryLookupResponse, error) {
+func (s *PracticeUsecase) LookupDictionary(ctx context.Context, userID uuid.UUID, word string) (*dto.DictionaryLookupResponse, error) {
+	_ = ctx
 	word = strings.TrimSpace(word)
 	if word == "" {
 		return nil, apperr.BadRequest("word is required")
@@ -137,8 +143,8 @@ func (s *PracticeUsecase) LookupDictionary(userID uuid.UUID, word string) (*dto.
 	return mapDictionaryHistory(item), nil
 }
 
-func (s *PracticeUsecase) SaveDictionaryWord(userID uuid.UUID, req dto.DictionarySaveRequest) (*dto.DictionaryLookupResponse, error) {
-	item, err := s.LookupDictionary(userID, req.Word)
+func (s *PracticeUsecase) SaveDictionaryWord(ctx context.Context, userID uuid.UUID, req dto.DictionarySaveRequest) (*dto.DictionaryLookupResponse, error) {
+	item, err := s.LookupDictionary(ctx, userID, req.Word)
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +171,8 @@ func (s *PracticeUsecase) SaveDictionaryWord(userID uuid.UUID, req dto.Dictionar
 	return item, nil
 }
 
-func (s *PracticeUsecase) ListDictionaryHistory(userID uuid.UUID, query dto.DictionaryHistoryQuery) (*dto.PageResult[dto.DictionaryLookupResponse], error) {
+func (s *PracticeUsecase) ListDictionaryHistory(ctx context.Context, userID uuid.UUID, query dto.DictionaryHistoryQuery) (*dto.PageResult[dto.DictionaryLookupResponse], error) {
+	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, total, err := s.repo.ListDictionaryHistory(userID, repository.DictionaryHistoryFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
@@ -182,15 +189,16 @@ func (s *PracticeUsecase) ListDictionaryHistory(userID uuid.UUID, query dto.Dict
 	return &dto.PageResult[dto.DictionaryLookupResponse]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *PracticeUsecase) ReadingLookup(userID uuid.UUID, req dto.ReadingLookupRequest) (*dto.DictionaryLookupResponse, error) {
-	return s.LookupDictionary(userID, req.Word)
+func (s *PracticeUsecase) ReadingLookup(ctx context.Context, userID uuid.UUID, req dto.ReadingLookupRequest) (*dto.DictionaryLookupResponse, error) {
+	return s.LookupDictionary(ctx, userID, req.Word)
 }
 
-func (s *PracticeUsecase) ReadingSaveWord(userID uuid.UUID, req dto.ReadingSaveWordRequest) (*dto.DictionaryLookupResponse, error) {
-	return s.SaveDictionaryWord(userID, dto.DictionarySaveRequest{Word: req.Word})
+func (s *PracticeUsecase) ReadingSaveWord(ctx context.Context, userID uuid.UUID, req dto.ReadingSaveWordRequest) (*dto.DictionaryLookupResponse, error) {
+	return s.SaveDictionaryWord(ctx, userID, dto.DictionarySaveRequest{Word: req.Word})
 }
 
-func (s *PracticeUsecase) ListVocabularySets(userID uuid.UUID, query dto.VocabularySetListQuery) (*dto.PageResult[dto.VocabularySetItem], error) {
+func (s *PracticeUsecase) ListVocabularySets(ctx context.Context, userID uuid.UUID, query dto.VocabularySetListQuery) (*dto.PageResult[dto.VocabularySetItem], error) {
+	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, total, err := s.repo.ListVocabularySets(userID, repository.VocabularySetFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
@@ -212,7 +220,8 @@ func (s *PracticeUsecase) ListVocabularySets(userID uuid.UUID, query dto.Vocabul
 	return &dto.PageResult[dto.VocabularySetItem]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *PracticeUsecase) CreateVocabularySet(userID uuid.UUID, req dto.VocabularySetRequest) (*dto.VocabularySetItem, error) {
+func (s *PracticeUsecase) CreateVocabularySet(ctx context.Context, userID uuid.UUID, req dto.VocabularySetRequest) (*dto.VocabularySetItem, error) {
+	_ = ctx
 	item := &domain.VocabularySet{UserID: userID, TenantID: uuid.Nil, Name: req.Name, Description: req.Description, Domain: fallback(req.Domain, "english")}
 	if err := s.repo.CreateVocabularySet(item); err != nil {
 		return nil, apperr.Internal(err)
@@ -220,7 +229,8 @@ func (s *PracticeUsecase) CreateVocabularySet(userID uuid.UUID, req dto.Vocabula
 	return &dto.VocabularySetItem{ID: item.ID.String(), Name: item.Name, Description: item.Description, Domain: item.Domain}, nil
 }
 
-func (s *PracticeUsecase) GetVocabularySet(userID uuid.UUID, id string) (*dto.VocabularySetItem, error) {
+func (s *PracticeUsecase) GetVocabularySet(ctx context.Context, userID uuid.UUID, id string) (*dto.VocabularySetItem, error) {
+	_ = ctx
 	setID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid set id")
@@ -243,7 +253,8 @@ func (s *PracticeUsecase) GetVocabularySet(userID uuid.UUID, id string) (*dto.Vo
 	return &dto.VocabularySetItem{ID: item.ID.String(), Name: item.Name, Description: item.Description, Domain: item.Domain, Words: wordNames}, nil
 }
 
-func (s *PracticeUsecase) AddWordToSet(userID uuid.UUID, id string, req dto.VocabularySetAddWordRequest) (*dto.VocabularySetItem, error) {
+func (s *PracticeUsecase) AddWordToSet(ctx context.Context, userID uuid.UUID, id string, req dto.VocabularySetAddWordRequest) (*dto.VocabularySetItem, error) {
+	_ = ctx
 	setID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid set id")
@@ -267,10 +278,11 @@ func (s *PracticeUsecase) AddWordToSet(userID uuid.UUID, id string, req dto.Voca
 	if err := s.repo.AddWordToSet(&domain.VocabularySetWord{SetID: setID, WordID: wordID}); err != nil {
 		return nil, apperr.Internal(err)
 	}
-	return s.GetVocabularySet(userID, id)
+	return s.GetVocabularySet(ctx, userID, id)
 }
 
-func (s *PracticeUsecase) StreamResponse(userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
+func (s *PracticeUsecase) StreamResponse(ctx context.Context, userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
+	_ = ctx
 	_ = userID
 	return map[string]any{
 		"chunks": []string{
@@ -282,15 +294,16 @@ func (s *PracticeUsecase) StreamResponse(userID uuid.UUID, req dto.AIStreamReque
 	}, nil
 }
 
-func (s *PracticeUsecase) PronunciationFeedback(userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
-	item, err := s.savePronunciation(userID, "sentence", req.Message)
+func (s *PracticeUsecase) PronunciationFeedback(ctx context.Context, userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
+	item, err := s.savePronunciation(ctx, userID, "sentence", req.Message)
 	if err != nil {
 		return nil, err
 	}
 	return map[string]any{"accuracy": item.Accuracy, "feedback": item.Feedback, "source": item.Source}, nil
 }
 
-func (s *PracticeUsecase) ContextCorrection(userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
+func (s *PracticeUsecase) ContextCorrection(ctx context.Context, userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
+	_ = ctx
 	_ = userID
 	return map[string]any{
 		"original":  req.Message,
@@ -299,7 +312,8 @@ func (s *PracticeUsecase) ContextCorrection(userID uuid.UUID, req dto.AIStreamRe
 	}, nil
 }
 
-func (s *PracticeUsecase) savePronunciation(userID uuid.UUID, kind, source string) (*dto.PronunciationHistoryItem, error) {
+func (s *PracticeUsecase) savePronunciation(ctx context.Context, userID uuid.UUID, kind, source string) (*dto.PronunciationHistoryItem, error) {
+	_ = ctx
 	eval, err := s.llm.EvaluateSpeaking(source)
 	if err != nil {
 		return nil, apperr.Internal(err)

@@ -15,7 +15,9 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/http/middleware"
 	"github.com/unitechio/eLearning/apps/api/internal/http/route"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
+	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	repoimpl "github.com/unitechio/eLearning/apps/api/internal/repository/impl"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	svcimpl "github.com/unitechio/eLearning/apps/api/internal/usecase/impl"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
 )
@@ -40,31 +42,44 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	}
 
 	userRepo := repoimpl.NewUserRepository(dbInstance)
+	roleRepo := repoimpl.NewRoleRepository(dbInstance)
 	courseRepo := repoimpl.NewCourseRepository(dbInstance)
 	activityRepo := repoimpl.NewActivityRepository(dbInstance)
 	progressRepo := repoimpl.NewProgressRepository(dbInstance)
 	plannerRepo := repoimpl.NewPlannerRepository(dbInstance)
 	notificationRepo := repoimpl.NewNotificationRepository(dbInstance)
 	billingRepo := repoimpl.NewBillingRepository(dbInstance)
+	permissionRepo := repoimpl.NewPermissionRepository(dbInstance)
 	vocabularyRepo := repoimpl.NewVocabularyRepository(dbInstance)
 	writingRepo := repoimpl.NewWritingRepository(dbInstance)
 	speakingRepo := repoimpl.NewSpeakingRepository(dbInstance)
 	listeningRepo := repoimpl.NewListeningRepository(dbInstance)
 	engagementRepo := repoimpl.NewEngagementRepository(dbInstance)
 	practiceRepo := repoimpl.NewPracticeRepository(dbInstance)
+	authRepo := repoimpl.NewAuthRepository(dbInstance)
+	sessionRepo := repoimpl.NewSessionRepository(dbInstance)
+	loginAttemptRepo := repoimpl.NewLoginAttemptRepository(dbInstance)
+	environmentRepo := repository.NewEnvironmentRepository(dbInstance)
+	featureFlagRepo := repoimpl.NewFeatureFlagRepository(dbInstance)
+	systemSettingRepo := repoimpl.NewSystemSettingRepository(dbInstance)
+	licenseRepo := repoimpl.NewLicenseRepository(dbInstance)
+	auditRepo := repoimpl.NewAuditRepository(dbInstance)
+	emailRepo := repoimpl.NewEmailRepository(dbInstance)
+	userSettingsRepo := repository.NewUserSettingsRepository(dbInstance)
 
 	llmSvc := ai.NewLLMService()
 	sttSvc := ai.NewSTTService()
-	authWorkflowSvc := svcimpl.NewAuthWorkflowService()
 	authorizationSvc := svcimpl.NewAuthorizationService(userRepo, billingRepo)
-	courseSvc := svcimpl.NewCourseService(courseRepo)
-	activitySvc := svcimpl.NewActivityService(activityRepo)
+	permissionSvc := usecase.NewPermissionUsecase(permissionRepo)
+	roleSvc := usecase.NewRoleUsecase(roleRepo)
+	courseSvc := svcimpl.NewCourseService(courseRepo, authorizationSvc)
+	activitySvc := svcimpl.NewActivityService(activityRepo, authorizationSvc)
 	userInsightsSvc := svcimpl.NewUserInsightsService(progressRepo, activityRepo)
 	progressSvc := svcimpl.NewProgressService(progressRepo)
 	plannerSvc := svcimpl.NewPlannerService(plannerRepo)
 	notificationSvc := svcimpl.NewNotificationService(notificationRepo)
 	adminSvc := svcimpl.NewAdminService(userRepo, courseRepo, progressRepo, activityRepo)
-	billingSvc := svcimpl.NewBillingService(billingRepo)
+	billingSvc := svcimpl.NewBillingService(billingRepo, userRepo)
 	engagementSvc := svcimpl.NewEngagementService(engagementRepo, progressRepo, activityRepo, billingRepo)
 	practiceSvc := svcimpl.NewPracticeService(practiceRepo, vocabularyRepo, llmSvc)
 	writingExtrasSvc := svcimpl.NewWritingExtrasService(writingRepo, llmSvc)
@@ -76,13 +91,21 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	academyAISvc := svcimpl.NewAIService(llmSvc)
 	vocabularySvc := svcimpl.NewVocabularyService(vocabularyRepo)
 	userSvc := svcimpl.NewUserService(userRepo)
-	authSvc := svcimpl.NewAuthService(userRepo, &cfg.JWT)
+	authSvc := svcimpl.NewAuthService(userRepo, authRepo, sessionRepo, loginAttemptRepo, &cfg.JWT)
+	environmentSvc := svcimpl.NewEnvironmentUsecase(environmentRepo)
+	featureFlagSvc := svcimpl.NewFeatureFlagUsecase(featureFlagRepo)
+	systemSettingSvc := usecase.NewSystemSettingUsecase(systemSettingRepo)
+	licenseSvc := svcimpl.NewLicenseUsecase(licenseRepo)
+	auditSvc := usecase.NewAuditUsecase(auditRepo)
+	emailSvc := svcimpl.NewEmailUsecase(emailRepo)
+	userSettingsSvc := svcimpl.NewUserSettingsUsecase(userSettingsRepo)
 
 	handlers := route.Handlers{
 		Auth:             handler.NewAuthHandler(authSvc),
-		AuthWorkflow:     handler.NewAuthWorkflowHandler(authWorkflowSvc),
+		AuthWorkflow:     handler.NewAuthWorkflowHandler(authSvc),
 		User:             handler.NewUserHandler(userSvc),
 		UserInsights:     handler.NewUserInsightsHandler(userInsightsSvc),
+		UserSettings:     handler.NewUserSettingsHandler(userSettingsSvc),
 		Speaking:         handler.NewSpeakingHandler(speakingSvc),
 		SpeakingExtras:   handler.NewSpeakingExtrasHandler(speakingExtrasSvc),
 		Vocabulary:       handler.NewVocabularyHandler(vocabularySvc),
@@ -98,8 +121,17 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Notification:     handler.NewNotificationHandler(notificationSvc),
 		Engagement:       handler.NewEngagementHandler(engagementSvc),
 		Practice:         handler.NewPracticeHandler(practiceSvc),
-		Admin:            handler.NewAdminHandler(adminSvc, courseSvc),
+		Admin:            handler.NewAdminHandler(adminSvc),
 		Billing:          handler.NewBillingHandler(billingSvc),
+		Environment:      handler.NewEnvironmentHandler(environmentSvc),
+		FeatureFlag:      handler.NewFeatureFlagHandler(featureFlagSvc),
+		SystemSetting:    handler.NewSystemSettingHandler(systemSettingSvc),
+		License:          handler.NewLicenseHandler(licenseSvc),
+		Audit:            handler.NewAuditHandler(auditSvc),
+		Email:            handler.NewEmailHandler(emailSvc),
+		Authorization:    handler.NewAuthorizationHandler(authorizationSvc, permissionSvc),
+		Role:             handler.NewRoleHandler(roleSvc),
+		Permission:       handler.NewPermissionHandler(permissionSvc),
 		Realtime:         handler.NewRealtimeHandler(),
 	}
 

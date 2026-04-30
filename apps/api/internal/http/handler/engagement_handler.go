@@ -3,8 +3,17 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type EngagementHandler struct {
+	svc usecase.EngagementService
+}
+
+func NewEngagementHandler(svc usecase.EngagementService) *EngagementHandler {
+	return &EngagementHandler{svc: svc}
+}
 
 // Leaderboard godoc
 // @Summary      Get leaderboard

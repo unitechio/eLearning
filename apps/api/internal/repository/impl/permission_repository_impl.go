@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"gorm.io/gorm"
 )
 
@@ -48,7 +49,7 @@ func (r *PermissionRepository) GetByName(ctx context.Context, name string) (*dom
 	return &permission, nil
 }
 
-func (r *PermissionRepository) List(ctx context.Context, filter domain.PermissionFilter) ([]*domain.Permission, int64, error) {
+func (r *PermissionRepository) List(ctx context.Context, filter dto.PermissionFilter) ([]*domain.Permission, int64, error) {
 	var permissions []*domain.Permission
 	var total int64
 
@@ -66,6 +67,7 @@ func (r *PermissionRepository) List(ctx context.Context, filter domain.Permissio
 		return nil, 0, err
 	}
 
+	filter.PaginationQuery = filter.PaginationQuery.Normalize()
 	offset := (filter.Page - 1) * filter.PageSize
 	query = query.Offset(offset).Limit(filter.PageSize)
 

@@ -3,8 +3,49 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type WritingExtrasHandler struct {
+	svc usecase.WritingExtrasService
+}
+
+type SpeakingExtrasHandler struct {
+	svc usecase.SpeakingExtrasService
+}
+
+type VocabularyExtrasHandler struct {
+	svc usecase.VocabularyExtrasService
+}
+
+type ListeningHandler struct {
+	svc usecase.ListeningService
+}
+
+type AIHandler struct {
+	svc usecase.AIService
+}
+
+func NewWritingExtrasHandler(svc usecase.WritingExtrasService) *WritingExtrasHandler {
+	return &WritingExtrasHandler{svc: svc}
+}
+
+func NewSpeakingExtrasHandler(svc usecase.SpeakingExtrasService) *SpeakingExtrasHandler {
+	return &SpeakingExtrasHandler{svc: svc}
+}
+
+func NewVocabularyExtrasHandler(svc usecase.VocabularyExtrasService) *VocabularyExtrasHandler {
+	return &VocabularyExtrasHandler{svc: svc}
+}
+
+func NewListeningHandler(svc usecase.ListeningService) *ListeningHandler {
+	return &ListeningHandler{svc: svc}
+}
+
+func NewAIHandler(svc usecase.AIService) *AIHandler {
+	return &AIHandler{svc: svc}
+}
 
 // GetByID godoc
 // @Summary      Get writing item by id
@@ -20,7 +61,7 @@ func (h *WritingExtrasHandler) GetByID(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetWritingByID(userID, c.Param("id"))
+	item, err := h.svc.GetWritingByID(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -43,7 +84,7 @@ func (h *WritingExtrasHandler) Evaluate(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.EvaluateWriting(req)
+	item, err := h.svc.EvaluateWriting(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -64,7 +105,7 @@ func (h *SpeakingExtrasHandler) StartSession(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.StartSession(userID)
+	item, err := h.svc.StartSession(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -85,7 +126,7 @@ func (h *SpeakingExtrasHandler) StopSession(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.StopSession(userID)
+	item, err := h.svc.StopSession(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -107,7 +148,7 @@ func (h *SpeakingExtrasHandler) GetSession(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetSession(userID, c.Param("id"))
+	item, err := h.svc.GetSession(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -130,7 +171,7 @@ func (h *SpeakingExtrasHandler) Pronunciation(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.CheckPronunciation(req)
+	item, err := h.svc.CheckPronunciation(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -154,7 +195,7 @@ func (h *VocabularyExtrasHandler) UpdateWord(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.UpdateWord(c.Param("id"), req)
+	item, err := h.svc.UpdateWord(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -170,7 +211,7 @@ func (h *VocabularyExtrasHandler) UpdateWord(c *gin.Context) {
 // @Success      204
 // @Router       /vocabulary/words/{id} [delete]
 func (h *VocabularyExtrasHandler) DeleteWord(c *gin.Context) {
-	if err := h.svc.DeleteWord(c.Param("id")); err != nil {
+	if err := h.svc.DeleteWord(requestContext(c), c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -199,7 +240,7 @@ func (h *VocabularyExtrasHandler) History(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.ListVocabularyHistory(userID, query)
+	res, err := h.svc.ListVocabularyHistory(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -223,7 +264,7 @@ func (h *ListeningHandler) ListLessons(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListLessons(query)
+	res, err := h.svc.ListLessons(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -240,7 +281,7 @@ func (h *ListeningHandler) ListLessons(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.ListeningLesson}
 // @Router       /listening/{id} [get]
 func (h *ListeningHandler) GetLesson(c *gin.Context) {
-	item, err := h.svc.GetLesson(c.Param("id"))
+	item, err := h.svc.GetLesson(requestContext(c), c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -264,7 +305,7 @@ func (h *ListeningHandler) Submit(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.SubmitLesson(c.Param("id"), req)
+	item, err := h.svc.SubmitLesson(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -287,7 +328,7 @@ func (h *AIHandler) Chat(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.Chat(req)
+	item, err := h.svc.Chat(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -310,7 +351,7 @@ func (h *AIHandler) EvaluateWriting(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.EvaluateWriting(req)
+	item, err := h.svc.EvaluateWriting(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -333,7 +374,7 @@ func (h *AIHandler) EvaluateSpeaking(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.EvaluateSpeaking(req)
+	item, err := h.svc.EvaluateSpeaking(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -356,7 +397,7 @@ func (h *AIHandler) GenerateQuestion(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.GenerateQuestion(req)
+	item, err := h.svc.GenerateQuestion(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return

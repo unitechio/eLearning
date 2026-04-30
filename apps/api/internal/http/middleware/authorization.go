@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 const ContextKeyAccess = "access_profile"
 
-func RequireRoles(authz service.AuthorizationService, roles ...string) gin.HandlerFunc {
+func RequireRoles(authz usecase.AuthorizationService, roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, ok := currentUserIDFromContext(c)
 		if !ok {
@@ -19,12 +20,13 @@ func RequireRoles(authz service.AuthorizationService, roles ...string) gin.Handl
 			c.Abort()
 			return
 		}
-		if err := authz.RequireRoles(userID, roles...); err != nil {
+		ctx := requestContext(c)
+		if err := authz.RequireRoles(ctx, userID, roles...); err != nil {
 			_ = c.Error(err)
 			c.Abort()
 			return
 		}
-		profile, err := authz.GetAccessProfile(userID)
+		profile, err := authz.GetAccessProfile(ctx, userID)
 		if err == nil {
 			c.Set(ContextKeyAccess, profile)
 		}
@@ -32,7 +34,7 @@ func RequireRoles(authz service.AuthorizationService, roles ...string) gin.Handl
 	}
 }
 
-func RequireFeature(authz service.AuthorizationService, feature string) gin.HandlerFunc {
+func RequireFeature(authz usecase.AuthorizationService, feature string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, ok := currentUserIDFromContext(c)
 		if !ok {
@@ -40,7 +42,7 @@ func RequireFeature(authz service.AuthorizationService, feature string) gin.Hand
 			c.Abort()
 			return
 		}
-		if err := authz.RequireFeature(userID, feature); err != nil {
+		if err := authz.RequireFeature(requestContext(c), userID, feature); err != nil {
 			_ = c.Error(err)
 			c.Abort()
 			return
@@ -56,4 +58,8 @@ func currentUserIDFromContext(c *gin.Context) (uuid.UUID, bool) {
 	}
 	userID, ok := val.(uuid.UUID)
 	return userID, ok
+}
+
+func requestContext(c *gin.Context) context.Context {
+	return c.Request.Context()
 }

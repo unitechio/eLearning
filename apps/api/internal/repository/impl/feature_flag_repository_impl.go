@@ -1,7 +1,6 @@
 package impl
 
 import (
-	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
@@ -15,7 +14,6 @@ func NewFeatureFlagRepository(db *gorm.DB) *FeatureFlagRepository {
 }
 
 func (r *FeatureFlagRepository) Create(flag *domain.FeatureFlag) (*domain.FeatureFlag, error) {
-	flag.ID = uuid.New().String()
 	if err := r.DB.Create(flag).Error; err != nil {
 		return nil, err
 	}
@@ -60,10 +58,10 @@ func (r *FeatureFlagRepository) GetByTier(tier domain.LicenseTier) ([]*domain.Fe
 
 	// Tier hierarchy: Free < Pro < Enterprise < Custom
 	tierOrder := map[domain.LicenseTier]int{
-		domain.TierFree:       1,
-		domain.TierPro:        2,
-		domain.TierEnterprise: 3,
-		domain.TierCustom:     4,
+		domain.LicenseTierFree:       1,
+		domain.LicenseTierStarter:    2,
+		domain.LicenseTierPro:        3,
+		domain.LicenseTierEnterprise: 4,
 	}
 
 	currentTierLevel := tierOrder[tier]

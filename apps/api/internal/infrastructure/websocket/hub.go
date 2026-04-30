@@ -51,7 +51,7 @@ type clientMessage struct {
 	message  []byte
 }
 
-func NewHub(logger *zap.Logger) service.WebSocketUsecase {
+func NewHub(logger *zap.Logger) usecase.WebSocketService {
 	return &Hub{
 		clients:      make(map[string]*domain.WebSocketClient),
 		userClients:  make(map[uuid.UUID]map[string]bool),

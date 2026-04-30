@@ -13,11 +13,13 @@ import (
 type Course struct {
 	UUIDModel
 	TenantID    uuid.UUID `json:"tenant_id" gorm:"type:uuid;not null;index"`
+	CreatedBy   uuid.UUID `json:"created_by" gorm:"type:uuid;not null;index"`
 	Title       string    `json:"title" gorm:"type:varchar(255);not null"`
 	Description string    `json:"description" gorm:"type:text"`
 	Domain      string    `json:"domain" gorm:"type:varchar(50);not null;index"`
 	Level       string    `json:"level" gorm:"type:varchar(50);default:'beginner'"`
 	Status      string    `json:"status" gorm:"type:varchar(50);default:'draft';index"`
+	Visibility  string    `json:"visibility" gorm:"type:varchar(20);default:'private';index"`
 }
 
 type Unit struct {

@@ -1,12 +1,11 @@
-//go:build legacy
-// +build legacy
-
 package repository
 
 import (
 	"context"
+	"strconv"
 
-	"einfra/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+
 	"gorm.io/gorm"
 )
 
@@ -33,7 +32,11 @@ func (r *environmentRepository) Create(ctx context.Context, env *domain.Environm
 
 func (r *environmentRepository) GetByID(ctx context.Context, id string) (*domain.Environment, error) {
 	var env domain.Environment
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&env).Error; err != nil {
+	parsedID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.db.WithContext(ctx).Where("id = ?", uint(parsedID)).First(&env).Error; err != nil {
 		return nil, err
 	}
 	return &env, nil
@@ -51,6 +54,7 @@ func (r *environmentRepository) List(ctx context.Context, filter domain.Environm
 	var environments []*domain.Environment
 	var total int64
 
+	filter = filter.Normalize()
 	query := r.db.WithContext(ctx).Model(&domain.Environment{})
 
 	if filter.IsActive != nil {
@@ -64,10 +68,8 @@ func (r *environmentRepository) List(ctx context.Context, filter domain.Environm
 		return nil, 0, err
 	}
 
-	if filter.Page > 0 && filter.PageSize > 0 {
-		offset := (filter.Page - 1) * filter.PageSize
-		query = query.Offset(offset).Limit(filter.PageSize)
-	}
+	offset := (filter.Page - 1) * filter.PageSize
+	query = query.Offset(offset).Limit(filter.PageSize)
 
 	query = query.Order("sort_order ASC, name ASC")
 
@@ -83,5 +85,9 @@ func (r *environmentRepository) Update(ctx context.Context, env *domain.Environm
 }
 
 func (r *environmentRepository) Delete(ctx context.Context, id string) error {
-	return r.db.WithContext(ctx).Where("id = ?", id).Delete(&domain.Environment{}).Error
+	parsedID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return err
+	}
+	return r.db.WithContext(ctx).Where("id = ?", uint(parsedID)).Delete(&domain.Environment{}).Error
 }

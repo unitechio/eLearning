@@ -6,11 +6,11 @@ type SpeechToTextService interface {
 	Transcribe(audioData []byte) (string, error)
 }
 
-type sttUsecase struct{}
+type sttService struct{}
 
-func NewSTTService() SpeechToTextUsecase { return &sttUsecase{} }
+func NewSTTService() SpeechToTextService { return &sttService{} }
 
-func (s *sttUsecase) Transcribe(audioData []byte) (string, error) {
+func (s *sttService) Transcribe(audioData []byte) (string, error) {
 	if len(audioData) == 0 {
 		return "", fmt.Errorf("empty audio data")
 	}

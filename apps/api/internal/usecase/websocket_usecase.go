@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 // WebSocketService defines the interface for WebSocket operations
