@@ -37,6 +37,10 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.UserPermission{},
 		&domain.OTP{},
 		&domain.RefreshToken{},
+		&domain.Session{},
+		&domain.LoginAttempt{},
+		&domain.Environment{},
+		&domain.FeatureFlag{},
 		&domain.VocabularyWord{},
 		&domain.UserVocabularyProgress{},
 		&domain.WritingSubmission{},
@@ -68,7 +72,7 @@ func AutoMigrate(db *gorm.DB) error {
 	if err := db.AutoMigrate(
 		&domain.Module{},
 		&domain.Department{},
-		&domain.Usecase{},
+		&domain.Service{},
 		&domain.Scope{},
 		&domain.EnhancedPermission{},
 		&domain.RoleEnhancedPermission{},
@@ -99,6 +103,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.ActivityLog{},
 		&domain.EmailTemplate{},
 		&domain.EmailLog{},
+		&domain.UserSettings{},
 		&domain.Document{},
 		&domain.DocumentPermission{},
 		&domain.DocumentComment{},
@@ -265,13 +270,14 @@ func seedServices(db *gorm.DB) error {
 	db.Where("code = ?", "sales").First(&salesDept)
 	db.Where("code = ?", "editorial").First(&editorialDept)
 
-	services := []domain.Usecase{
+	services := []domain.Service{
 		{DepartmentID: systemDept.ID, Code: "users", Name: "User Management", IsActive: true, IsSystem: true},
 		{DepartmentID: salesDept.ID, Code: "customers", Name: "Customer Management", IsActive: true, IsSystem: true},
 	}
 
 	for _, service := range services {
-		if err := db.Where("code = ?", service.Code).FirstOrCreate(&Usecase).Error; err != nil {
+		current := service
+		if err := db.Where("code = ?", current.Code).FirstOrCreate(&current).Error; err != nil {
 			slog.Error("Failed to create service", slog.String("service", service.Code), slog.String("error", err.Error()))
 			return err
 		}

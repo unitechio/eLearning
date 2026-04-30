@@ -21,7 +21,7 @@ export function LoginPage() {
     try {
       const data = await loginMutation.mutateAsync({ email, password });
       if (data && data.user) {
-        setAuth(data.user, data.token);
+        setAuth(data);
         navigate("/dashboard");
       } else {
         setError("Invalid login credentials.");
@@ -192,4 +192,3 @@ export function LoginPage() {
     </main>
   );
 }
-

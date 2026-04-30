@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/google/uuid"
@@ -16,8 +17,8 @@ func NewPlannerService(repo repository.PlannerRepository) *PlannerUsecase {
 	return &PlannerUsecase{repo: repo}
 }
 
-func (s *PlannerUsecase) GetPlanner(userID uuid.UUID) (*dto.Planner, error) {
-	item, err := s.repo.FindByUserID(userID)
+func (s *PlannerUsecase) GetPlanner(ctx context.Context, userID uuid.UUID) (*dto.Planner, error) {
+	item, err := s.repo.FindByUserID(ctx, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return &dto.Planner{FocusArea: "academy-english", WeeklyTarget: 3, Tasks: []string{}}, nil
@@ -27,13 +28,13 @@ func (s *PlannerUsecase) GetPlanner(userID uuid.UUID) (*dto.Planner, error) {
 	return mapPlanner(item), nil
 }
 
-func (s *PlannerUsecase) GeneratePlanner(userID uuid.UUID) (*dto.Planner, error) {
+func (s *PlannerUsecase) GeneratePlanner(ctx context.Context, userID uuid.UUID) (*dto.Planner, error) {
 	req := dto.PlannerUpdateRequest{FocusArea: "academy-english", WeeklyTarget: 5, Tasks: []string{"Vocabulary review", "Writing task", "Speaking practice"}}
-	return s.UpdatePlanner(userID, req)
+	return s.UpdatePlanner(ctx, userID, req)
 }
 
-func (s *PlannerUsecase) UpdatePlanner(userID uuid.UUID, req dto.PlannerUpdateRequest) (*dto.Planner, error) {
-	item, err := s.repo.FindByUserID(userID)
+func (s *PlannerUsecase) UpdatePlanner(ctx context.Context, userID uuid.UUID, req dto.PlannerUpdateRequest) (*dto.Planner, error) {
+	item, err := s.repo.FindByUserID(ctx, userID)
 	if err != nil && !isNotFoundErr(err) {
 		return nil, apperr.Internal(err)
 	}
@@ -46,7 +47,7 @@ func (s *PlannerUsecase) UpdatePlanner(userID uuid.UUID, req dto.PlannerUpdateRe
 	}
 	rawTasks, _ := json.Marshal(req.Tasks)
 	item.Tasks = rawTasks
-	if err := s.repo.Save(item); err != nil {
+	if err := s.repo.Save(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapPlanner(item), nil

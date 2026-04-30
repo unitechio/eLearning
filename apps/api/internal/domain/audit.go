@@ -44,6 +44,44 @@ type AuditLog struct {
 	User *User `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }
 
+type AuditFilter struct {
+	Page       int
+	PageSize   int
+	UserID     *uint
+	Action     *AuditAction
+	Resource   string
+	ResourceID *uint
+	IPAddress  string
+	Method     string
+	Path       string
+	StartDate  *time.Time
+	EndDate    *time.Time
+	SortBy     string
+	SortOrder  string
+}
+
+func (f AuditFilter) Normalize() AuditFilter {
+	if f.Page < 1 {
+		f.Page = 1
+	}
+	if f.PageSize < 1 {
+		f.PageSize = 20
+	}
+	if f.PageSize > 100 {
+		f.PageSize = 100
+	}
+	return f
+}
+
+type AuditStatistics struct {
+	TotalLogs         int64                 `json:"total_logs"`
+	SuccessfulActions int64                 `json:"successful_actions"`
+	FailedActions     int64                 `json:"failed_actions"`
+	UniqueUsers       int64                 `json:"unique_users"`
+	ActionBreakdown   map[AuditAction]int64 `json:"action_breakdown"`
+	ResourceBreakdown map[string]int64      `json:"resource_breakdown"`
+}
+
 // TableName specifies the table name for AuditLog
 func (AuditLog) TableName() string {
 	return "audit_logs"

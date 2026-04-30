@@ -7,6 +7,7 @@ type Course struct {
 	Domain      string `json:"domain"`
 	Level       string `json:"level"`
 	Status      string `json:"status"`
+	Visibility  string `json:"visibility"`
 }
 
 type CourseListQuery struct {
@@ -23,6 +24,7 @@ type UpsertCourseRequest struct {
 	Domain      string `json:"domain" binding:"required"`
 	Level       string `json:"level"`
 	Status      string `json:"status"`
+	Visibility  string `json:"visibility"`
 }
 
 type CourseModule struct {

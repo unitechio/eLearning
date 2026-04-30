@@ -3,8 +3,10 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 )
 
@@ -36,28 +38,41 @@ func (u *auditUsecase) Log(ctx context.Context, log *domain.AuditLog) error {
 }
 
 func (u *auditUsecase) LogUserAction(ctx context.Context, userID, username string, action domain.AuditAction, resource, resourceID, description string) error {
+	var parsedUserID *uint
+	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
+		value := uint(id)
+		parsedUserID = &value
+	}
+	var parsedResourceID *uint
+	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
+		value := uint(id)
+		parsedResourceID = &value
+	}
 	log := &domain.AuditLog{
-		UserID:      &userID,
-		Username:    username,
+		UserID:      parsedUserID,
 		Action:      action,
 		Resource:    resource,
-		ResourceID:  &resourceID,
+		ResourceID:  parsedResourceID,
 		Description: description,
 		CreatedAt:   time.Now(),
-		Success:     true,
+		Metadata:    stringPtr(`{"username":"` + username + `"}`),
 	}
 	return u.auditRepo.Create(ctx, log)
 }
 
 func (u *auditUsecase) LogSystemAction(ctx context.Context, action domain.AuditAction, resource, resourceID, description string) error {
+	var parsedResourceID *uint
+	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
+		value := uint(id)
+		parsedResourceID = &value
+	}
 	log := &domain.AuditLog{
-		Username:    "SYSTEM",
 		Action:      action,
 		Resource:    resource,
-		ResourceID:  &resourceID,
+		ResourceID:  parsedResourceID,
 		Description: description,
 		CreatedAt:   time.Now(),
-		Success:     true,
+		Metadata:    stringPtr(`{"source":"system"}`),
 	}
 	return u.auditRepo.Create(ctx, log)
 }
@@ -71,13 +86,19 @@ func (u *auditUsecase) ListAuditLogs(ctx context.Context, filter domain.AuditFil
 }
 
 func (u *auditUsecase) GetUserAuditLogs(ctx context.Context, userID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
-	filter.UserID = &userID
+	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
+		value := uint(id)
+		filter.UserID = &value
+	}
 	return u.auditRepo.List(ctx, filter)
 }
 
 func (u *auditUsecase) GetResourceAuditLogs(ctx context.Context, resource, resourceID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Resource = resource
-	filter.ResourceID = resourceID
+	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
+		value := uint(id)
+		filter.ResourceID = &value
+	}
 	return u.auditRepo.List(ctx, filter)
 }
 
@@ -91,4 +112,8 @@ func (u *auditUsecase) CleanupOldLogs(ctx context.Context, retentionDays int) er
 
 func (u *auditUsecase) ExportAuditLogs(ctx context.Context, filter domain.AuditFilter, format string) (string, error) {
 	return "", fmt.Errorf("not implemented")
+}
+
+func stringPtr(value string) *string {
+	return &value
 }

@@ -10,10 +10,10 @@ import (
 )
 
 type WritingHandler struct {
-	svc service.WritingService
+	svc usecase.WritingService
 }
 
-func NewWritingHandler(svc service.WritingUsecase) *WritingHandler {
+func NewWritingHandler(svc usecase.WritingService) *WritingHandler {
 	return &WritingHandler{svc: svc}
 }
 
@@ -23,26 +23,24 @@ func NewWritingHandler(svc service.WritingUsecase) *WritingHandler {
 // @Security     BearerAuth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      service.SubmitRequest  true  "Writing submission"
+// @Param        body  body      usecase.SubmitRequest  true  "Writing submission"
 // @Success      201   {object}  response.Envelope{data=domain.WritingSubmission}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /writing/submit [post]
 // @Router       /writing/submissions [post]
 func (h *WritingHandler) Submit(c *gin.Context) {
-	var req service.SubmitRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	var req usecase.SubmitRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
 
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	submission, err := h.svc.Submit(userID, req)
+	submission, err := h.svc.Submit(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -65,13 +63,12 @@ func (h *WritingHandler) GetHistory(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	res, err := h.svc.GetHistory(userID, page, pageSize)
+	res, err := h.svc.GetHistory(requestContext(c), userID, page, pageSize)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -97,13 +94,12 @@ func (h *WritingHandler) GetSubmission(c *gin.Context) {
 		return
 	}
 
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	item, err := h.svc.GetSubmissionByID(userID, submissionID)
+	item, err := h.svc.GetSubmissionByID(requestContext(c), userID, submissionID)
 	if err != nil {
 		_ = c.Error(err)
 		return

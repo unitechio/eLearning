@@ -3,14 +3,15 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 type VocabularyHandler struct {
-	svc service.VocabularyService
+	svc usecase.VocabularyService
 }
 
-func NewVocabularyHandler(svc service.VocabularyUsecase) *VocabularyHandler {
+func NewVocabularyHandler(svc usecase.VocabularyService) *VocabularyHandler {
 	return &VocabularyHandler{svc: svc}
 }
 
@@ -24,13 +25,12 @@ func NewVocabularyHandler(svc service.VocabularyUsecase) *VocabularyHandler {
 // @Router       /vocabulary/due [get]
 // @Router       /vocabulary/reviews/due [get]
 func (h *VocabularyHandler) GetDueWords(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	items, err := h.svc.GetDueWords(userID)
+	items, err := h.svc.GetDueWords(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -44,26 +44,24 @@ func (h *VocabularyHandler) GetDueWords(c *gin.Context) {
 // @Security     BearerAuth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      service.ReviewRequest  true  "Review payload"
+// @Param        body  body      usecase.ReviewRequest  true  "Review payload"
 // @Success      200   {object}  response.Envelope{data=domain.UserVocabularyProgress}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /vocabulary/review [post]
 // @Router       /vocabulary/reviews [post]
 func (h *VocabularyHandler) SubmitReview(c *gin.Context) {
-	var req service.ReviewRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	var req usecase.ReviewRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
 
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	progress, err := h.svc.SubmitReview(userID, req)
+	progress, err := h.svc.SubmitReview(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -80,7 +78,7 @@ func (h *VocabularyHandler) SubmitReview(c *gin.Context) {
 // @Failure      401  {object}  response.Envelope
 // @Router       /vocabulary/words [get]
 func (h *VocabularyHandler) GetAllWords(c *gin.Context) {
-	words, err := h.svc.GetAllWords()
+	words, err := h.svc.GetAllWords(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -106,7 +104,7 @@ func (h *VocabularyHandler) GetWord(c *gin.Context) {
 		return
 	}
 
-	word, err := h.svc.GetWordByID(wordID)
+	word, err := h.svc.GetWordByID(requestContext(c), wordID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -120,25 +118,23 @@ func (h *VocabularyHandler) GetWord(c *gin.Context) {
 // @Security     BearerAuth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      service.CreateWordRequest  true  "Word payload"
+// @Param        body  body      usecase.CreateWordRequest  true  "Word payload"
 // @Success      201   {object}  response.Envelope{data=domain.VocabularyWord}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /vocabulary/words [post]
 func (h *VocabularyHandler) CreateWord(c *gin.Context) {
-	var req service.CreateWordRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	var req usecase.CreateWordRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
 
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
 
-	word, err := h.svc.CreateWord(userID, req)
+	word, err := h.svc.CreateWord(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

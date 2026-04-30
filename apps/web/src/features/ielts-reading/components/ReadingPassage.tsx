@@ -1,5 +1,6 @@
 import React from 'react';
 import { Highlighter, FileText, ZoomIn } from 'lucide-react';
+import { ReadingWord } from './ReadingWord';
 
 export function ReadingPassage() {
   return (
@@ -30,10 +31,10 @@ export function ReadingPassage() {
             An investigation into how modern algorithmic systems mimic the behavior of biological swarms to optimize resource distribution.
           </p>
           <p>
-            The concept of collective intelligence is not a novelty of the digital age. For millennia, <span className="bg-primary/10 border-b-2 border-primary">myrmecologists have observed the intricate navigational strategies</span> of ant colonies, noting how individual agents with limited cognitive capacity contribute to complex, goal-oriented structures. These biological models are now serving as the architectural blueprint for next-generation logistical frameworks.
+            The concept of collective intelligence is not a novelty of the digital age. For millennia, <ReadingWord context="For millennia, myrmecologists have observed the intricate navigational strategies of ant colonies." word="myrmecologists" /> have observed the intricate navigational strategies of ant colonies, noting how individual agents with limited cognitive capacity contribute to complex, goal-oriented structures. These biological models are now serving as the architectural blueprint for next-generation logistical frameworks.
           </p>
           <p>
-            Unlike traditional hierarchical systems, where a central node dictates every movement, decentralized intelligence relies on local interactions. Each 'agent'—whether a drone in a delivery fleet or a data packet in a cloud network—responds to its immediate environment based on a set of <span className="bg-secondary/10 border-b-2 border-secondary">stochastic parameters</span>. 
+            Unlike traditional hierarchical systems, where a central node dictates every movement, decentralized intelligence relies on local interactions. Each 'agent'—whether a drone in a delivery fleet or a data packet in a cloud network—responds to its immediate environment based on a set of <ReadingWord context="Each agent responds to its immediate environment based on a set of stochastic parameters." word="stochastic" highlightClassName="rounded-sm border-b-2 border-secondary bg-secondary/10 px-1 font-semibold text-slate-900" /> parameters. 
           </p>
           <div className="relative group">
             <img 
@@ -49,7 +50,7 @@ export function ReadingPassage() {
             Critics argue that this reliance on emergence over command leads to unpredictability. However, the robustness of such systems in the face of node failure suggests otherwise. When a single ant is lost, the colony's pheromone trail remains intact. Similarly, in a distributed ledger, the loss of one participant does not compromise the integrity of the whole. This resilience is what makes collective intelligence the "holy grail" of urban planning and automated transportation.
           </p>
           <p>
-            The transition from static infrastructure to dynamic, responsive environments requires a fundamental shift in our understanding of agency. We are no longer designing tools for humans to use; we are designing ecosystems for autonomous agents to inhabit. The implications for privacy and personal autonomy are, as yet, poorly understood.
+            The transition from static infrastructure to dynamic, responsive environments requires a fundamental shift in our understanding of agency. We are no longer designing tools for humans to use; we are designing ecosystems for <ReadingWord context="We are designing ecosystems for autonomous agents to inhabit." word="autonomous" /> agents to inhabit. The implications for privacy and personal autonomy are, as yet, poorly understood.
           </p>
         </article>
       </div>

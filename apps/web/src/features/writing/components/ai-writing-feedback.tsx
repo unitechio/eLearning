@@ -1,6 +1,6 @@
 "use client";
 
-import { useWritingStore } from "@/hooks/use-writing";
+import { useWritingStore } from "@/features/writing/stores/use-writing-store";
 import { Sparkles, CheckCircle2, Route, BookA, AlertTriangle, Send } from "lucide-react";
 
 export function AiWritingFeedback() {

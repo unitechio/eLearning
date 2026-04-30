@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiClient } from '@/shared/services';
+import { ApiResponse } from '@/shared/types/api.types';
 
 export interface SpeakingAnalysisResponse {
   transcript: string;
@@ -16,12 +17,12 @@ export const useAnalyzeSpeaking = () => {
       // 'audio' matches the backend FormFile key
       formData.append('audio', audioBlob, 'recording.webm');
 
-      const response = await api.post('/speaking/analyze', formData, {
+      const response = await apiClient.post<ApiResponse<SpeakingAnalysisResponse>>('/speaking/analyze', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      return response.data;
+      return { success: response.data.success, data: response.data.data, message: response.data.message };
     },
   });
 };

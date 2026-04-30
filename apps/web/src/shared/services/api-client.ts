@@ -22,11 +22,10 @@ apiClient.interceptors.request.use(
 
 // Response interceptor — unwrap data, handle 401
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

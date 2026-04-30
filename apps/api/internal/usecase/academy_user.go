@@ -1,29 +1,31 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
 )
 
 type UserInsightsService interface {
-	GetProgress(userID uuid.UUID) ([]dto.UserProgress, error)
-	GetStats(userID uuid.UUID) (*dto.UserStats, error)
-	GetActivities(userID uuid.UUID, query dto.UserActivityListQuery) (*dto.PageResult[dto.UserActivityItem], error)
+	GetProgress(ctx context.Context, userID uuid.UUID) ([]dto.UserProgress, error)
+	GetStats(ctx context.Context, userID uuid.UUID) (*dto.UserStats, error)
+	GetActivities(ctx context.Context, userID uuid.UUID, query dto.UserActivityListQuery) (*dto.PageResult[dto.UserActivityItem], error)
 }
 
 type ProgressService interface {
-	GetOverall(userID uuid.UUID) (*dto.ProgressSnapshot, error)
-	GetCourseProgress(userID uuid.UUID, courseID string) (map[string]any, error)
-	GetActivityProgress(userID uuid.UUID, activityID string) (map[string]any, error)
+	GetOverall(ctx context.Context, userID uuid.UUID) (*dto.ProgressSnapshot, error)
+	GetCourseProgress(ctx context.Context, userID uuid.UUID, courseID string) (map[string]any, error)
+	GetActivityProgress(ctx context.Context, userID uuid.UUID, activityID string) (map[string]any, error)
 }
 
 type PlannerService interface {
-	GetPlanner(userID uuid.UUID) (*dto.Planner, error)
-	GeneratePlanner(userID uuid.UUID) (*dto.Planner, error)
-	UpdatePlanner(userID uuid.UUID, req dto.PlannerUpdateRequest) (*dto.Planner, error)
+	GetPlanner(ctx context.Context, userID uuid.UUID) (*dto.Planner, error)
+	GeneratePlanner(ctx context.Context, userID uuid.UUID) (*dto.Planner, error)
+	UpdatePlanner(ctx context.Context, userID uuid.UUID, req dto.PlannerUpdateRequest) (*dto.Planner, error)
 }
 
 type NotificationService interface {
-	ListNotifications(userID uuid.UUID, query dto.NotificationListQuery) (*dto.PageResult[dto.NotificationItem], error)
-	MarkAsRead(userID uuid.UUID, id string) error
+	ListNotifications(ctx context.Context, userID uuid.UUID, query dto.NotificationListQuery) (*dto.PageResult[dto.NotificationItem], error)
+	MarkAsRead(ctx context.Context, userID uuid.UUID, id string) error
 }

@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
@@ -20,9 +22,9 @@ type CreateWordRequest struct {
 }
 
 type VocabularyService interface {
-	GetDueWords(userID uuid.UUID) ([]domain.UserVocabularyProgress, error)
-	SubmitReview(userID uuid.UUID, req ReviewRequest) (*domain.UserVocabularyProgress, error)
-	GetAllWords() ([]domain.VocabularyWord, error)
-	GetWordByID(id uuid.UUID) (*domain.VocabularyWord, error)
-	CreateWord(tenantID uuid.UUID, req CreateWordRequest) (*domain.VocabularyWord, error)
+	GetDueWords(ctx context.Context, userID uuid.UUID) ([]domain.UserVocabularyProgress, error)
+	SubmitReview(ctx context.Context, userID uuid.UUID, req ReviewRequest) (*domain.UserVocabularyProgress, error)
+	GetAllWords(ctx context.Context) ([]domain.VocabularyWord, error)
+	GetWordByID(ctx context.Context, id uuid.UUID) (*domain.VocabularyWord, error)
+	CreateWord(ctx context.Context, tenantID uuid.UUID, req CreateWordRequest) (*domain.VocabularyWord, error)
 }

@@ -3,8 +3,33 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type ProgressHandler struct {
+	svc usecase.ProgressService
+}
+
+type PlannerHandler struct {
+	svc usecase.PlannerService
+}
+
+type NotificationHandler struct {
+	svc usecase.NotificationService
+}
+
+func NewProgressHandler(svc usecase.ProgressService) *ProgressHandler {
+	return &ProgressHandler{svc: svc}
+}
+
+func NewPlannerHandler(svc usecase.PlannerService) *PlannerHandler {
+	return &PlannerHandler{svc: svc}
+}
+
+func NewNotificationHandler(svc usecase.NotificationService) *NotificationHandler {
+	return &NotificationHandler{svc: svc}
+}
 
 // Overall godoc
 // @Summary      Get overall progress
@@ -14,12 +39,11 @@ import (
 // @Success      200  {object}  response.Envelope{data=dto.ProgressSnapshot}
 // @Router       /progress [get]
 func (h *ProgressHandler) Overall(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetOverall(userID)
+	item, err := h.svc.GetOverall(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -36,12 +60,11 @@ func (h *ProgressHandler) Overall(c *gin.Context) {
 // @Success      200  {object}  response.Envelope
 // @Router       /progress/course/{id} [get]
 func (h *ProgressHandler) Course(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetCourseProgress(userID, c.Param("id"))
+	item, err := h.svc.GetCourseProgress(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -58,12 +81,11 @@ func (h *ProgressHandler) Course(c *gin.Context) {
 // @Success      200  {object}  response.Envelope
 // @Router       /progress/activity/{id} [get]
 func (h *ProgressHandler) Activity(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetActivityProgress(userID, c.Param("id"))
+	item, err := h.svc.GetActivityProgress(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -79,12 +101,11 @@ func (h *ProgressHandler) Activity(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.Planner}
 // @Router       /planner [get]
 func (h *PlannerHandler) Get(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetPlanner(userID)
+	item, err := h.svc.GetPlanner(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -100,12 +121,11 @@ func (h *PlannerHandler) Get(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.Planner}
 // @Router       /planner/generate [post]
 func (h *PlannerHandler) Generate(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GeneratePlanner(userID)
+	item, err := h.svc.GeneratePlanner(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -124,16 +144,14 @@ func (h *PlannerHandler) Generate(c *gin.Context) {
 // @Router       /planner/update [put]
 func (h *PlannerHandler) Update(c *gin.Context) {
 	var req dto.PlannerUpdateRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.UpdatePlanner(userID, req)
+	item, err := h.svc.UpdatePlanner(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -155,16 +173,14 @@ func (h *PlannerHandler) Update(c *gin.Context) {
 // @Router       /notifications [get]
 func (h *NotificationHandler) List(c *gin.Context) {
 	var query dto.NotificationListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.ListNotifications(userID, query)
+	res, err := h.svc.ListNotifications(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -181,12 +197,11 @@ func (h *NotificationHandler) List(c *gin.Context) {
 // @Success      200  {object}  response.Envelope
 // @Router       /notifications/{id}/read [put]
 func (h *NotificationHandler) Read(c *gin.Context) {
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	if err := h.svc.MarkAsRead(userID, c.Param("id")); err != nil {
+	if err := h.svc.MarkAsRead(requestContext(c), userID, c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}

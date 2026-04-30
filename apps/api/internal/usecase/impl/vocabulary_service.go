@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +19,8 @@ func NewVocabularyService(repo repository.VocabularyRepository) *VocabularyUseca
 	return &VocabularyUsecase{repo: repo}
 }
 
-func (s *VocabularyUsecase) GetDueWords(userID uuid.UUID) ([]domain.UserVocabularyProgress, error) {
+func (s *VocabularyUsecase) GetDueWords(ctx context.Context, userID uuid.UUID) ([]domain.UserVocabularyProgress, error) {
+	_ = ctx
 	items, err := s.repo.FindDueProgressByUser(userID, 20)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -26,7 +28,8 @@ func (s *VocabularyUsecase) GetDueWords(userID uuid.UUID) ([]domain.UserVocabula
 	return items, nil
 }
 
-func (s *VocabularyUsecase) SubmitReview(userID uuid.UUID, req service.ReviewRequest) (*domain.UserVocabularyProgress, error) {
+func (s *VocabularyUsecase) SubmitReview(ctx context.Context, userID uuid.UUID, req usecase.ReviewRequest) (*domain.UserVocabularyProgress, error) {
+	_ = ctx
 	word, err := s.repo.FindWordByID(req.WordID)
 	if err != nil {
 		if isNotFoundErr(err) {
@@ -71,7 +74,8 @@ func (s *VocabularyUsecase) SubmitReview(userID uuid.UUID, req service.ReviewReq
 	return progress, nil
 }
 
-func (s *VocabularyUsecase) GetAllWords() ([]domain.VocabularyWord, error) {
+func (s *VocabularyUsecase) GetAllWords(ctx context.Context) ([]domain.VocabularyWord, error) {
+	_ = ctx
 	words, err := s.repo.ListWords()
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -79,7 +83,8 @@ func (s *VocabularyUsecase) GetAllWords() ([]domain.VocabularyWord, error) {
 	return words, nil
 }
 
-func (s *VocabularyUsecase) GetWordByID(id uuid.UUID) (*domain.VocabularyWord, error) {
+func (s *VocabularyUsecase) GetWordByID(ctx context.Context, id uuid.UUID) (*domain.VocabularyWord, error) {
+	_ = ctx
 	word, err := s.repo.FindWordByID(id)
 	if err != nil {
 		if isNotFoundErr(err) {
@@ -90,7 +95,8 @@ func (s *VocabularyUsecase) GetWordByID(id uuid.UUID) (*domain.VocabularyWord, e
 	return word, nil
 }
 
-func (s *VocabularyUsecase) CreateWord(tenantID uuid.UUID, req service.CreateWordRequest) (*domain.VocabularyWord, error) {
+func (s *VocabularyUsecase) CreateWord(ctx context.Context, tenantID uuid.UUID, req usecase.CreateWordRequest) (*domain.VocabularyWord, error) {
+	_ = ctx
 	word := &domain.VocabularyWord{
 		TenantID:     tenantID,
 		Word:         req.Word,

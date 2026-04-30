@@ -9,10 +9,10 @@ import (
 )
 
 type SpeakingHandler struct {
-	svc service.SpeakingService
+	svc usecase.SpeakingService
 }
 
-func NewSpeakingHandler(svc service.SpeakingUsecase) *SpeakingHandler {
+func NewSpeakingHandler(svc usecase.SpeakingService) *SpeakingHandler {
 	return &SpeakingHandler{svc: svc}
 }
 
@@ -23,7 +23,7 @@ func NewSpeakingHandler(svc service.SpeakingUsecase) *SpeakingHandler {
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        audio  formData  file  true  "Audio file (webm/wav/mp3)"
-// @Success      200    {object}  response.Envelope{data=service.AnalyzeResult}
+// @Success      200    {object}  response.Envelope{data=usecase.AnalyzeResult}
 // @Failure      400    {object}  response.Envelope
 // @Failure      401    {object}  response.Envelope
 // @Failure      500    {object}  response.Envelope

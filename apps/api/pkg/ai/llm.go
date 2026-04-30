@@ -13,11 +13,11 @@ type LLMService interface {
 	EvaluateWriting(prompt, text string) (*EvaluationResult, error)
 }
 
-type llmUsecase struct{}
+type llmService struct{}
 
-func NewLLMService() LLMUsecase { return &llmUsecase{} }
+func NewLLMService() LLMService { return &llmService{} }
 
-func (s *llmUsecase) EvaluateSpeaking(transcript string) (*EvaluationResult, error) {
+func (s *llmService) EvaluateSpeaking(transcript string) (*EvaluationResult, error) {
 	if transcript == "" {
 		return nil, fmt.Errorf("empty transcript")
 	}
@@ -28,7 +28,7 @@ func (s *llmUsecase) EvaluateSpeaking(transcript string) (*EvaluationResult, err
 	}, nil
 }
 
-func (s *llmUsecase) EvaluateWriting(prompt, text string) (*EvaluationResult, error) {
+func (s *llmService) EvaluateWriting(prompt, text string) (*EvaluationResult, error) {
 	if text == "" {
 		return nil, fmt.Errorf("empty response")
 	}

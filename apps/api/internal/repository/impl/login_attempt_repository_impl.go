@@ -25,7 +25,7 @@ func (r *LoginAttemptRepository) GetRecentAttempts(ctx context.Context, username
 	since := time.Now().Add(-duration)
 
 	err := r.db.WithContext(ctx).
-		Where("username = ? AND ip_address = ? AND created_at > ?", username, ipAddress, since).
+		Where("email = ? AND ip_address = ? AND created_at > ?", username, ipAddress, since).
 		Order("created_at DESC").
 		Find(&attempts).Error
 
@@ -42,7 +42,7 @@ func (r *LoginAttemptRepository) GetFailedAttempts(ctx context.Context, username
 
 	err := r.db.WithContext(ctx).
 		Model(&domain.LoginAttempt{}).
-		Where("username = ? AND ip_address = ? AND success = false AND created_at > ?", username, ipAddress, since).
+		Where("email = ? AND ip_address = ? AND successful = false AND created_at > ?", username, ipAddress, since).
 		Count(&count).Error
 
 	if err != nil {

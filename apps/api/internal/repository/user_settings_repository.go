@@ -1,13 +1,11 @@
-//go:build legacy
-// +build legacy
-
 package repository
 
 import (
 	"context"
 	"fmt"
 
-	"einfra/api/internal/domain"
+	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -42,8 +40,12 @@ func (r *userSettingsRepository) GetByID(ctx context.Context, id string) (*domai
 }
 
 func (r *userSettingsRepository) GetByUserID(ctx context.Context, userID string) (*domain.UserSettings, error) {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, err
+	}
 	var s domain.UserSettings
-	if err := r.db.WithContext(ctx).Where("user_id = ? AND deleted_at IS NULL", userID).First(&s).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND deleted_at IS NULL", uid).First(&s).Error; err != nil {
 		return nil, err
 	}
 	return &s, nil
@@ -54,6 +56,10 @@ func (r *userSettingsRepository) Update(ctx context.Context, settings *domain.Us
 }
 
 func (r *userSettingsRepository) PartialUpdate(ctx context.Context, userID string, upd *domain.UserSettingsUpdate) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
 	updates := make(map[string]interface{})
 	// UI settings
 	if upd.Theme != nil {
@@ -144,7 +150,7 @@ func (r *userSettingsRepository) PartialUpdate(ctx context.Context, userID strin
 	if len(updates) == 0 {
 		return fmt.Errorf("no fields to update")
 	}
-	return r.db.WithContext(ctx).Model(&domain.UserSettings{}).Where("user_id = ? AND deleted_at IS NULL", userID).Updates(updates).Error
+	return r.db.WithContext(ctx).Model(&domain.UserSettings{}).Where("user_id = ? AND deleted_at IS NULL", uid).Updates(updates).Error
 }
 
 func (r *userSettingsRepository) Delete(ctx context.Context, id string) error {
@@ -152,6 +158,10 @@ func (r *userSettingsRepository) Delete(ctx context.Context, id string) error {
 }
 
 func (r *userSettingsRepository) ResetToDefaults(ctx context.Context, userID string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
 	defaults := domain.GetDefaultSettings(userID)
-	return r.db.WithContext(ctx).Model(&domain.UserSettings{}).Where("user_id = ? AND deleted_at IS NULL", userID).Updates(defaults).Error
+	return r.db.WithContext(ctx).Model(&domain.UserSettings{}).Where("user_id = ? AND deleted_at IS NULL", uid).Updates(defaults).Error
 }

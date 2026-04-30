@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"context"
-	"einfra/api/internal/model"
+
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type UserSettingsUsecase interface {

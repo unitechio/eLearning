@@ -1,7 +1,10 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
@@ -16,7 +19,7 @@ type HistoryResponse struct {
 }
 
 type WritingService interface {
-	Submit(userID uuid.UUID, req SubmitRequest) (*domain.WritingSubmission, error)
-	GetHistory(userID uuid.UUID, page, pageSize int) (*HistoryResponse, error)
-	GetSubmissionByID(userID, submissionID uuid.UUID) (*domain.WritingSubmission, error)
+	Submit(ctx context.Context, userID uuid.UUID, req SubmitRequest) (*domain.WritingSubmission, error)
+	GetHistory(ctx context.Context, userID uuid.UUID, page, pageSize int) (*HistoryResponse, error)
+	GetSubmissionByID(ctx context.Context, userID, submissionID uuid.UUID) (*domain.WritingSubmission, error)
 }

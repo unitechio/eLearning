@@ -33,6 +33,7 @@ type RegisterRequest struct {
 }
 
 type AuthResponse struct {
-	Token string       `json:"token"`
-	User  *domain.User `json:"user"`
+	Token        string       `json:"token"`
+	RefreshToken string       `json:"refresh_token,omitempty"`
+	User         *domain.User `json:"user"`
 }

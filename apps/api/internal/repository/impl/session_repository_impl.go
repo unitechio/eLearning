@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
@@ -37,9 +38,13 @@ func (r *SessionRepository) GetByToken(ctx context.Context, token string) (*doma
 }
 
 func (r *SessionRepository) GetByUserID(ctx context.Context, userID string) ([]*domain.Session, error) {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, err
+	}
 	var sessions []*domain.Session
-	err := r.db.WithContext(ctx).
-		Where("user_id = ? AND is_active = true", userID).
+	err = r.db.WithContext(ctx).
+		Where("user_id = ? AND is_active = true", uid).
 		Order("last_activity DESC").
 		Find(&sessions).Error
 
@@ -63,8 +68,12 @@ func (r *SessionRepository) DeleteByToken(ctx context.Context, token string) err
 }
 
 func (r *SessionRepository) DeleteAllForUser(ctx context.Context, userID string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
 	return r.db.WithContext(ctx).
-		Where("user_id = ?", userID).
+		Where("user_id = ?", uid).
 		Delete(&domain.Session{}).Error
 }
 

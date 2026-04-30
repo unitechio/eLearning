@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"context"
+
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type EnvironmentUsecase interface {

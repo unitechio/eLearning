@@ -55,7 +55,7 @@ func (Department) TableName() string {
 }
 
 // Service represents a specific service/functionality within a department
-type Usecase struct {
+type Service struct {
 	BaseModel
 	DepartmentID uint   `gorm:"index;not null" json:"department_id"`
 	Code         string `gorm:"uniqueIndex;size:50;not null" json:"code"` // e.g., "user_management", "post_management"
@@ -72,7 +72,7 @@ type Usecase struct {
 }
 
 // TableName specifies the table name for Service
-func (Usecase) TableName() string {
+func (Service) TableName() string {
 	return "services"
 }
 

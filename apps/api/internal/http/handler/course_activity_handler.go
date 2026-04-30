@@ -3,8 +3,25 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type CourseHandler struct {
+	svc usecase.CourseService
+}
+
+type ActivityHandler struct {
+	svc usecase.ActivityService
+}
+
+func NewCourseHandler(svc usecase.CourseService) *CourseHandler {
+	return &CourseHandler{svc: svc}
+}
+
+func NewActivityHandler(svc usecase.ActivityService) *ActivityHandler {
+	return &ActivityHandler{svc: svc}
+}
 
 // ListCourses godoc
 // @Summary      List courses
@@ -21,11 +38,14 @@ import (
 // @Router       /courses [get]
 func (h *CourseHandler) ListCourses(c *gin.Context) {
 	var query dto.CourseListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	res, err := h.svc.ListCourses(query)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	res, err := h.svc.ListCourses(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -45,11 +65,14 @@ func (h *CourseHandler) ListCourses(c *gin.Context) {
 // @Router       /courses [post]
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
 	var req dto.UpsertCourseRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.CreateCourse(req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CreateCourse(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -67,7 +90,11 @@ func (h *CourseHandler) CreateCourse(c *gin.Context) {
 // @Failure      404  {object}  response.Envelope
 // @Router       /courses/{id} [get]
 func (h *CourseHandler) GetCourse(c *gin.Context) {
-	item, err := h.svc.GetCourse(c.Param("id"))
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.GetCourse(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -88,11 +115,14 @@ func (h *CourseHandler) GetCourse(c *gin.Context) {
 // @Router       /courses/{id} [put]
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 	var req dto.UpsertCourseRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.UpdateCourse(c.Param("id"), req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.UpdateCourse(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -108,7 +138,11 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
 // @Success      204
 // @Router       /courses/{id} [delete]
 func (h *CourseHandler) DeleteCourse(c *gin.Context) {
-	if err := h.svc.DeleteCourse(c.Param("id")); err != nil {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.DeleteCourse(requestContext(c), userID, c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -128,11 +162,14 @@ func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 // @Router       /courses/{id}/modules [get]
 func (h *CourseHandler) ListCourseModules(c *gin.Context) {
 	var query dto.ModuleListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	res, err := h.svc.ListCourseModules(c.Param("id"), query)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	res, err := h.svc.ListCourseModules(requestContext(c), userID, c.Param("id"), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -151,11 +188,14 @@ func (h *CourseHandler) ListCourseModules(c *gin.Context) {
 // @Router       /modules [post]
 func (h *CourseHandler) CreateModule(c *gin.Context) {
 	var req dto.UpsertModuleRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.CreateModule(req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CreateModule(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -175,11 +215,14 @@ func (h *CourseHandler) CreateModule(c *gin.Context) {
 // @Router       /modules/{id} [put]
 func (h *CourseHandler) UpdateModule(c *gin.Context) {
 	var req dto.UpsertModuleRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.UpdateModule(c.Param("id"), req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.UpdateModule(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -195,7 +238,11 @@ func (h *CourseHandler) UpdateModule(c *gin.Context) {
 // @Success      204
 // @Router       /modules/{id} [delete]
 func (h *CourseHandler) DeleteModule(c *gin.Context) {
-	if err := h.svc.DeleteModule(c.Param("id")); err != nil {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.DeleteModule(requestContext(c), userID, c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -215,11 +262,14 @@ func (h *CourseHandler) DeleteModule(c *gin.Context) {
 // @Router       /modules/{id}/lessons [get]
 func (h *CourseHandler) ListModuleLessons(c *gin.Context) {
 	var query dto.LessonListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	res, err := h.svc.ListModuleLessons(c.Param("id"), query)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	res, err := h.svc.ListModuleLessons(requestContext(c), userID, c.Param("id"), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -238,11 +288,14 @@ func (h *CourseHandler) ListModuleLessons(c *gin.Context) {
 // @Router       /lessons [post]
 func (h *CourseHandler) CreateLesson(c *gin.Context) {
 	var req dto.UpsertLessonRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.CreateLesson(req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CreateLesson(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -262,11 +315,14 @@ func (h *CourseHandler) CreateLesson(c *gin.Context) {
 // @Router       /lessons/{id} [put]
 func (h *CourseHandler) UpdateLesson(c *gin.Context) {
 	var req dto.UpsertLessonRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.UpdateLesson(c.Param("id"), req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.UpdateLesson(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -282,7 +338,11 @@ func (h *CourseHandler) UpdateLesson(c *gin.Context) {
 // @Success      204
 // @Router       /lessons/{id} [delete]
 func (h *CourseHandler) DeleteLesson(c *gin.Context) {
-	if err := h.svc.DeleteLesson(c.Param("id")); err != nil {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.DeleteLesson(requestContext(c), userID, c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -298,7 +358,11 @@ func (h *CourseHandler) DeleteLesson(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.Activity}
 // @Router       /activities/{id} [get]
 func (h *ActivityHandler) GetActivity(c *gin.Context) {
-	item, err := h.svc.GetActivity(c.Param("id"))
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.GetActivity(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -317,11 +381,14 @@ func (h *ActivityHandler) GetActivity(c *gin.Context) {
 // @Router       /activities [post]
 func (h *ActivityHandler) CreateActivity(c *gin.Context) {
 	var req dto.UpsertActivityRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.CreateActivity(req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CreateActivity(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -341,11 +408,14 @@ func (h *ActivityHandler) CreateActivity(c *gin.Context) {
 // @Router       /activities/{id} [put]
 func (h *ActivityHandler) UpdateActivity(c *gin.Context) {
 	var req dto.UpsertActivityRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.UpdateActivity(c.Param("id"), req)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.UpdateActivity(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -361,7 +431,11 @@ func (h *ActivityHandler) UpdateActivity(c *gin.Context) {
 // @Success      204
 // @Router       /activities/{id} [delete]
 func (h *ActivityHandler) DeleteActivity(c *gin.Context) {
-	if err := h.svc.DeleteActivity(c.Param("id")); err != nil {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.DeleteActivity(requestContext(c), userID, c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -380,16 +454,14 @@ func (h *ActivityHandler) DeleteActivity(c *gin.Context) {
 // @Router       /activities/{id}/submit [post]
 func (h *ActivityHandler) SubmitActivity(c *gin.Context) {
 	var req dto.SubmitActivityRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	userID, ok := currentUserID(c)
+	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
-		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.SubmitActivity(c.Param("id"), userID, req)
+	item, err := h.svc.SubmitActivity(requestContext(c), c.Param("id"), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -411,11 +483,14 @@ func (h *ActivityHandler) SubmitActivity(c *gin.Context) {
 // @Router       /activities/{id}/submissions [get]
 func (h *ActivityHandler) ListSubmissions(c *gin.Context) {
 	var query dto.ActivitySubmissionListQuery
-	if err := c.ShouldBindQuery(&query); err != nil {
-		response.Fail(c, 400, err.Error())
+	if !bindQueryOrAbort(c, &query) {
 		return
 	}
-	res, err := h.svc.ListActivitySubmissions(c.Param("id"), query)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	res, err := h.svc.ListActivitySubmissions(requestContext(c), userID, c.Param("id"), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -432,7 +507,11 @@ func (h *ActivityHandler) ListSubmissions(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.Submission}
 // @Router       /submissions/{id} [get]
 func (h *ActivityHandler) GetSubmission(c *gin.Context) {
-	item, err := h.svc.GetSubmission(c.Param("id"))
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.GetSubmission(requestContext(c), userID, c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return

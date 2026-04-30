@@ -1,20 +1,19 @@
 package handler
 
 import (
-	"einfra/api/pkg/errorx"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 type AuthHandler struct {
-	authService service.AuthService
+	svc usecase.AuthUsecase
 }
 
-func NewAuthHandler(authService service.AuthUsecase) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthHandler(svc usecase.AuthUsecase) *AuthHandler {
+	return &AuthHandler{svc: svc}
 }
 
 // Register godoc
@@ -22,19 +21,18 @@ func NewAuthHandler(authService service.AuthUsecase) *AuthHandler {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      service.RegisterRequest  true  "Registration payload"
-// @Success      201   {object}  response.Envelope{data=service.AuthResponse}
+// @Param        body  body      dto.RegisterRequest  true  "Registration payload"
+// @Success      201   {object}  response.Envelope{data=dto.AuthResponse}
 // @Failure      400   {object}  response.Envelope
 // @Failure      409   {object}  response.Envelope
 // @Router       /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req service.RegisterRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	var req dto.RegisterRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
 
-	res, err := h.authService.Register(req)
+	res, err := h.svc.Register(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -47,19 +45,18 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      service.LoginRequest  true  "Login credentials"
-// @Success      200   {object}  response.Envelope{data=service.AuthResponse}
+// @Param        body  body      dto.LoginRequest  true  "Login credentials"
+// @Success      200   {object}  response.Envelope{data=dto.AuthResponse}
 // @Failure      400   {object}  response.Envelope
 // @Failure      401   {object}  response.Envelope
 // @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req service.LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, 400, err.Error())
+	var req dto.LoginRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
 
-	res, err := h.authService.Login(req)
+	res, err := h.svc.Login(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -67,81 +64,46 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	response.OK(c, "login successful", res)
 }
 
-// ForgotPassword handles password reset requests
-// @Summary Request Password Reset
-// @Description Request a password reset token via email
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param request body struct{Email string `json:"email"`} true "Email address"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Router /auth/forgot-password [post]
 func (h *AuthHandler) ForgotPassword(c *gin.Context) {
-	var req struct {
-		Email string `json:"email" binding:"required,email"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body"))
+	var req dto.ForgotPasswordRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	resetReq := &domain.PasswordResetRequest{Email: req.Email}
-	if err := h.authService.RequestPasswordReset(c.Request.Context(), resetReq); err != nil {
-		// Don't reveal if email exists or not for security
-		c.JSON(http.StatusOK, gin.H{"message": "If the email exists, a password reset link has been sent"})
+	if err := h.svc.RequestPasswordReset(requestContext(c), req); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "If the email exists, a password reset link has been sent"})
+	response.OK(c, "password reset email requested", gin.H{"sent": true})
 }
 
-// ResetPassword handles password reset with token
-// @Summary Reset Password
-// @Description Reset password using reset token
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param request body domain.PasswordResetConfirm true "Reset token and new password"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Router /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
-	var req domain.PasswordResetConfirm
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body"))
+	var req dto.ResetPasswordRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	if err := h.authService.ResetPassword(c.Request.Context(), &req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, err.Error()))
+	if err := h.svc.ResetPassword(requestContext(c), req); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Password reset successful"})
+	response.OK(c, "password reset successful", gin.H{"updated": true})
 }
 
-// VerifyEmail handles email verification
-// @Summary Verify Email
-// @Description Verify user email with verification token
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param request body domain.EmailVerificationRequest true "Verification token"
-// @Success 200 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Router /auth/verify-email [post]
 func (h *AuthHandler) VerifyEmail(c *gin.Context) {
-	var req domain.EmailVerificationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body"))
+	var req dto.VerifyEmailRequest
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	if err := h.authService.VerifyEmail(c.Request.Context(), &req); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, err.Error()))
+	if err := h.svc.VerifyEmail(requestContext(c), req); err != nil {
+		_ = c.Error(err)
 		return
 	}
+	response.OK(c, "email verified", gin.H{"verified": true})
+}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
+func registerToDomainUser(req dto.RegisterRequest) *domain.User {
+	return &domain.User{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     req.Email,
+	}
 }

@@ -60,3 +60,69 @@ type BillingHistoryQuery struct {
 	Search string `form:"q"`
 	Status string `form:"status"`
 }
+
+type CreateBillingPlanRequest struct {
+	Name         string  `json:"name" binding:"required"`
+	Code         string  `json:"code" binding:"required"`
+	Price        float64 `json:"price" binding:"required"`
+	Currency     string  `json:"currency"`
+	Description  string  `json:"description"`
+	BillingCycle string  `json:"billing_cycle"`
+	IsActive     *bool   `json:"is_active,omitempty"`
+}
+
+type UpdateBillingPlanRequest struct {
+	Name         string  `json:"name" binding:"required"`
+	Code         string  `json:"code" binding:"required"`
+	Price        float64 `json:"price" binding:"required"`
+	Currency     string  `json:"currency"`
+	Description  string  `json:"description"`
+	BillingCycle string  `json:"billing_cycle"`
+	IsActive     *bool   `json:"is_active,omitempty"`
+}
+
+type AdminBillingPlan struct {
+	ID           string  `json:"id"`
+	Name         string  `json:"name"`
+	Code         string  `json:"code"`
+	Price        float64 `json:"price"`
+	Currency     string  `json:"currency"`
+	Description  string  `json:"description"`
+	BillingCycle string  `json:"billing_cycle"`
+	IsActive     bool    `json:"is_active"`
+}
+
+type AdminBillingPlanListQuery struct {
+	PaginationQuery
+	Search   string `form:"q"`
+	Currency string `form:"currency"`
+	Active   *bool  `form:"active"`
+}
+
+type AdminBillingSubscription struct {
+	ID           string  `json:"id"`
+	UserID       string  `json:"user_id"`
+	UserEmail    string  `json:"user_email"`
+	PlanID       string  `json:"plan_id"`
+	PlanName     string  `json:"plan_name"`
+	Status       string  `json:"status"`
+	StartedAt    string  `json:"started_at"`
+	ExpiresAt    *string `json:"expires_at,omitempty"`
+	CancelledAt  *string `json:"cancelled_at,omitempty"`
+	IsPremium    bool    `json:"is_premium"`
+}
+
+type AdminBillingSubscriptionListQuery struct {
+	PaginationQuery
+	Search string `form:"q"`
+	Status string `form:"status"`
+}
+
+type UpdateSubscriptionStatusRequest struct {
+	Status string `json:"status" binding:"required"`
+}
+
+type GrantPremiumRequest struct {
+	UserID string `json:"user_id" binding:"required"`
+	PlanID string `json:"plan_id" binding:"required"`
+}

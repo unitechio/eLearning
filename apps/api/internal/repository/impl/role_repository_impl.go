@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"gorm.io/gorm"
 )
 
@@ -52,7 +53,7 @@ func (r *RoleRepository) GetByName(ctx context.Context, name string) (*domain.Ro
 	return &role, nil
 }
 
-func (r *RoleRepository) List(ctx context.Context, filter domain.RoleFilter) ([]*domain.Role, int64, error) {
+func (r *RoleRepository) List(ctx context.Context, filter dto.RoleFilter) ([]*domain.Role, int64, error) {
 	var roles []*domain.Role
 	var total int64
 
@@ -66,6 +67,7 @@ func (r *RoleRepository) List(ctx context.Context, filter domain.RoleFilter) ([]
 		return nil, 0, err
 	}
 
+	filter.PaginationQuery = filter.PaginationQuery.Normalize()
 	offset := (filter.Page - 1) * filter.PageSize
 	query = query.Offset(offset).Limit(filter.PageSize)
 

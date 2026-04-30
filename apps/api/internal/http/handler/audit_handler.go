@@ -1,304 +1,181 @@
 package handler
 
 import (
-	"einfra/api/pkg/errorx"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-// AuditHandler handles audit log-related HTTP requests.
 type AuditHandler struct {
-	auditService service.AuditUsecase
+	svc usecase.AuditUsecase
 }
 
-// NewAuditHandler creates a new AuditHandler instance.
-func NewAuditHandler(auditService service.AuditUsecase) *AuditHandler {
-	return &AuditHandler{
-		auditService: auditService,
-	}
+func NewAuditHandler(svc usecase.AuditUsecase) *AuditHandler {
+	return &AuditHandler{svc: svc}
 }
 
-// Log creates a new audit log entry
-// @Summary Create audit log entry
-// @Description Create a new audit log entry for tracking user actions and system events
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param request body domain.AuditLog true "Audit log data"
-// @Success 201 {object} map[string]interface{} "Audit entry logged successfully"
-// @Failure 400 {object} errorx.Error "Invalid request body"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/logs [post]
-// @Security BearerAuth
+// Log godoc
+// @Summary      Create audit log entry
+// @Tags         audit
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.AuditLog  true  "Audit log payload"
+// @Success      201   {object}  response.Envelope{data=domain.AuditLog}
+// @Router       /audit/logs [post]
 func (h *AuditHandler) Log(c *gin.Context) {
-	var entry domain.AuditLog
-	if err := c.ShouldBindJSON(&entry); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request body: "+err.Error()))
+	var req domain.AuditLog
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	if err := h.auditService.Log(c.Request.Context(), &entry); err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to log audit entry").WithStack())
+	if req.IPAddress == "" {
+		req.IPAddress = c.ClientIP()
+	}
+	if req.UserAgent == "" {
+		req.UserAgent = c.GetHeader("User-Agent")
+	}
+	if req.Method == "" {
+		req.Method = c.Request.Method
+	}
+	if req.Path == "" {
+		req.Path = c.FullPath()
+	}
+	if req.CreatedAt.IsZero() {
+		req.CreatedAt = time.Now()
+	}
+	if err := h.svc.Log(requestContext(c), &req); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Audit entry logged successfully",
-		"data":    entry,
-	})
+	response.Created(c, "audit entry logged", req)
 }
 
-// GetAll retrieves all audit log entries with filtering and pagination
-// @Summary List all audit logs
-// @Description Get a paginated list of audit logs with optional filtering by user, action, resource, date range, etc.
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param user_id query string false "Filter by user ID"
-// @Param username query string false "Filter by username"
-// @Param action query string false "Filter by action (create, update, delete, etc.)"
-// @Param resource query string false "Filter by resource type"
-// @Param resource_id query string false "Filter by resource ID"
-// @Param ip_address query string false "Filter by IP address"
-// @Param success query boolean false "Filter by success status"
-// @Param start_date query string false "Filter by start date (RFC3339 format)"
-// @Param end_date query string false "Filter by end date (RFC3339 format)"
-// @Param page query int false "Page number (default: 1)" default(1)
-// @Param page_size query int false "Page size (default: 20, max: 100)" default(20)
-// @Param sort_by query string false "Sort by field (created_at, action, resource)" default(created_at)
-// @Param sort_order query string false "Sort order (asc, desc)" default(desc)
-// @Success 200 {object} map[string]interface{} "List of audit logs with pagination"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/logs [get]
-// @Security BearerAuth
+// GetAll godoc
+// @Summary      List audit logs
+// @Tags         audit
+// @Produce      json
+// @Param        page         query     int     false  "Page number"
+// @Param        page_size    query     int     false  "Page size"
+// @Param        user_id      query     int     false  "Filter by user ID"
+// @Param        action       query     string  false  "Filter by action"
+// @Param        resource     query     string  false  "Filter by resource"
+// @Param        resource_id  query     int     false  "Filter by resource ID"
+// @Param        ip_address   query     string  false  "Filter by IP address"
+// @Param        method       query     string  false  "Filter by HTTP method"
+// @Param        path         query     string  false  "Filter by path"
+// @Param        start_date   query     string  false  "Start date (RFC3339)"
+// @Param        end_date     query     string  false  "End date (RFC3339)"
+// @Param        sort_by      query     string  false  "Sort field"
+// @Param        sort_order   query     string  false  "Sort order"
+// @Success      200          {object}  response.Envelope{data=[]domain.AuditLog}
+// @Router       /audit/logs [get]
 func (h *AuditHandler) GetAll(c *gin.Context) {
-	var filter domain.AuditFilter
-	if err := c.ShouldBindQuery(&filter); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request query: "+err.Error()))
+	filter, ok := parseAuditFilter(c)
+	if !ok {
 		return
 	}
-
-	// Set default pagination values if not provided
-	if filter.Page == 0 {
-		filter.Page = 1
-	}
-	if filter.PageSize == 0 {
-		filter.PageSize = 20
-	}
-	if filter.PageSize > 100 {
-		filter.PageSize = 100
-	}
-
-	audits, total, err := h.auditService.ListAuditLogs(c.Request.Context(), filter)
+	items, total, err := h.svc.ListAuditLogs(requestContext(c), filter)
 	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to get audit entries").WithStack())
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "Audit entries retrieved successfully",
-		"data":      audits,
-		"total":     total,
-		"page":      filter.Page,
-		"page_size": filter.PageSize,
-	})
+	meta := buildAuditMeta(filter, total)
+	response.OKWithMeta(c, "audit logs fetched", items, &meta)
 }
 
-// GetByID retrieves a specific audit log entry by ID
-// @Summary Get audit log by ID
-// @Description Get detailed information about a specific audit log entry
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param id path string true "Audit log ID (UUID)"
-// @Success 200 {object} map[string]interface{} "Audit log details"
-// @Failure 404 {object} errorx.Error "Audit entry not found"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/logs/{id} [get]
-// @Security BearerAuth
+// GetByID godoc
+// @Summary      Get audit log
+// @Tags         audit
+// @Produce      json
+// @Param        id   path      string  true  "Audit log ID"
+// @Success      200  {object}  response.Envelope{data=domain.AuditLog}
+// @Router       /audit/logs/{id} [get]
 func (h *AuditHandler) GetByID(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.Error(errorx.New(http.StatusBadRequest, "Audit log ID is required"))
-		return
-	}
-
-	audit, err := h.auditService.GetAuditLog(c.Request.Context(), id)
+	item, err := h.svc.GetAuditLog(requestContext(c), c.Param("id"))
 	if err != nil {
-		c.Error(errorx.New(http.StatusNotFound, "Audit entry not found: "+err.Error()))
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Audit entry retrieved successfully",
-		"data":    audit,
-	})
+	response.OK(c, "audit log fetched", item)
 }
 
-// GetUserAuditLogs retrieves audit logs for a specific user
-// @Summary Get user audit logs
-// @Description Get all audit logs for a specific user with optional filtering
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param user_id path string true "User ID (UUID)"
-// @Param action query string false "Filter by action"
-// @Param resource query string false "Filter by resource type"
-// @Param start_date query string false "Filter by start date (RFC3339 format)"
-// @Param end_date query string false "Filter by end date (RFC3339 format)"
-// @Param page query int false "Page number (default: 1)" default(1)
-// @Param page_size query int false "Page size (default: 20, max: 100)" default(20)
-// @Success 200 {object} map[string]interface{} "User audit logs"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/users/{user_id}/logs [get]
-// @Security BearerAuth
+// GetUserAuditLogs godoc
+// @Summary      List user audit logs
+// @Tags         audit
+// @Produce      json
+// @Param        user_id     path      string  true   "User ID"
+// @Param        page        query     int     false  "Page number"
+// @Param        page_size   query     int     false  "Page size"
+// @Param        action      query     string  false  "Filter by action"
+// @Param        resource    query     string  false  "Filter by resource"
+// @Param        start_date  query     string  false  "Start date (RFC3339)"
+// @Param        end_date    query     string  false  "End date (RFC3339)"
+// @Success      200         {object}  response.Envelope{data=[]domain.AuditLog}
+// @Router       /audit/users/{user_id}/logs [get]
 func (h *AuditHandler) GetUserAuditLogs(c *gin.Context) {
-	userID := c.Param("user_id")
-	if userID == "" {
-		c.Error(errorx.New(http.StatusBadRequest, "User ID is required"))
+	filter, ok := parseAuditFilter(c)
+	if !ok {
 		return
 	}
-
-	var filter domain.AuditFilter
-	if err := c.ShouldBindQuery(&filter); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request query: "+err.Error()))
-		return
-	}
-
-	// Set default pagination
-	if filter.Page == 0 {
-		filter.Page = 1
-	}
-	if filter.PageSize == 0 {
-		filter.PageSize = 20
-	}
-
-	audits, total, err := h.auditService.GetUserAuditLogs(c.Request.Context(), userID, filter)
+	items, total, err := h.svc.GetUserAuditLogs(requestContext(c), c.Param("user_id"), filter)
 	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to get user audit logs").WithStack())
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "User audit logs retrieved successfully",
-		"data":      audits,
-		"total":     total,
-		"page":      filter.Page,
-		"page_size": filter.PageSize,
-	})
+	meta := buildAuditMeta(filter, total)
+	response.OKWithMeta(c, "user audit logs fetched", items, &meta)
 }
 
-// GetResourceAuditLogs retrieves audit logs for a specific resource
-// @Summary Get resource audit logs
-// @Description Get all audit logs for a specific resource with optional filtering
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param resource path string true "Resource type (e.g., server, user, database)"
-// @Param resource_id path string true "Resource ID"
-// @Param action query string false "Filter by action"
-// @Param start_date query string false "Filter by start date (RFC3339 format)"
-// @Param end_date query string false "Filter by end date (RFC3339 format)"
-// @Param page query int false "Page number (default: 1)" default(1)
-// @Param page_size query int false "Page size (default: 20, max: 100)" default(20)
-// @Success 200 {object} map[string]interface{} "Resource audit logs"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/resources/{resource}/{resource_id}/logs [get]
-// @Security BearerAuth
+// GetResourceAuditLogs godoc
+// @Summary      List resource audit logs
+// @Tags         audit
+// @Produce      json
+// @Param        resource     path      string  true   "Resource"
+// @Param        resource_id  path      string  true   "Resource ID"
+// @Param        page         query     int     false  "Page number"
+// @Param        page_size    query     int     false  "Page size"
+// @Param        action       query     string  false  "Filter by action"
+// @Param        start_date   query     string  false  "Start date (RFC3339)"
+// @Param        end_date     query     string  false  "End date (RFC3339)"
+// @Success      200          {object}  response.Envelope{data=[]domain.AuditLog}
+// @Router       /audit/resources/{resource}/{resource_id}/logs [get]
 func (h *AuditHandler) GetResourceAuditLogs(c *gin.Context) {
-	resource := c.Param("resource")
-	resourceID := c.Param("resource_id")
-
-	if resource == "" || resourceID == "" {
-		c.Error(errorx.New(http.StatusBadRequest, "Resource type and resource ID are required"))
+	filter, ok := parseAuditFilter(c)
+	if !ok {
 		return
 	}
-
-	var filter domain.AuditFilter
-	if err := c.ShouldBindQuery(&filter); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request query: "+err.Error()))
-		return
-	}
-
-	// Set default pagination
-	if filter.Page == 0 {
-		filter.Page = 1
-	}
-	if filter.PageSize == 0 {
-		filter.PageSize = 20
-	}
-
-	audits, total, err := h.auditService.GetResourceAuditLogs(c.Request.Context(), resource, resourceID, filter)
+	items, total, err := h.svc.GetResourceAuditLogs(requestContext(c), c.Param("resource"), c.Param("resource_id"), filter)
 	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to get resource audit logs").WithStack())
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "Resource audit logs retrieved successfully",
-		"data":      audits,
-		"total":     total,
-		"page":      filter.Page,
-		"page_size": filter.PageSize,
-	})
+	meta := buildAuditMeta(filter, total)
+	response.OKWithMeta(c, "resource audit logs fetched", items, &meta)
 }
 
-// GetStatistics retrieves audit log statistics
-// @Summary Get audit statistics
-// @Description Get statistical information about audit logs including action breakdown, resource breakdown, and hourly activity
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param start_date query string false "Start date for statistics (RFC3339 format)"
-// @Param end_date query string false "End date for statistics (RFC3339 format)"
-// @Success 200 {object} map[string]interface{} "Audit statistics"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/statistics [get]
-// @Security BearerAuth
+// GetStatistics godoc
+// @Summary      Get audit statistics
+// @Tags         audit
+// @Produce      json
+// @Param        start_date  query     string  false  "Start date (RFC3339)"
+// @Param        end_date    query     string  false  "End date (RFC3339)"
+// @Success      200         {object}  response.Envelope{data=domain.AuditStatistics}
+// @Router       /audit/statistics [get]
 func (h *AuditHandler) GetStatistics(c *gin.Context) {
-	startDateStr := c.Query("start_date")
-	endDateStr := c.Query("end_date")
-
-	var startDate, endDate time.Time
-	var err error
-
-	// Default to last 30 days if not provided
-	if startDateStr == "" {
-		startDate = time.Now().AddDate(0, 0, -30)
-	} else {
-		startDate, err = time.Parse(time.RFC3339, startDateStr)
-		if err != nil {
-			c.Error(errorx.New(http.StatusBadRequest, "Invalid start_date format. Use RFC3339 format"))
-			return
-		}
-	}
-
-	if endDateStr == "" {
-		endDate = time.Now()
-	} else {
-		endDate, err = time.Parse(time.RFC3339, endDateStr)
-		if err != nil {
-			c.Error(errorx.New(http.StatusBadRequest, "Invalid end_date format. Use RFC3339 format"))
-			return
-		}
-	}
-
-	stats, err := h.auditService.GetAuditStatistics(c.Request.Context(), startDate, endDate)
-	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to get audit statistics").WithStack())
+	startDate, endDate, ok := parseDateRange(c)
+	if !ok {
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Audit statistics retrieved successfully",
-		"data":    stats,
+	stats, err := h.svc.GetAuditStatistics(requestContext(c), startDate, endDate)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "audit statistics fetched", gin.H{
+		"statistics": stats,
 		"period": gin.H{
 			"start_date": startDate,
 			"end_date":   endDate,
@@ -306,76 +183,168 @@ func (h *AuditHandler) GetStatistics(c *gin.Context) {
 	})
 }
 
-// CleanupOldLogs removes old audit logs based on retention policy
-// @Summary Cleanup old audit logs
-// @Description Delete audit logs older than the specified retention period
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param retention_days query int false "Number of days to retain logs (default: 90)" default(90)
-// @Success 200 {object} map[string]interface{} "Cleanup successful"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/cleanup [post]
-// @Security BearerAuth
+// CleanupOldLogs godoc
+// @Summary      Cleanup old audit logs
+// @Tags         audit
+// @Produce      json
+// @Param        retention_days  query     int  false  "Retention period in days"
+// @Success      200             {object}  response.Envelope
+// @Router       /audit/cleanup [post]
 func (h *AuditHandler) CleanupOldLogs(c *gin.Context) {
-	retentionDaysStr := c.DefaultQuery("retention_days", "90")
-	retentionDays, err := strconv.Atoi(retentionDaysStr)
-	if err != nil || retentionDays < 1 {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid retention_days parameter"))
+	retentionDays := 90
+	if raw := c.Query("retention_days"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < 1 {
+			response.Fail(c, 400, "invalid retention_days")
+			return
+		}
+		retentionDays = value
+	}
+	if err := h.svc.CleanupOldLogs(requestContext(c), retentionDays); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	if err := h.auditService.CleanupOldLogs(c.Request.Context(), retentionDays); err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to cleanup old logs").WithStack())
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":        "Old audit logs cleaned up successfully",
-		"retention_days": retentionDays,
-	})
+	response.OK(c, "old audit logs cleaned", gin.H{"retention_days": retentionDays})
 }
 
-// ExportAuditLogs exports audit logs in specified format
-// @Summary Export audit logs
-// @Description Export audit logs to CSV or JSON format with optional filtering
-// @Tags audit
-// @Accept json
-// @Produce json
-// @Param format query string false "Export format (csv, json)" default(json)
-// @Param user_id query string false "Filter by user ID"
-// @Param action query string false "Filter by action"
-// @Param resource query string false "Filter by resource type"
-// @Param start_date query string false "Filter by start date (RFC3339 format)"
-// @Param end_date query string false "Filter by end date (RFC3339 format)"
-// @Success 200 {object} map[string]interface{} "Export file path or data"
-// @Failure 400 {object} errorx.Error "Invalid request parameters"
-// @Failure 500 {object} errorx.Error "Internal server error"
-// @Router /audit/export [get]
-// @Security BearerAuth
+// ExportAuditLogs godoc
+// @Summary      Export audit logs
+// @Tags         audit
+// @Produce      json
+// @Param        format       query     string  false  "Export format"
+// @Param        user_id      query     int     false  "Filter by user ID"
+// @Param        action       query     string  false  "Filter by action"
+// @Param        resource     query     string  false  "Filter by resource"
+// @Param        resource_id  query     int     false  "Filter by resource ID"
+// @Param        start_date   query     string  false  "Start date (RFC3339)"
+// @Param        end_date     query     string  false  "End date (RFC3339)"
+// @Success      200          {object}  response.Envelope
+// @Router       /audit/export [get]
 func (h *AuditHandler) ExportAuditLogs(c *gin.Context) {
+	filter, ok := parseAuditFilter(c)
+	if !ok {
+		return
+	}
 	format := c.DefaultQuery("format", "json")
 	if format != "json" && format != "csv" {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid format. Supported formats: json, csv"))
+		response.Fail(c, 400, "invalid export format")
 		return
 	}
-
-	var filter domain.AuditFilter
-	if err := c.ShouldBindQuery(&filter); err != nil {
-		c.Error(errorx.New(http.StatusBadRequest, "Invalid request query: "+err.Error()))
-		return
-	}
-
-	exportPath, err := h.auditService.ExportAuditLogs(c.Request.Context(), filter, format)
+	exportPath, err := h.svc.ExportAuditLogs(requestContext(c), filter, format)
 	if err != nil {
-		c.Error(errorx.New(http.StatusInternalServerError, "Failed to export audit logs: "+err.Error()).WithStack())
+		_ = c.Error(err)
 		return
 	}
+	response.OK(c, "audit logs exported", gin.H{"format": format, "export_path": exportPath})
+}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Audit logs exported successfully",
-		"export_path": exportPath,
-		"format":      format,
-	})
+func parseAuditFilter(c *gin.Context) (domain.AuditFilter, bool) {
+	filter := domain.AuditFilter{
+		Page:      1,
+		PageSize:  20,
+		SortBy:    c.DefaultQuery("sort_by", "created_at"),
+		SortOrder: c.DefaultQuery("sort_order", "desc"),
+		Resource:  c.Query("resource"),
+		IPAddress: c.Query("ip_address"),
+		Method:    c.Query("method"),
+		Path:      c.Query("path"),
+	}
+
+	if raw := c.Query("page"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < 1 {
+			response.Fail(c, 400, "invalid page")
+			return domain.AuditFilter{}, false
+		}
+		filter.Page = value
+	}
+
+	if raw := c.Query("page_size"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil || value < 1 || value > 100 {
+			response.Fail(c, 400, "invalid page_size")
+			return domain.AuditFilter{}, false
+		}
+		filter.PageSize = value
+	}
+
+	if raw := c.Query("user_id"); raw != "" {
+		value, err := strconv.ParseUint(raw, 10, 64)
+		if err != nil {
+			response.Fail(c, 400, "invalid user_id")
+			return domain.AuditFilter{}, false
+		}
+		parsed := uint(value)
+		filter.UserID = &parsed
+	}
+
+	if raw := c.Query("resource_id"); raw != "" {
+		value, err := strconv.ParseUint(raw, 10, 64)
+		if err != nil {
+			response.Fail(c, 400, "invalid resource_id")
+			return domain.AuditFilter{}, false
+		}
+		parsed := uint(value)
+		filter.ResourceID = &parsed
+	}
+
+	if raw := c.Query("action"); raw != "" {
+		action := domain.AuditAction(raw)
+		filter.Action = &action
+	}
+
+	if raw := c.Query("start_date"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid start_date")
+			return domain.AuditFilter{}, false
+		}
+		filter.StartDate = &value
+	}
+
+	if raw := c.Query("end_date"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid end_date")
+			return domain.AuditFilter{}, false
+		}
+		filter.EndDate = &value
+	}
+
+	return filter.Normalize(), true
+}
+
+func parseDateRange(c *gin.Context) (time.Time, time.Time, bool) {
+	startDate := time.Now().AddDate(0, 0, -30)
+	endDate := time.Now()
+
+	if raw := c.Query("start_date"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid start_date")
+			return time.Time{}, time.Time{}, false
+		}
+		startDate = value
+	}
+
+	if raw := c.Query("end_date"); raw != "" {
+		value, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid end_date")
+			return time.Time{}, time.Time{}, false
+		}
+		endDate = value
+	}
+
+	return startDate, endDate, true
+}
+
+func buildAuditMeta(filter domain.AuditFilter, total int64) response.Meta {
+	totalPages := int((total + int64(filter.PageSize) - 1) / int64(filter.PageSize))
+	return response.Meta{
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
+		TotalItems: total,
+		TotalPages: totalPages,
+	}
 }

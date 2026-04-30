@@ -1,7 +1,9 @@
 import React from "react";
 import { FlashcardHero, LearningActions } from "@/features/vocabulary";
+import { PremiumBadge, PremiumLockCard, usePremiumAccess } from '@/features/billing/premium';
 
 export function VocabularyPage() {
+  const { unlocked } = usePremiumAccess('vocab_pro');
   return (
     <div className="space-y-8 animate-in fade-in duration-500 relative">
       <section className="max-w-5xl mx-auto py-12">
@@ -11,6 +13,9 @@ export function VocabularyPage() {
             <span className="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider mb-2">
               Active Session: Academic Vocabulary
             </span>
+            <div className="mb-3">
+              <PremiumBadge unlocked={unlocked} />
+            </div>
             <h2 className="text-4xl font-headline font-semibold text-on-surface tracking-tight">Expand your Lexis</h2>
           </div>
           <div className="flex items-center gap-4 text-on-surface-variant text-sm font-medium">
@@ -24,6 +29,11 @@ export function VocabularyPage() {
         </div>
 
         {/* Layout Grid */}
+        {!unlocked ? (
+          <div className="mb-8">
+            <PremiumLockCard title="Vocabulary Pro is locked" description="Spaced repetition, advanced vocab sets, and premium practice modes unlock after upgrading your plan." featureKey="vocab_pro" />
+          </div>
+        ) : null}
         <div className="grid grid-cols-12 gap-8 items-start">
           <div className="col-span-12 lg:col-span-8 space-y-8">
             <FlashcardHero />

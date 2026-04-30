@@ -1,257 +1,152 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/modules/server/application/settings_uc"
-	"einfra/api/internal/domain"
-	"einfra/api/pkg/errorx"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/usecase"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
 type EnvironmentHandler struct {
-	envUsecase service.EnvironmentUsecase
+	svc usecase.EnvironmentUsecase
 }
 
-func NewEnvironmentHandler(envUsecase service.EnvironmentUsecase) *EnvironmentHandler {
-	return &EnvironmentHandler{
-		envUsecase: envUsecase,
-	}
+func NewEnvironmentHandler(svc usecase.EnvironmentUsecase) *EnvironmentHandler {
+	return &EnvironmentHandler{svc: svc}
 }
 
-// Create creates a new environment
-// @Summary Create a new environment
-// @Description Create a new deployment environment (dev, staging, production, etc.)
-// @Tags environments
-// @Accept json
-// @Produce json
-// @Param environment body domain.Environment true "Environment object"
-// @Success 201 {object} map[string]interface{} "Environment created successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request body"
-// @Failure 409 {object} map[string]interface{} "Environment with this name already exists"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/environments [post]
-// @Security BearerAuth
+// Create godoc
+// @Summary      Create environment
+// @Tags         environments
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.Environment  true  "Environment payload"
+// @Success      201   {object}  response.Envelope{data=domain.Environment}
+// @Failure      400   {object}  response.Envelope
+// @Router       /environments [post]
 func (h *EnvironmentHandler) Create(c *gin.Context) {
-	var env domain.Environment
-	if err := c.ShouldBindJSON(&env); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	var req domain.Environment
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	if err := h.envservice.CreateEnvironment(c.Request.Context(), &env); err != nil {
-		if errorx.GetCode(err) == errorx.CodeConflict {
-			c.Error(err)
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to create environment"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create environment"})
+	if err := h.svc.CreateEnvironment(requestContext(c), &req); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message":     "Environment created successfully",
-		"environment": env,
-	})
+	response.Created(c, "environment created", req)
 }
 
-// Get retrieves an environment by ID
-// @Summary Get environment by ID
-// @Description Retrieve a specific environment by its ID
-// @Tags environments
-// @Produce json
-// @Param id path string true "Environment ID (UUID)"
-// @Success 200 {object} map[string]interface{} "Environment details"
-// @Failure 400 {object} map[string]interface{} "Invalid environment ID"
-// @Failure 404 {object} map[string]interface{} "Environment not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/environments/{id} [get]
-// @Security BearerAuth
+// Get godoc
+// @Summary      Get environment
+// @Tags         environments
+// @Produce      json
+// @Param        id   path      string  true  "Environment ID"
+// @Success      200  {object}  response.Envelope{data=domain.Environment}
+// @Failure      404  {object}  response.Envelope
+// @Router       /environments/{id} [get]
 func (h *EnvironmentHandler) Get(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "Environment ID is required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Environment ID is required"})
-		return
-	}
-
-	env, err := h.envservice.GetEnvironment(c.Request.Context(), id)
+	item, err := h.svc.GetEnvironment(requestContext(c), c.Param("id"))
 	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeNotFound, "Environment not found"))
-		c.JSON(http.StatusNotFound, gin.H{"error": "Environment not found"})
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"environment": env,
-	})
+	response.OK(c, "environment fetched", item)
 }
 
-// List retrieves all environments with filtering and pagination
-// @Summary List all environments
-// @Description Retrieve a list of environments with optional filtering and pagination
-// @Tags environments
-// @Produce json
-// @Param is_active query boolean false "Filter by active status"
-// @Param name query string false "Filter by name (partial match)"
-// @Param page query int false "Page number (default: 1)" default(1)
-// @Param page_size query int false "Page size (default: 20, max: 100)" default(20)
-// @Success 200 {object} map[string]interface{} "List of environments"
-// @Failure 400 {object} map[string]interface{} "Invalid query parameters"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/environments [get]
-// @Security BearerAuth
+// List godoc
+// @Summary      List environments
+// @Tags         environments
+// @Produce      json
+// @Param        name       query     string  false  "Search by name"
+// @Param        is_active  query     bool    false  "Filter by active flag"
+// @Param        page       query     int     false  "Page number"
+// @Param        page_size  query     int     false  "Page size"
+// @Success      200  {object}  response.Envelope{data=[]domain.Environment}
+// @Router       /environments [get]
 func (h *EnvironmentHandler) List(c *gin.Context) {
 	filter := domain.EnvironmentFilter{
 		Name:     c.Query("name"),
 		Page:     1,
 		PageSize: 20,
 	}
-
-	// Parse is_active
-	if isActiveStr := c.Query("is_active"); isActiveStr != "" {
-		isActive, err := strconv.ParseBool(isActiveStr)
+	if raw := c.Query("is_active"); raw != "" {
+		value, err := strconv.ParseBool(raw)
 		if err != nil {
-			c.Error(errorx.New(errorx.CodeBadRequest, "Invalid is_active parameter"))
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid is_active parameter"})
+			response.Fail(c, 400, "invalid is_active")
 			return
 		}
-		filter.IsActive = &isActive
+		filter.IsActive = &value
 	}
-
-	// Parse page
-	if pageStr := c.Query("page"); pageStr != "" {
-		page, err := strconv.Atoi(pageStr)
-		if err != nil || page < 1 {
-			c.Error(errorx.New(errorx.CodeBadRequest, "Invalid page parameter"))
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page parameter"})
+	if raw := c.Query("page"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid page")
 			return
 		}
-		filter.Page = page
+		filter.Page = value
 	}
-
-	// Parse page_size
-	if pageSizeStr := c.Query("page_size"); pageSizeStr != "" {
-		pageSize, err := strconv.Atoi(pageSizeStr)
-		if err != nil || pageSize < 1 || pageSize > 100 {
-			c.Error(errorx.New(errorx.CodeBadRequest, "Invalid page_size parameter (max: 100)"))
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page_size parameter (max: 100)"})
+	if raw := c.Query("page_size"); raw != "" {
+		value, err := strconv.Atoi(raw)
+		if err != nil {
+			response.Fail(c, 400, "invalid page_size")
 			return
 		}
-		filter.PageSize = pageSize
+		filter.PageSize = value
 	}
 
-	environments, total, err := h.envservice.ListEnvironments(c.Request.Context(), filter)
+	items, total, err := h.svc.ListEnvironments(requestContext(c), filter)
 	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to list environments"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list environments"})
+		_ = c.Error(err)
 		return
 	}
-
-	totalPages := (int(total) + filter.PageSize - 1) / filter.PageSize
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "Environments retrieved successfully",
-		"environments": environments,
-		"total":        total,
-		"page":         filter.Page,
-		"page_size":    filter.PageSize,
-		"total_pages":  totalPages,
-	})
+	totalPages := 0
+	if filter.PageSize > 0 {
+		totalPages = int((total + int64(filter.PageSize) - 1) / int64(filter.PageSize))
+	}
+	meta := response.Meta{Page: filter.Page, PageSize: filter.PageSize, TotalItems: total, TotalPages: totalPages}
+	response.OKWithMeta(c, "environments fetched", items, &meta)
 }
 
-// Update updates an existing environment
-// @Summary Update environment
-// @Description Update an existing environment's information
-// @Tags environments
-// @Accept json
-// @Produce json
-// @Param id path string true "Environment ID (UUID)"
-// @Param environment body domain.Environment true "Updated environment object"
-// @Success 200 {object} map[string]interface{} "Environment updated successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid request"
-// @Failure 404 {object} map[string]interface{} "Environment not found"
-// @Failure 409 {object} map[string]interface{} "Environment name already exists"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/environments/{id} [put]
-// @Security BearerAuth
+// Update godoc
+// @Summary      Update environment
+// @Tags         environments
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string              true  "Environment ID"
+// @Param        body  body      domain.Environment  true  "Environment payload"
+// @Success      200   {object}  response.Envelope{data=domain.Environment}
+// @Router       /environments/{id} [put]
 func (h *EnvironmentHandler) Update(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "Environment ID is required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Environment ID is required"})
+	var req domain.Environment
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-
-	var env domain.Environment
-	if err := c.ShouldBindJSON(&env); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.Fail(c, 400, "invalid environment id")
 		return
 	}
-
-	env.ID = id
-
-	if err := h.envservice.UpdateEnvironment(c.Request.Context(), &env); err != nil {
-		if errorx.GetCode(err) == errorx.CodeNotFound {
-			c.Error(err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		if errorx.GetCode(err) == errorx.CodeConflict {
-			c.Error(err)
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to update environment"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update environment"})
+	req.ID = uint(id)
+	if err := h.svc.UpdateEnvironment(requestContext(c), &req); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":     "Environment updated successfully",
-		"environment": env,
-	})
+	response.OK(c, "environment updated", req)
 }
 
-// Delete deletes an environment
-// @Summary Delete environment
-// @Description Soft delete an environment by ID
-// @Tags environments
-// @Produce json
-// @Param id path string true "Environment ID (UUID)"
-// @Success 200 {object} map[string]interface{} "Environment deleted successfully"
-// @Failure 400 {object} map[string]interface{} "Invalid environment ID"
-// @Failure 404 {object} map[string]interface{} "Environment not found"
-// @Failure 500 {object} map[string]interface{} "Internal server error"
-// @Router /api/environments/{id} [delete]
-// @Security BearerAuth
+// Delete godoc
+// @Summary      Delete environment
+// @Tags         environments
+// @Produce      json
+// @Param        id   path      string  true  "Environment ID"
+// @Success      200  {object}  response.Envelope
+// @Router       /environments/{id} [delete]
 func (h *EnvironmentHandler) Delete(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.Error(errorx.New(errorx.CodeBadRequest, "Environment ID is required"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Environment ID is required"})
+	if err := h.svc.DeleteEnvironment(requestContext(c), c.Param("id")); err != nil {
+		_ = c.Error(err)
 		return
 	}
-
-	if err := h.envservice.DeleteEnvironment(c.Request.Context(), id); err != nil {
-		if errorx.GetCode(err) == errorx.CodeNotFound {
-			c.Error(err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to delete environment"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete environment"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Environment deleted successfully",
-	})
+	response.OK(c, "environment deleted", gin.H{"deleted": true})
 }

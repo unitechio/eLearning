@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 )
 
@@ -29,7 +30,7 @@ func (u *RoleUsecase) GetByName(ctx context.Context, name string) (*domain.Role,
 	return u.roleRepo.GetByName(ctx, name)
 }
 
-func (u *RoleUsecase) List(ctx context.Context, filter domain.RoleFilter) ([]*domain.Role, int64, error) {
+func (u *RoleUsecase) List(ctx context.Context, filter dto.RoleFilter) ([]*domain.Role, int64, error) {
 	return u.roleRepo.List(ctx, filter)
 }
 

@@ -4,18 +4,20 @@ import (
 	"context"
 	"errors"
 
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
 
-type userSettingsUsecase struct {
+type UserSettingsUsecase struct {
 	repo repository.UserSettingsRepository
 }
 
-func NewUserSettingsUsecase(repo repository.UserSettingsRepository) UserSettingsUsecase {
-	return &userSettingsUsecase{repo: repo}
+func NewUserSettingsUsecase(repo repository.UserSettingsRepository) *UserSettingsUsecase {
+	return &UserSettingsUsecase{repo: repo}
 }
 
-func (u *userSettingsUsecase) GetUserSettings(ctx context.Context, userID string) (*domain.UserSettings, error) {
+func (u *UserSettingsUsecase) GetUserSettings(ctx context.Context, userID string) (*domain.UserSettings, error) {
 	settings, err := u.repo.GetByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -30,7 +32,7 @@ func (u *userSettingsUsecase) GetUserSettings(ctx context.Context, userID string
 	return settings, nil
 }
 
-func (u *userSettingsUsecase) UpdateUserSettings(ctx context.Context, userID string, settings *domain.UserSettingsUpdate) error {
+func (u *UserSettingsUsecase) UpdateUserSettings(ctx context.Context, userID string, settings *domain.UserSettingsUpdate) error {
 	// Ensure the record exists
 	if _, err := u.repo.GetByUserID(ctx, userID); err != nil {
 		return err
@@ -40,7 +42,7 @@ func (u *userSettingsUsecase) UpdateUserSettings(ctx context.Context, userID str
 }
 
 // PartialUpdateUserSettings updates selected fields
-func (u *userSettingsUsecase) PartialUpdateUserSettings(ctx context.Context, userID string, upd *domain.UserSettingsUpdate) error {
+func (u *UserSettingsUsecase) PartialUpdateUserSettings(ctx context.Context, userID string, upd *domain.UserSettingsUpdate) error {
 	// Ensure user settings exist
 	if _, err := u.repo.GetByUserID(ctx, userID); err != nil {
 		return err
@@ -49,12 +51,12 @@ func (u *userSettingsUsecase) PartialUpdateUserSettings(ctx context.Context, use
 }
 
 // ResetToDefaults resets a user's settings to the default configuration
-func (u *userSettingsUsecase) ResetToDefaults(ctx context.Context, userID string) error {
+func (u *UserSettingsUsecase) ResetToDefaults(ctx context.Context, userID string) error {
 	return u.repo.ResetToDefaults(ctx, userID)
 }
 
 // GetOrCreateSettings returns existing settings or creates defaults if missing
-func (u *userSettingsUsecase) GetOrCreateSettings(ctx context.Context, userID string) (*domain.UserSettings, error) {
+func (u *UserSettingsUsecase) GetOrCreateSettings(ctx context.Context, userID string) (*domain.UserSettings, error) {
 	settings, err := u.repo.GetByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

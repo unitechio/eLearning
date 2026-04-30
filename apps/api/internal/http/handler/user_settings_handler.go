@@ -1,120 +1,189 @@
-//go:build legacy
-// +build legacy
-
 package handler
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"einfra/api/internal/modules/server/application/settings_uc"
-	"einfra/api/internal/domain"
-	"einfra/api/pkg/errorx"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	usecaseimpl "github.com/unitechio/eLearning/apps/api/internal/usecase/impl"
+	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
-// UserSettingsHandler handles user settings API endpoints
 type UserSettingsHandler struct {
-	usecase service.UserSettingsUsecase
+	svc *usecaseimpl.UserSettingsUsecase
 }
 
-// NewUserSettingsHandler creates a new handler instance
-func NewUserSettingsHandler(us service.UserSettingsUsecase) *UserSettingsHandler {
-	return &UserSettingsHandler{usecase: us}
+func NewUserSettingsHandler(svc *usecaseimpl.UserSettingsUsecase) *UserSettingsHandler {
+	return &UserSettingsHandler{svc: svc}
 }
 
-// Get retrieves user settings for a given user ID
-// @Summary Get user settings
-// @Description Retrieve settings for a specific user
-// @Tags UserSettings
-// @Accept json
-// @Produce json
-// @Param userId path string true "User ID"
-// @Success 200 {object} domain.UserSettings
-// @Failure 404 {object} map[string]string
-// @Router /users/{userId}/settings [get]
+// Get godoc
+// @Summary      Get current user settings
+// @Tags         user-settings
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /users/settings [get]
 func (h *UserSettingsHandler) Get(c *gin.Context) {
-	userID := c.Param("userId")
-	settings, err := h.service.GetUserSettings(c.Request.Context(), userID)
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.GetOrCreateSettings(requestContext(c), userID.String())
 	if err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to get user settings"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user settings"})
+		_ = c.Error(err)
 		return
 	}
-	c.JSON(http.StatusOK, settings)
+	response.OK(c, "user settings fetched", item)
 }
 
-// Update performs a full update of user settings
-// @Summary Update user settings
-// @Description Replace the entire settings object for a user
-// @Tags UserSettings
-// @Accept json
-// @Produce json
-// @Param userId path string true "User ID"
-// @Param settings body domain.UserSettings true "Settings"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /users/{userId}/settings [put]
+// Update godoc
+// @Summary      Update current user settings
+// @Tags         user-settings
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.UserSettingsUpdate  true  "User settings update payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /users/settings [put]
 func (h *UserSettingsHandler) Update(c *gin.Context) {
-	userID := c.Param("userId")
-	var update domain.UserSettingsUpdate
-	if err := c.ShouldBindJSON(&update); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	var req struct {
+		Theme                *string `json:"theme,omitempty"`
+		FontSize             *string `json:"font_size,omitempty"`
+		FontFamily           *string `json:"font_family,omitempty"`
+		CompactMode          *bool   `json:"compact_mode,omitempty"`
+		SidebarCollapsed     *bool   `json:"sidebar_collapsed,omitempty"`
+		Sidebar              *string `json:"sidebar,omitempty"`
+		Language             *string `json:"language,omitempty"`
+		Timezone             *string `json:"timezone,omitempty"`
+		DateFormat           *string `json:"date_format,omitempty"`
+		TimeFormat           *string `json:"time_format,omitempty"`
+		Currency             *string `json:"currency,omitempty"`
+		NotificationLevel    *string `json:"notification_level,omitempty"`
+		EmailNotifications   *bool   `json:"email_notifications,omitempty"`
+		PushNotifications    *bool   `json:"push_notifications,omitempty"`
+		DesktopNotifications *bool   `json:"desktop_notifications,omitempty"`
+		NotificationSound    *bool   `json:"notification_sound,omitempty"`
+		DigestFrequency      *string `json:"digest_frequency,omitempty"`
+		DefaultDashboard     *string `json:"default_dashboard,omitempty"`
+		WidgetLayout         *string `json:"widget_layout,omitempty"`
+		DefaultPageSize      *int    `json:"default_page_size,omitempty"`
+		TableDensity         *string `json:"table_density,omitempty"`
+		HighContrast         *bool   `json:"high_contrast,omitempty"`
+		ReduceMotion         *bool   `json:"reduce_motion,omitempty"`
+		ShowOnlineStatus     *bool   `json:"show_online_status,omitempty"`
+		DeveloperMode        *bool   `json:"developer_mode,omitempty"`
+		BetaFeatures         *bool   `json:"beta_features,omitempty"`
+	}
+	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	if err := h.service.UpdateUserSettings(c.Request.Context(), userID, &update); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to update settings"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Settings updated"})
+	update := toUserSettingsUpdate(req)
+	if err := h.svc.UpdateUserSettings(requestContext(c), userID.String(), update); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	item, err := h.svc.GetUserSettings(requestContext(c), userID.String())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "user settings updated", item)
 }
 
-// Patch performs a partial update of user settings
-// @Summary Patch user settings
-// @Description Update selected fields of user settings
-// @Tags UserSettings
-// @Accept json
-// @Produce json
-// @Param userId path string true "User ID"
-// @Param update body domain.UserSettingsUpdate true "Partial update"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /users/{userId}/settings [patch]
+// Patch godoc
+// @Summary      Patch current user settings
+// @Tags         user-settings
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      domain.UserSettingsUpdate  true  "User settings patch payload"
+// @Success      200   {object}  response.Envelope
+// @Router       /users/settings [patch]
 func (h *UserSettingsHandler) Patch(c *gin.Context) {
-	userID := c.Param("userId")
-	var upd domain.UserSettingsUpdate
-	if err := c.ShouldBindJSON(&upd); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeBadRequest, "Invalid request body"))
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-	if err := h.service.UpdateUserSettings(c.Request.Context(), userID, &upd); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to patch settings"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to patch settings"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Settings patched"})
+	h.Update(c)
 }
 
-// Reset resets a user's settings to defaults
-// @Summary Reset user settings
-// @Description Reset settings to default values for a user
-// @Tags UserSettings
-// @Accept json
-// @Produce json
-// @Param userId path string true "User ID"
-// @Success 200 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /users/{userId}/settings/reset [post]
+// Reset godoc
+// @Summary      Reset current user settings
+// @Tags         user-settings
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /users/settings/reset [post]
 func (h *UserSettingsHandler) Reset(c *gin.Context) {
-	userID := c.Param("userId")
-	if err := h.service.ResetToDefaults(c.Request.Context(), userID); err != nil {
-		c.Error(errorx.Wrap(err, errorx.CodeInternalError, "Failed to reset settings"))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset settings"})
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Settings reset to defaults"})
+	if err := h.svc.ResetToDefaults(requestContext(c), userID.String()); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	item, err := h.svc.GetUserSettings(requestContext(c), userID.String())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "user settings reset", item)
+}
+
+func toUserSettingsUpdate(req struct {
+	Theme                *string `json:"theme,omitempty"`
+	FontSize             *string `json:"font_size,omitempty"`
+	FontFamily           *string `json:"font_family,omitempty"`
+	CompactMode          *bool   `json:"compact_mode,omitempty"`
+	SidebarCollapsed     *bool   `json:"sidebar_collapsed,omitempty"`
+	Sidebar              *string `json:"sidebar,omitempty"`
+	Language             *string `json:"language,omitempty"`
+	Timezone             *string `json:"timezone,omitempty"`
+	DateFormat           *string `json:"date_format,omitempty"`
+	TimeFormat           *string `json:"time_format,omitempty"`
+	Currency             *string `json:"currency,omitempty"`
+	NotificationLevel    *string `json:"notification_level,omitempty"`
+	EmailNotifications   *bool   `json:"email_notifications,omitempty"`
+	PushNotifications    *bool   `json:"push_notifications,omitempty"`
+	DesktopNotifications *bool   `json:"desktop_notifications,omitempty"`
+	NotificationSound    *bool   `json:"notification_sound,omitempty"`
+	DigestFrequency      *string `json:"digest_frequency,omitempty"`
+	DefaultDashboard     *string `json:"default_dashboard,omitempty"`
+	WidgetLayout         *string `json:"widget_layout,omitempty"`
+	DefaultPageSize      *int    `json:"default_page_size,omitempty"`
+	TableDensity         *string `json:"table_density,omitempty"`
+	HighContrast         *bool   `json:"high_contrast,omitempty"`
+	ReduceMotion         *bool   `json:"reduce_motion,omitempty"`
+	ShowOnlineStatus     *bool   `json:"show_online_status,omitempty"`
+	DeveloperMode        *bool   `json:"developer_mode,omitempty"`
+	BetaFeatures         *bool   `json:"beta_features,omitempty"`
+}) *domain.UserSettingsUpdate {
+	return &domain.UserSettingsUpdate{
+		Theme:                req.Theme,
+		FontSize:             req.FontSize,
+		FontFamily:           req.FontFamily,
+		CompactMode:          req.CompactMode,
+		SidebarCollapsed:     req.SidebarCollapsed,
+		Sidebar:              req.Sidebar,
+		Language:             req.Language,
+		Timezone:             req.Timezone,
+		DateFormat:           req.DateFormat,
+		TimeFormat:           req.TimeFormat,
+		Currency:             req.Currency,
+		NotificationLevel:    req.NotificationLevel,
+		EmailNotifications:   req.EmailNotifications,
+		PushNotifications:    req.PushNotifications,
+		DesktopNotifications: req.DesktopNotifications,
+		NotificationSound:    req.NotificationSound,
+		DigestFrequency:      req.DigestFrequency,
+		DefaultDashboard:     req.DefaultDashboard,
+		WidgetLayout:         req.WidgetLayout,
+		DefaultPageSize:      req.DefaultPageSize,
+		TableDensity:         req.TableDensity,
+		HighContrast:         req.HighContrast,
+		ReduceMotion:         req.ReduceMotion,
+		ShowOnlineStatus:     req.ShowOnlineStatus,
+		DeveloperMode:        req.DeveloperMode,
+		BetaFeatures:         req.BetaFeatures,
+	}
 }

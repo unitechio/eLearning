@@ -1,6 +1,8 @@
 package impl
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
@@ -13,11 +15,12 @@ type WritingExtrasUsecase struct {
 	llm  ai.LLMService
 }
 
-func NewWritingExtrasService(repo repository.WritingRepository, llm ai.LLMUsecase) *WritingExtrasUsecase {
+func NewWritingExtrasService(repo repository.WritingRepository, llm ai.LLMService) *WritingExtrasUsecase {
 	return &WritingExtrasUsecase{repo: repo, llm: llm}
 }
 
-func (s *WritingExtrasUsecase) GetWritingByID(userID uuid.UUID, id string) (map[string]any, error) {
+func (s *WritingExtrasUsecase) GetWritingByID(ctx context.Context, userID uuid.UUID, id string) (map[string]any, error) {
+	_ = ctx
 	submissionID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid writing id")
@@ -42,7 +45,8 @@ func (s *WritingExtrasUsecase) GetWritingByID(userID uuid.UUID, id string) (map[
 	}, nil
 }
 
-func (s *WritingExtrasUsecase) EvaluateWriting(req dto.WritingEvaluationRequest) (map[string]any, error) {
+func (s *WritingExtrasUsecase) EvaluateWriting(ctx context.Context, req dto.WritingEvaluationRequest) (map[string]any, error) {
+	_ = ctx
 	eval, err := s.llm.EvaluateWriting(req.Prompt, req.Text)
 	if err != nil {
 		return nil, apperr.Internal(err)

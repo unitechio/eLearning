@@ -1,0 +1,5 @@
+cmd\api\main.go:6:2: open C:\Users\Admin\AppData\Local\go-build\47\476b1daaabbedc5f24a92e9e33bc134a1b8c00342439508682e730478be8a4ce-d: Access is denied.
+cmd\api\main.go:7:2: open C:\Users\Admin\AppData\Local\go-build\88\8825b33f17b9521304ff24e273c0e7ddad6a8fe6217c1ad042de2064355dc9f0-d: Access is denied.
+cmd\api\main.go:8:2: open C:\Users\Admin\AppData\Local\go-build\a3\a3135f5581fb331eff7b20cae4b7bce118b9228730ec718149544697a64e0206-d: Access is denied.
+cmd\api\main.go:4:2: package net/http is not in std (C:\Users\Admin\.g\go\src\net\http)
+package command-line-arguments: cannot find package

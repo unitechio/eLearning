@@ -1,9 +1,24 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
+
+type RealtimeHandler struct {
+	upgrader websocket.Upgrader
+}
+
+func NewRealtimeHandler() *RealtimeHandler {
+	return &RealtimeHandler{
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool { return true },
+		},
+	}
+}
 
 // SpeakingWS godoc
 // @Summary      WebSocket speaking stream

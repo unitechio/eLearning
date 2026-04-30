@@ -20,4 +20,13 @@ type BillingService interface {
 	ListPlans(query dto.BillingPlanListQuery) (*dto.PageResult[dto.BillingPlan], error)
 	Subscribe(userID uuid.UUID, req dto.SubscribeRequest) (map[string]any, error)
 	ListBillingHistory(userID uuid.UUID, query dto.BillingHistoryQuery) (*dto.PageResult[dto.BillingHistoryItem], error)
+	ListAdminPlans(query dto.AdminBillingPlanListQuery) (*dto.PageResult[dto.AdminBillingPlan], error)
+	CreatePlan(req dto.CreateBillingPlanRequest) (*dto.AdminBillingPlan, error)
+	UpdatePlan(id string, req dto.UpdateBillingPlanRequest) (*dto.AdminBillingPlan, error)
+	DeletePlan(id string) error
+	ListSubscriptions(query dto.AdminBillingSubscriptionListQuery) (*dto.PageResult[dto.AdminBillingSubscription], error)
+	GetSubscription(id string) (*dto.AdminBillingSubscription, error)
+	UpdateSubscriptionStatus(id string, req dto.UpdateSubscriptionStatusRequest) (*dto.AdminBillingSubscription, error)
+	CancelSubscription(id string) (*dto.AdminBillingSubscription, error)
+	GrantPremium(req dto.GrantPremiumRequest) (*dto.AdminBillingSubscription, error)
 }

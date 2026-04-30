@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/dto"
-	"github.com/xuri/excelize/v2"
 )
 
 type UserRepository interface {
@@ -17,9 +16,10 @@ type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	Update(ctx context.Context, user *domain.User) error
 	AssignRoleByName(ctx context.Context, userID uuid.UUID, roleName string) error
+	AssignRoleByID(ctx context.Context, userID uuid.UUID, roleID uint) error
+	RemoveRoleByID(ctx context.Context, userID uuid.UUID, roleID uint) error
+	AssignPermissionIDs(ctx context.Context, userID uuid.UUID, permissionIDs []uint) error
+	RemovePermissionIDs(ctx context.Context, userID uuid.UUID, permissionIDs []uint) error
 	ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error
 	ResetPassword(ctx context.Context, userID, newPassword string) error
-	UpdateUserSettings(ctx context.Context, userID string, settings domain.UserSettings) error
-	ImportUsersFromExcel(ctx context.Context, filePath string) error
-	ExportUsersToExcel(ctx context.Context) (*excelize.File, string, error)
 }

@@ -14,6 +14,7 @@ type Handlers struct {
 	AuthWorkflow     *handler.AuthWorkflowHandler
 	User             *handler.UserHandler
 	UserInsights     *handler.UserInsightsHandler
+	UserSettings     *handler.UserSettingsHandler
 	Speaking         *handler.SpeakingHandler
 	SpeakingExtras   *handler.SpeakingExtrasHandler
 	Vocabulary       *handler.VocabularyHandler
@@ -31,6 +32,15 @@ type Handlers struct {
 	Practice         *handler.PracticeHandler
 	Admin            *handler.AdminHandler
 	Billing          *handler.BillingHandler
+	Environment      *handler.EnvironmentHandler
+	FeatureFlag      *handler.FeatureFlagHandler
+	SystemSetting    *handler.SystemSettingHandler
+	License          *handler.LicenseHandler
+	Audit            *handler.AuditHandler
+	Email            *handler.EmailHandler
+	Authorization    *handler.AuthorizationHandler
+	Role             *handler.RoleHandler
+	Permission       *handler.PermissionHandler
 	Realtime         *handler.RealtimeHandler
 }
 
@@ -74,6 +84,10 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				users.GET("/progress", h.UserInsights.GetProgress)
 				users.GET("/stats", h.UserInsights.GetStats)
 				users.GET("/activities", h.UserInsights.GetActivities)
+				users.GET("/settings", h.UserSettings.Get)
+				users.PUT("/settings", h.UserSettings.Update)
+				users.PATCH("/settings", h.UserSettings.Patch)
+				users.POST("/settings/reset", h.UserSettings.Reset)
 			}
 
 			courses := protected.Group("/courses")
@@ -185,23 +199,40 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				notifications.PUT("/:id/read", h.Notification.Read)
 			}
 
+			authorization := protected.Group("/authorization")
+			{
+				authorization.GET("/me", h.Authorization.GetMyAccessProfile)
+			}
+			protected.POST("/permissions/grant", guards.Admin, h.Authorization.GrantResourcePermission)
+			protected.POST("/permissions/revoke", guards.Admin, h.Authorization.RevokeResourcePermission)
+			protected.POST("/permissions/assign-role", guards.Admin, h.Authorization.AssignEnvironmentRole)
+			protected.DELETE("/permissions/environment-roles/:id", guards.Admin, h.Authorization.RemoveEnvironmentRole)
+			protected.POST("/permissions/cleanup", guards.Admin, h.Authorization.CleanupExpiredPermissions)
+			protected.GET("/users/:user_id/permissions", guards.Admin, h.Authorization.GetUserPermissions)
+			protected.GET("/resources/:resource_type/:resource_id/permissions", guards.Admin, h.Authorization.GetResourcePermissions)
+
 			protected.GET("/leaderboard", h.Engagement.Leaderboard)
 			protected.GET("/leaderboard/me", h.Engagement.MyLeaderboard)
+
 			protected.GET("/activity/heatmap", h.Engagement.Heatmap)
 			protected.GET("/activity/daily", h.Engagement.DailyActivity)
 			protected.GET("/activity/xp", h.Engagement.XPHistory)
 			protected.GET("/activity/time-spent", h.Engagement.TimeSpent)
+
 			protected.GET("/gamification/profile", h.Engagement.GamificationProfile)
 			protected.POST("/gamification/xp", h.Engagement.AddXP)
 			protected.POST("/gamification/xp/add", h.Engagement.AddXP)
 			protected.GET("/gamification/streak", h.Engagement.Streak)
 			protected.GET("/gamification/achievements", h.Engagement.Achievements)
+
 			protected.GET("/recommendations", h.Engagement.Recommendations)
 			protected.GET("/recommendations/next", h.Engagement.NextLesson)
 			protected.GET("/recommendations/next-lesson", h.Engagement.NextLesson)
+
 			protected.GET("/analytics/learning-pattern", h.Engagement.LearningPattern)
 			protected.GET("/analytics/weak-points", h.Engagement.WeakPoints)
 			protected.GET("/analytics/improvement", h.Engagement.Improvement)
+
 			protected.GET("/premium/features", h.Engagement.PremiumFeatures)
 			protected.POST("/premium/unlock", h.Engagement.PremiumUnlock)
 
@@ -254,6 +285,27 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				admin.DELETE("/courses/:id", h.Admin.DeleteCourse)
 				admin.GET("/analytics", h.Admin.Analytics)
 				admin.GET("/ai-usage", h.Admin.AIUsage)
+				admin.GET("/billing/plans", h.Billing.AdminPlans)
+				admin.POST("/billing/plans", h.Billing.CreatePlan)
+				admin.PUT("/billing/plans/:id", h.Billing.UpdatePlan)
+				admin.DELETE("/billing/plans/:id", h.Billing.DeletePlan)
+				admin.GET("/billing/subscriptions", h.Billing.AdminSubscriptions)
+				admin.GET("/billing/subscriptions/:id", h.Billing.GetSubscription)
+				admin.PUT("/billing/subscriptions/:id/status", h.Billing.UpdateSubscriptionStatus)
+				admin.POST("/billing/subscriptions/:id/cancel", h.Billing.CancelSubscription)
+				admin.POST("/billing/subscriptions/grant-premium", h.Billing.GrantPremium)
+				admin.GET("/roles", h.Role.List)
+				admin.POST("/roles", h.Role.Create)
+				admin.GET("/roles/:id", h.Role.Get)
+				admin.PUT("/roles/:id", h.Role.Update)
+				admin.DELETE("/roles/:id", h.Role.Delete)
+				admin.PUT("/roles/:id/permissions", h.Role.AssignPermissions)
+				admin.GET("/permissions", h.Permission.List)
+				admin.POST("/permissions", h.Permission.Create)
+				admin.GET("/permissions/:id", h.Permission.Get)
+				admin.PUT("/permissions/:id", h.Permission.Update)
+				admin.DELETE("/permissions/:id", h.Permission.Delete)
+				admin.GET("/permissions/resource/:resource", h.Permission.GetByResource)
 			}
 
 			billing := protected.Group("/billing")
@@ -261,6 +313,80 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				billing.GET("/plans", h.Billing.Plans)
 				billing.POST("/subscribe", h.Billing.Subscribe)
 				billing.GET("/history", h.Billing.History)
+			}
+
+			licenses := protected.Group("/licenses")
+			{
+				licenses.POST("/activate", h.License.ActivateLicense)
+				licenses.GET("/validate", h.License.ValidateLicense)
+				licenses.GET("/current", h.License.GetCurrentLicense)
+				licenses.GET("/usage", h.License.GetUsageStatistics)
+				licenses.POST("/upgrade", guards.Admin, h.License.UpgradeLicense)
+			}
+
+			adminPlatform := protected.Group("/platform", guards.Admin)
+			{
+				environments := adminPlatform.Group("/environments")
+				{
+					environments.GET("", h.Environment.List)
+					environments.POST("", h.Environment.Create)
+					environments.GET("/:id", h.Environment.Get)
+					environments.PUT("/:id", h.Environment.Update)
+					environments.DELETE("/:id", h.Environment.Delete)
+				}
+
+				featureFlags := adminPlatform.Group("/feature-flags")
+				{
+					featureFlags.GET("", h.FeatureFlag.GetAllFeatureFlags)
+					featureFlags.POST("", h.FeatureFlag.CreateFeatureFlag)
+					featureFlags.GET("/name/:name", h.FeatureFlag.GetFeatureFlagByName)
+					featureFlags.GET("/category/:category", h.FeatureFlag.GetFeatureFlagsByCategory)
+					featureFlags.PUT("", h.FeatureFlag.UpdateFeatureFlag)
+					featureFlags.DELETE("/:id", h.FeatureFlag.DeleteFeatureFlag)
+				}
+
+				systemSettings := adminPlatform.Group("/system-settings")
+				{
+					systemSettings.GET("", h.SystemSetting.GetAllSystemSettings)
+					systemSettings.POST("", h.SystemSetting.CreateSystemSetting)
+					systemSettings.GET("/key/:key", h.SystemSetting.GetSystemSettingByKey)
+					systemSettings.GET("/category/:category", h.SystemSetting.GetSystemSettingsByCategory)
+					systemSettings.PUT("/:id", h.SystemSetting.UpdateSystemSetting)
+					systemSettings.DELETE("/:id", h.SystemSetting.DeleteSystemSetting)
+				}
+
+				licenseAdmin := adminPlatform.Group("/licenses")
+				{
+					licenseAdmin.GET("", h.License.ListLicenses)
+					licenseAdmin.POST("", h.License.CreateLicense)
+					licenseAdmin.POST("/:license_key/suspend", h.License.SuspendLicense)
+					licenseAdmin.POST("/:license_key/reactivate", h.License.ReactivateLicense)
+				}
+
+				audit := adminPlatform.Group("/audit")
+				{
+					audit.POST("/logs", h.Audit.Log)
+					audit.GET("/logs", h.Audit.GetAll)
+					audit.GET("/logs/:id", h.Audit.GetByID)
+					audit.GET("/users/:user_id/logs", h.Audit.GetUserAuditLogs)
+					audit.GET("/resources/:resource/:resource_id/logs", h.Audit.GetResourceAuditLogs)
+					audit.GET("/statistics", h.Audit.GetStatistics)
+					audit.POST("/cleanup", h.Audit.CleanupOldLogs)
+					audit.GET("/export", h.Audit.ExportAuditLogs)
+				}
+
+				emails := adminPlatform.Group("/emails")
+				{
+					emails.POST("/send", h.Email.SendEmail)
+					emails.POST("/send-template", h.Email.SendTemplateEmail)
+					emails.POST("/send-bulk", h.Email.SendBulkEmail)
+					emails.POST("/send-with-attachment", h.Email.SendEmailWithAttachment)
+					emails.POST("/schedule", h.Email.ScheduleEmail)
+					emails.GET("/logs", h.Email.GetEmailLogs)
+					emails.GET("/logs/:id", h.Email.GetEmailLog)
+					emails.GET("/logs/:id/status", h.Email.GetEmailStatus)
+					emails.POST("/validate", h.Email.ValidateEmail)
+				}
 			}
 		}
 	}

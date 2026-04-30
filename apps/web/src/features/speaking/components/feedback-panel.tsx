@@ -1,6 +1,6 @@
 "use client";
 
-import { useSpeakingStore } from "@/hooks/use-speaking";
+import { useSpeakingStore } from "@/features/speaking/stores/use-speaking-store";
 import { Gauge, Languages, Sparkles, RefreshCcw } from "lucide-react";
 
 export function FeedbackPanel() {
