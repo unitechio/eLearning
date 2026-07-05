@@ -1,5 +1,7 @@
 /** Base API response envelope */
 export interface ApiResponse<T> {
+  code: number;
+  description: string;
   success: boolean;
   message: string;
   data: T;

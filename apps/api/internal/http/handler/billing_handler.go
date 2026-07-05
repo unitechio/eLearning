@@ -273,6 +273,42 @@ func (h *BillingHandler) History(c *gin.Context) {
 	response.OKWithMeta(c, "billing history fetched", res.Items, &res.Meta)
 }
 
+func (h *BillingHandler) Checkout(c *gin.Context) {
+	var req dto.CheckoutPaymentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CreateCheckout(userID, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "payment checkout created", item)
+}
+
+func (h *BillingHandler) ConfirmSandboxPayment(c *gin.Context) {
+	var req dto.ConfirmPaymentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.ConfirmSandboxPayment(userID, c.Param("id"), req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "sandbox payment confirmed", item)
+}
+
 // AdminPlans godoc
 // @Summary      List admin billing plans
 // @Tags         admin-billing
@@ -465,4 +501,32 @@ func (h *BillingHandler) GrantPremium(c *gin.Context) {
 		return
 	}
 	response.OK(c, "premium granted", item)
+}
+
+func (h *BillingHandler) AdminInvoices(c *gin.Context) {
+	var query dto.AdminBillingListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	res, err := h.svc.ListInvoices(query)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OKWithMeta(c, "billing invoices fetched", res.Items, &res.Meta)
+}
+
+func (h *BillingHandler) AdminPaymentTransactions(c *gin.Context) {
+	var query dto.AdminBillingListQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	res, err := h.svc.ListPaymentTransactions(query)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OKWithMeta(c, "payment transactions fetched", res.Items, &res.Meta)
 }

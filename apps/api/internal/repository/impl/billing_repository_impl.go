@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -103,5 +103,79 @@ func (r *BillingRepository) ListHistoryByUserID(userID uuid.UUID, filter reposit
 		return nil, 0, err
 	}
 	err := q.Order("paid_at desc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
+	return items, total, err
+}
+
+func (r *BillingRepository) CreateInvoice(invoice *domain.BillingInvoice) error {
+	return r.db.Create(invoice).Error
+}
+
+func (r *BillingRepository) FindInvoiceByID(id uuid.UUID) (*domain.BillingInvoice, error) {
+	var item domain.BillingInvoice
+	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *BillingRepository) UpdateInvoice(invoice *domain.BillingInvoice) error {
+	return r.db.Save(invoice).Error
+}
+
+func (r *BillingRepository) ListInvoices(filter repository.BillingAdminListFilter) ([]domain.BillingInvoice, int64, error) {
+	var items []domain.BillingInvoice
+	var total int64
+	q := r.db.Model(&domain.BillingInvoice{})
+	if filter.Status != "" {
+		q = q.Where("status = ?", filter.Status)
+	}
+	if filter.UserID != uuid.Nil {
+		q = q.Where("user_id = ?", filter.UserID)
+	}
+	if filter.Search != "" {
+		like := "%" + strings.ToLower(filter.Search) + "%"
+		q = q.Where("lower(invoice_no) like ? OR lower(description) like ?", like, like)
+	}
+	if err := q.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := q.Order("created_at desc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
+	return items, total, err
+}
+
+func (r *BillingRepository) CreatePaymentTransaction(tx *domain.PaymentTransaction) error {
+	return r.db.Create(tx).Error
+}
+
+func (r *BillingRepository) FindPaymentTransactionByID(id uuid.UUID) (*domain.PaymentTransaction, error) {
+	var item domain.PaymentTransaction
+	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *BillingRepository) UpdatePaymentTransaction(tx *domain.PaymentTransaction) error {
+	return r.db.Save(tx).Error
+}
+
+func (r *BillingRepository) ListPaymentTransactions(filter repository.BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error) {
+	var items []domain.PaymentTransaction
+	var total int64
+	q := r.db.Model(&domain.PaymentTransaction{})
+	if filter.Status != "" {
+		q = q.Where("status = ?", filter.Status)
+	}
+	if filter.UserID != uuid.Nil {
+		q = q.Where("user_id = ?", filter.UserID)
+	}
+	if filter.Search != "" {
+		like := "%" + strings.ToLower(filter.Search) + "%"
+		q = q.Where("lower(provider) like ? OR lower(provider_reference) like ?", like, like)
+	}
+	if err := q.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	err := q.Order("created_at desc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
 	return items, total, err
 }

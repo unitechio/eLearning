@@ -29,4 +29,8 @@ type BillingService interface {
 	UpdateSubscriptionStatus(id string, req dto.UpdateSubscriptionStatusRequest) (*dto.AdminBillingSubscription, error)
 	CancelSubscription(id string) (*dto.AdminBillingSubscription, error)
 	GrantPremium(req dto.GrantPremiumRequest) (*dto.AdminBillingSubscription, error)
+	CreateCheckout(userID uuid.UUID, req dto.CheckoutPaymentRequest) (*dto.CheckoutPaymentResponse, error)
+	ConfirmSandboxPayment(userID uuid.UUID, id string, req dto.ConfirmPaymentRequest) (*dto.CheckoutPaymentResponse, error)
+	ListInvoices(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminBillingInvoice], error)
+	ListPaymentTransactions(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminPaymentTransaction], error)
 }

@@ -25,25 +25,27 @@ export function FilterSidebar({
   onSearch,
 }: FilterSidebarProps) {
   return (
-    <aside className="w-48 shrink-0 hidden md:block">
+    <aside className="w-64 shrink-0 hidden md:block">
       {/* Search */}
-      <p className="font-bold text-sm text-gray-700 mb-2">Tìm kiếm</p>
-      <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden mb-5">
+      <p className="font-label font-bold text-sm text-on-surface mb-2">Tìm kiếm</p>
+      <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden mb-5">
         <input
           value={searchValue}
           onChange={(e) => onSearch?.(e.target.value)}
-          className="flex-1 text-sm px-3 py-2 outline-none"
+          className="flex-1 text-sm px-3 py-2 outline-none bg-transparent text-on-surface placeholder:text-on-surface-variant/60"
           placeholder="Search"
         />
-        <span className="px-3 text-gray-400 text-sm">🔍</span>
+        <span className="px-3 text-on-surface-variant text-sm" aria-hidden="true">🔍</span>
       </div>
 
       {/* Filter groups */}
-      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Bộ lọc</p>
+      <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide mb-2">
+        Bộ lọc
+      </p>
       {groups.map((group) => (
         <div key={group.title} className="mb-5">
           {group.title && (
-            <p className="text-sm font-semibold text-gray-700 mb-1">{group.title}</p>
+            <p className="text-sm font-semibold text-on-surface mb-1">{group.title}</p>
           )}
           <div className="space-y-1.5">
             {group.items.map((item) => {
@@ -52,11 +54,11 @@ export function FilterSidebar({
                 <label key={item} className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
-                    className="accent-red-600"
+                    className="accent-primary"
                     checked={checked}
                     onChange={() => onToggle?.(group.title, item)}
                   />
-                  <span className="text-sm text-gray-600 group-hover:text-red-600 transition-colors">
+                  <span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">
                     {item}
                   </span>
                 </label>
@@ -69,7 +71,9 @@ export function FilterSidebar({
       {/* Sort */}
       {sortOptions.length > 0 && (
         <>
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">SẮP XẾP THEO</p>
+          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wide mb-2">
+            Sắp xếp theo
+          </p>
           <div className="space-y-1.5">
             {sortOptions.map((s) => (
               <label key={s} className="flex items-center gap-2 cursor-pointer">
@@ -79,9 +83,9 @@ export function FilterSidebar({
                   value={s}
                   checked={sort === s}
                   onChange={() => onSort?.(s)}
-                  className="accent-red-600"
+                  className="accent-primary"
                 />
-                <span className="text-sm text-gray-600">{s}</span>
+                <span className="text-sm text-on-surface-variant">{s}</span>
               </label>
             ))}
           </div>

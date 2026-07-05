@@ -56,6 +56,8 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.BillingPlan{},
 		&domain.BillingSubscription{},
 		&domain.BillingHistory{},
+		&domain.BillingInvoice{},
+		&domain.PaymentTransaction{},
 		&domain.Streak{},
 		&domain.XPPoint{},
 		&domain.PracticeSession{},
@@ -63,6 +65,18 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.DictionaryHistory{},
 		&domain.VocabularySet{},
 		&domain.VocabularySetWord{},
+		&domain.IELTSContentItem{},
+		&domain.IELTSPassage{},
+		&domain.IELTSQuestionGroup{},
+		&domain.IELTSQuestion{},
+		&domain.IELTSVocabularyItem{},
+		&domain.IELTSRelatedPost{},
+		&domain.IELTSPracticeAttempt{},
+		&domain.IELTSLearningProgress{},
+		&domain.IELTSMockTestSession{},
+		&domain.SupportTicket{},
+		&domain.SupportTicketComment{},
+		&domain.WsAudit{},
 	); err != nil {
 		slog.Error("Failed to migrate user tables", slog.String("error", err.Error()))
 		return err

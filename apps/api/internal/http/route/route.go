@@ -5,8 +5,8 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/config"
 	"github.com/unitechio/eLearning/apps/api/internal/http/handler"
 	"github.com/unitechio/eLearning/apps/api/internal/http/middleware"
+	"github.com/unitechio/eLearning/apps/api/internal/utils/constants"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
-	"github.com/unitechio/eLearning/apps/api/pkg/utils/constants"
 )
 
 type Handlers struct {
@@ -30,6 +30,9 @@ type Handlers struct {
 	Notification     *handler.NotificationHandler
 	Engagement       *handler.EngagementHandler
 	Practice         *handler.PracticeHandler
+	IELTS            *handler.IELTSHandler
+	Post             *handler.PostHandler
+	Support          *handler.SupportHandler
 	Admin            *handler.AdminHandler
 	Billing          *handler.BillingHandler
 	Environment      *handler.EnvironmentHandler
@@ -72,6 +75,20 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 			authRoutes.POST("/verify-email", h.AuthWorkflow.VerifyEmail)
 			authRoutes.POST("/forgot-password", h.AuthWorkflow.ForgotPassword)
 			authRoutes.POST("/reset-password", h.AuthWorkflow.ResetPassword)
+		}
+
+		publicIELTS := v1.Group("/public/ielts")
+		{
+			publicIELTS.GET("/content", h.IELTS.PublicList)
+			publicIELTS.GET("/content/:id", h.IELTS.PublicGet)
+			publicIELTS.GET("/content/:id/answer-key", h.IELTS.PublicAnswerKey)
+			publicIELTS.GET("/content/:id/vocabulary", h.IELTS.PublicVocabulary)
+		}
+
+		publicPosts := v1.Group("/public/posts")
+		{
+			publicPosts.GET("", h.Post.PublicList)
+			publicPosts.GET("/:slug", h.Post.PublicGet)
 		}
 
 		protected := v1.Group("/", middleware.JWTAuth(cfg.JWT.Secret))
@@ -215,6 +232,14 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 			{
 				authorization.GET("/me", h.Authorization.GetMyAccessProfile)
 			}
+
+			support := protected.Group("/support")
+			{
+				support.GET("/tickets", h.Support.MyTickets)
+				support.POST("/tickets", h.Support.Create)
+				support.GET("/tickets/:id", h.Support.Get)
+				support.POST("/tickets/:id/comments", h.Support.Comment)
+			}
 			protected.POST("/permissions/grant", guards.Admin, h.Authorization.GrantResourcePermission)
 			protected.POST("/permissions/revoke", guards.Admin, h.Authorization.RevokeResourcePermission)
 			protected.POST("/permissions/assign-role", guards.Admin, h.Authorization.AssignEnvironmentRole)
@@ -257,6 +282,21 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				practice.POST("/dictation/submit", h.Practice.PracticeSubmit)
 				practice.POST("/shadowing/start", h.Practice.PracticeStart)
 				practice.POST("/shadowing/submit", h.Practice.PracticeSubmit)
+			}
+
+			ielts := protected.Group("/ielts")
+			{
+				ielts.GET("/content", h.IELTS.PublicList)
+				ielts.GET("/content/:id", h.IELTS.Get)
+				ielts.GET("/content/:id/answer-key", h.IELTS.AnswerKey)
+				ielts.GET("/content/:id/vocabulary", h.IELTS.Vocabulary)
+				ielts.POST("/content/:id/attempts", h.IELTS.StartAttempt)
+				ielts.POST("/attempts/:id/submit", h.IELTS.SubmitAttempt)
+				ielts.GET("/attempts", h.IELTS.Attempts)
+				ielts.GET("/progress", h.IELTS.Progress)
+				ielts.PUT("/content/:id/progress", h.IELTS.UpdateProgress)
+				ielts.POST("/mock-tests", h.IELTS.StartMockTest)
+				ielts.POST("/mock-tests/:id/submit", h.IELTS.SubmitMockTest)
 			}
 
 			pronunciation := protected.Group("/pronunciation")
@@ -306,6 +346,13 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				admin.PUT("/billing/subscriptions/:id/status", h.Billing.UpdateSubscriptionStatus)
 				admin.POST("/billing/subscriptions/:id/cancel", h.Billing.CancelSubscription)
 				admin.POST("/billing/subscriptions/grant-premium", h.Billing.GrantPremium)
+				admin.GET("/billing/invoices", h.Billing.AdminInvoices)
+				admin.GET("/billing/payments", h.Billing.AdminPaymentTransactions)
+				admin.GET("/support/tickets", h.Support.AdminTickets)
+				admin.GET("/support/tickets/:id", h.Support.AdminGet)
+				admin.POST("/support/tickets/:id/comments", h.Support.AdminComment)
+				admin.PUT("/support/tickets/:id/assign", h.Support.Assign)
+				admin.PUT("/support/tickets/:id/status", h.Support.UpdateStatus)
 				admin.GET("/roles", h.Role.List)
 				admin.POST("/roles", h.Role.Create)
 				admin.GET("/roles/:id", h.Role.Get)
@@ -318,6 +365,40 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				admin.PUT("/permissions/:id", h.Permission.Update)
 				admin.DELETE("/permissions/:id", h.Permission.Delete)
 				admin.GET("/permissions/resource/:resource", h.Permission.GetByResource)
+				adminPosts := admin.Group("/posts")
+				{
+					adminPosts.GET("", h.Post.List)
+					adminPosts.POST("", h.Post.Create)
+					adminPosts.GET("/:slug", h.Post.Get)
+					adminPosts.PUT("/:id", h.Post.Update)
+					adminPosts.DELETE("/:id", h.Post.Delete)
+				}
+				adminIELTS := admin.Group("/ielts")
+				{
+					adminIELTS.GET("/content", h.IELTS.AdminList)
+					adminIELTS.POST("/content", h.IELTS.Create)
+					adminIELTS.POST("/content/import", h.IELTS.Import)
+					adminIELTS.GET("/content/:id", h.IELTS.Get)
+					adminIELTS.PUT("/content/:id", h.IELTS.Update)
+					adminIELTS.DELETE("/content/:id", h.IELTS.Delete)
+					adminIELTS.POST("/content/:id/review", h.IELTS.Review)
+					adminIELTS.POST("/content/:id/assets", h.IELTS.UploadAsset)
+					adminIELTS.POST("/content/:id/passages", h.IELTS.CreatePassage)
+					adminIELTS.PUT("/passages/:id", h.IELTS.UpdatePassage)
+					adminIELTS.DELETE("/passages/:id", h.IELTS.DeletePassage)
+					adminIELTS.POST("/content/:id/question-groups", h.IELTS.CreateQuestionGroup)
+					adminIELTS.PUT("/question-groups/:id", h.IELTS.UpdateQuestionGroup)
+					adminIELTS.DELETE("/question-groups/:id", h.IELTS.DeleteQuestionGroup)
+					adminIELTS.POST("/content/:id/questions", h.IELTS.CreateQuestion)
+					adminIELTS.PUT("/questions/:id", h.IELTS.UpdateQuestion)
+					adminIELTS.DELETE("/questions/:id", h.IELTS.DeleteQuestion)
+					adminIELTS.POST("/content/:id/vocabulary", h.IELTS.CreateVocabulary)
+					adminIELTS.PUT("/vocabulary/:id", h.IELTS.UpdateVocabulary)
+					adminIELTS.DELETE("/vocabulary/:id", h.IELTS.DeleteVocabulary)
+					adminIELTS.POST("/content/:id/related-posts", h.IELTS.CreateRelatedPost)
+					adminIELTS.PUT("/related-posts/:id", h.IELTS.UpdateRelatedPost)
+					adminIELTS.DELETE("/related-posts/:id", h.IELTS.DeleteRelatedPost)
+				}
 			}
 
 			billing := protected.Group("/billing")
@@ -325,6 +406,8 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				billing.GET("/plans", h.Billing.Plans)
 				billing.POST("/subscribe", h.Billing.Subscribe)
 				billing.GET("/history", h.Billing.History)
+				billing.POST("/payments/checkout", h.Billing.Checkout)
+				billing.POST("/payments/:id/sandbox-confirm", h.Billing.ConfirmSandboxPayment)
 			}
 
 			licenses := protected.Group("/licenses")

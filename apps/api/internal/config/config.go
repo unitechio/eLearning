@@ -3,6 +3,8 @@ package config
 import (
 	"io"
 	"os"
+	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -116,6 +118,10 @@ type MinioConfig struct {
 	SecretAccessKey string
 	UseSSL          bool   `example:"false"`
 	BucketName      string `example:"einfra-crm"`
+	ContentBucket   string `example:"ielts-content"`
+	AudioBucket     string `example:"ielts-audio"`
+	PDFBucket       string `example:"ielts-pdf"`
+	VocabBucket     string `example:"ielts-vocab"`
 }
 
 // EncryptionConfig holds encryption configuration for sensitive data
@@ -167,9 +173,33 @@ type ELKConfig struct {
 }
 
 func LoadConfig(configPath string) (*Config, error) {
-	if err := godotenv.Load(configPath); err != nil {
-		if !os.IsNotExist(err) {
-			return nil, err
+	// Try to load .env - check multiple candidate paths
+	candidates := []string{configPath}
+
+	// Also try relative to the source file location (for `go run`)
+	_, callerFile, _, ok := runtime.Caller(0)
+	if ok {
+		// callerFile is this config.go file, walk up 3 levels: config -> internal -> api root
+		apiRoot := filepath.Join(filepath.Dir(callerFile), "..", "..")
+		candidates = append(candidates, filepath.Join(apiRoot, ".env"))
+	}
+
+	// Also try relative to current working directory
+	if cwd, err := os.Getwd(); err == nil {
+		candidates = append(candidates, filepath.Join(cwd, ".env"))
+		candidates = append(candidates, filepath.Join(cwd, "..", ".env"))
+		candidates = append(candidates, filepath.Join(cwd, "..", "..", ".env"))
+	}
+
+	for _, candidate := range candidates {
+		abs, err := filepath.Abs(candidate)
+		if err != nil {
+			continue
+		}
+		if _, err := os.Stat(abs); err == nil {
+			if err := godotenv.Load(abs); err == nil {
+				break
+			}
 		}
 	}
 
@@ -230,6 +260,10 @@ func LoadConfig(configPath string) (*Config, error) {
 			SecretAccessKey: getEnvAny([]string{"MINIO_SECRET_ACCESS_KEY", "MINIO_SECRET_KEY"}, "minioadmin"),
 			UseSSL:          getEnvAsBool("MINIO_USE_SSL", false),
 			BucketName:      getEnvAny([]string{"MINIO_BUCKET_NAME", "MINIO_BUCKET"}, "einfra-crm"),
+			ContentBucket:   getEnv("MINIO_IELTS_CONTENT_BUCKET", "ielts-content"),
+			AudioBucket:     getEnv("MINIO_IELTS_AUDIO_BUCKET", "ielts-audio"),
+			PDFBucket:       getEnv("MINIO_IELTS_PDF_BUCKET", "ielts-pdf"),
+			VocabBucket:     getEnv("MINIO_IELTS_VOCAB_BUCKET", "ielts-vocab"),
 		},
 
 		Email: EmailConfig{

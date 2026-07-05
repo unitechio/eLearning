@@ -27,17 +27,19 @@ import (
 
 // Envelope is the standard JSON wrapper for every API response.
 type Envelope struct {
-	Success   bool       `json:"success"`
-	Message   string     `json:"message"`
-	Data      any        `json:"data,omitempty"`
-	Error     *ErrorBody `json:"error,omitempty"`
-	Meta      *Meta      `json:"meta,omitempty"`
-	RequestID string     `json:"request_id,omitempty"`
+	Code        int64      `json:"code"`
+	Description string     `json:"description"`
+	Success     bool       `json:"success"`
+	Message     string     `json:"message"`
+	Data        any        `json:"data,omitempty"`
+	Error       *ErrorBody `json:"error,omitempty"`
+	Meta        *Meta      `json:"meta,omitempty"`
+	RequestID   string     `json:"request_id,omitempty"`
 }
 
 // ErrorBody carries structured error details (never internal stack traces).
 type ErrorBody struct {
-	Code    int               `json:"code"`
+	Code    int64             `json:"code"`
 	Message string            `json:"message"`
 	Fields  map[string]string `json:"fields,omitempty"` // validation field errors
 }
@@ -56,12 +58,20 @@ type Meta struct {
 
 // OK writes a 200 JSON success envelope.
 func OK(c *gin.Context, message string, data any) {
-	respond(c, http.StatusOK, message, data, nil, nil)
+	respond(c, http.StatusOK, CodeSuccess, message, data, nil, nil)
+}
+
+func OKCode(c *gin.Context, appCode AppCode, data any) {
+	respond(c, http.StatusOK, appCode, appCode.Description, data, nil, nil)
 }
 
 // Created writes a 201 JSON success envelope.
 func Created(c *gin.Context, message string, data any) {
-	respond(c, http.StatusCreated, message, data, nil, nil)
+	respond(c, http.StatusCreated, CodeSuccess, message, data, nil, nil)
+}
+
+func CreatedCode(c *gin.Context, appCode AppCode, data any) {
+	respond(c, http.StatusCreated, appCode, appCode.Description, data, nil, nil)
 }
 
 // NoContent writes a 204 (no body).
@@ -71,7 +81,11 @@ func NoContent(c *gin.Context) {
 
 // OKWithMeta writes a 200 JSON success envelope including pagination metadata.
 func OKWithMeta(c *gin.Context, message string, data any, meta *Meta) {
-	respond(c, http.StatusOK, message, data, nil, meta)
+	respond(c, http.StatusOK, CodeSuccess, message, data, nil, meta)
+}
+
+func OKWithMetaCode(c *gin.Context, appCode AppCode, data any, meta *Meta) {
+	respond(c, http.StatusOK, appCode, appCode.Description, data, nil, meta)
 }
 
 // ---------------------------------------------------------------------------
@@ -80,13 +94,19 @@ func OKWithMeta(c *gin.Context, message string, data any, meta *Meta) {
 
 // Fail writes an error envelope with the provided HTTP status and message.
 func Fail(c *gin.Context, code int, message string) {
-	respond(c, code, message, nil, &ErrorBody{Code: code, Message: message}, nil)
+	appCode := CodeFromHTTP(code, message)
+	respond(c, code, appCode, message, nil, &ErrorBody{Code: appCode.Code, Message: message}, nil)
+}
+
+func FailCode(c *gin.Context, httpStatus int, appCode AppCode) {
+	respond(c, httpStatus, appCode, appCode.Description, nil, &ErrorBody{Code: appCode.Code, Message: appCode.Description}, nil)
 }
 
 // FailWithFields writes a 400 error envelope with per-field validation messages.
 func FailWithFields(c *gin.Context, message string, fields map[string]string) {
-	respond(c, http.StatusBadRequest, message, nil, &ErrorBody{
-		Code:    http.StatusBadRequest,
+	appCode := CodeFromHTTP(http.StatusBadRequest, message)
+	respond(c, http.StatusBadRequest, appCode, message, nil, &ErrorBody{
+		Code:    appCode.Code,
 		Message: message,
 		Fields:  fields,
 	}, nil)
@@ -104,19 +124,21 @@ func InternalError(c *gin.Context) {
 
 // respond is the single write point for all JSON responses.
 // It injects the request_id from the gin context (set by RequestIDMiddleware).
-func respond(c *gin.Context, code int, message string, data any, errBody *ErrorBody, meta *Meta) {
+func respond(c *gin.Context, httpStatus int, appCode AppCode, message string, data any, errBody *ErrorBody, meta *Meta) {
 	requestID, _ := c.Get("RequestID")
 
 	payload := Envelope{
-		Success:   errBody == nil,
-		Message:   message,
-		Data:      data,
-		Error:     errBody,
-		Meta:      meta,
-		RequestID: toString(requestID),
+		Code:        appCode.Code,
+		Description: appCode.Description,
+		Success:     errBody == nil,
+		Message:     message,
+		Data:        data,
+		Error:       errBody,
+		Meta:        meta,
+		RequestID:   toString(requestID),
 	}
 
-	c.JSON(code, payload)
+	c.JSON(httpStatus, payload)
 }
 
 func toString(v any) string {

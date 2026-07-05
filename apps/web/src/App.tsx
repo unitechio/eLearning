@@ -1,7 +1,7 @@
 import React from "react";
 import { AppProviders } from "@/app/providers";
 import { BrowserRouter } from "react-router-dom";
-import { AppRoutes } from "@/routers";
+import { AppRoutes } from "@/routes";
 import "@/app/styles/globals.css";
 
 export default function App() {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -45,4 +46,11 @@ func bindQueryOrAbort(c *gin.Context, target any) bool {
 		return false
 	}
 	return true
+}
+
+func setPublicCache(c *gin.Context, maxAgeSeconds int, staleWhileRevalidateSeconds int) {
+	if c.Request.Method != "GET" {
+		return
+	}
+	c.Header("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", maxAgeSeconds, staleWhileRevalidateSeconds))
 }

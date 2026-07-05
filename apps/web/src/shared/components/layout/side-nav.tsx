@@ -13,7 +13,8 @@ import {
   GraduationCap,
   CreditCard,
 } from 'lucide-react';
-import { useAuthStore } from '@/features/auth';
+import { useAuthStore } from '@/domains/auth';
+import { OptimizedImage } from '@/shared/components/media';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -160,6 +161,32 @@ export default function SideNav() {
                 Billing Admin
               </>
             </NavLink>
+            <NavLink
+              to="/admin/ielts-content"
+              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
+                isActive
+                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              }`}
+            >
+              <>
+                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                IELTS Content
+              </>
+            </NavLink>
+            <NavLink
+              to="/admin/support-tickets"
+              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
+                isActive
+                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+              }`}
+            >
+              <>
+                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                Support Tickets
+              </>
+            </NavLink>
           </>
         ) : null}
       </nav>
@@ -167,10 +194,12 @@ export default function SideNav() {
       <div className="mt-auto pt-6 border-t border-slate-200/50">
         <div className="flex items-center gap-3 px-2 mb-6 group cursor-pointer">
           <div className="relative">
-            <img
+            <OptimizedImage
               alt={[user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'User'}
-              className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-slate-800 shadow-sm"
+              aspectClassName="w-10 h-10 rounded-full"
+              className="border-2 border-white shadow-sm dark:border-slate-800"
               src={user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&h=100&auto=format&fit=crop'}
+              widthHint={96}
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
           </div>

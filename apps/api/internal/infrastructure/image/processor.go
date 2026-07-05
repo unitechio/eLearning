@@ -66,6 +66,11 @@ func (p *Processor) EncodePNG(img image.Image) (*bytes.Buffer, error) {
 
 // OptimizeImage optimizes an image by resizing if too large and compressing
 func (p *Processor) OptimizeImage(img image.Image, maxWidth, maxHeight, quality int) (*bytes.Buffer, error) {
+	return p.OptimizeImageByFormat(img, "jpeg", maxWidth, maxHeight, quality)
+}
+
+// OptimizeImageByFormat optimizes an image and encodes it in the specified format
+func (p *Processor) OptimizeImageByFormat(img image.Image, format string, maxWidth, maxHeight, quality int) (*bytes.Buffer, error) {
 	bounds := img.Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
@@ -75,6 +80,8 @@ func (p *Processor) OptimizeImage(img image.Image, maxWidth, maxHeight, quality 
 		img = imaging.Fit(img, maxWidth, maxHeight, imaging.Lanczos)
 	}
 
-	// Compress
-	return p.Compress(img, quality)
+	if format == "png" {
+		return p.EncodePNG(img)
+	}
+	return p.EncodeJPEG(img, quality)
 }

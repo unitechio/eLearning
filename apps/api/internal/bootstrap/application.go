@@ -14,7 +14,9 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/http/handler"
 	"github.com/unitechio/eLearning/apps/api/internal/http/middleware"
 	"github.com/unitechio/eLearning/apps/api/internal/http/route"
+	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/cache"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
+	storage "github.com/unitechio/eLearning/apps/api/internal/infrastructure/filestorage"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	repoimpl "github.com/unitechio/eLearning/apps/api/internal/repository/impl"
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
@@ -40,6 +42,15 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	if err := database.SeedData(dbInstance); err != nil {
 		logger.Warn("seed database failed", slog.String("error", err.Error()))
 	}
+	if err := cache.Init(&cfg.Cache); err != nil {
+		logger.Warn("redis unavailable; continuing without cache", slog.String("error", err.Error()))
+	}
+	var assetStorage *storage.MinioStorage
+	if minioStorage, err := storage.NewMinioStorage(cfg.Minio); err != nil {
+		logger.Warn("minio unavailable; ielts asset upload disabled", slog.String("error", err.Error()))
+	} else {
+		assetStorage = minioStorage
+	}
 
 	userRepo := repoimpl.NewUserRepository(dbInstance)
 	roleRepo := repoimpl.NewRoleRepository(dbInstance)
@@ -56,6 +67,9 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	listeningRepo := repoimpl.NewListeningRepository(dbInstance)
 	engagementRepo := repoimpl.NewEngagementRepository(dbInstance)
 	practiceRepo := repoimpl.NewPracticeRepository(dbInstance)
+	ieltsRepo := repoimpl.NewIELTSRepository(dbInstance)
+	postRepo := repoimpl.NewPostRepository(dbInstance)
+	supportRepo := repoimpl.NewSupportRepository(dbInstance)
 	authRepo := repoimpl.NewAuthRepository(dbInstance)
 	sessionRepo := repoimpl.NewSessionRepository(dbInstance)
 	loginAttemptRepo := repoimpl.NewLoginAttemptRepository(dbInstance)
@@ -82,6 +96,9 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	billingSvc := svcimpl.NewBillingService(billingRepo, userRepo)
 	engagementSvc := svcimpl.NewEngagementService(engagementRepo, progressRepo, activityRepo, billingRepo)
 	practiceSvc := svcimpl.NewPracticeService(practiceRepo, vocabularyRepo, llmSvc)
+	ieltsSvc := svcimpl.NewIELTSServiceWithDependencies(ieltsRepo, cache.GetClient(), assetStorage)
+	postSvc := svcimpl.NewPostService(postRepo)
+	supportSvc := svcimpl.NewSupportService(supportRepo)
 	writingExtrasSvc := svcimpl.NewWritingExtrasService(writingRepo, llmSvc)
 	speakingExtrasSvc := svcimpl.NewSpeakingExtrasService(speakingRepo, llmSvc)
 	vocabularyExtrasSvc := svcimpl.NewVocabularyExtrasService(vocabularyRepo)
@@ -121,6 +138,9 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Notification:     handler.NewNotificationHandler(notificationSvc),
 		Engagement:       handler.NewEngagementHandler(engagementSvc),
 		Practice:         handler.NewPracticeHandler(practiceSvc),
+		IELTS:            handler.NewIELTSHandler(ieltsSvc),
+		Post:             handler.NewPostHandler(postSvc),
+		Support:          handler.NewSupportHandler(supportSvc),
 		Admin:            handler.NewAdminHandler(adminSvc),
 		Billing:          handler.NewBillingHandler(billingSvc),
 		Environment:      handler.NewEnvironmentHandler(environmentSvc),

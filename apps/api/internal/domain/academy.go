@@ -102,3 +102,31 @@ type BillingHistory struct {
 	Status         string    `json:"status" gorm:"type:varchar(50);default:'paid'"`
 	PaidAt         time.Time `json:"paid_at" gorm:"autoCreateTime"`
 }
+
+type BillingInvoice struct {
+	UUIDModel
+	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;index"`
+	PlanID      uuid.UUID  `json:"plan_id" gorm:"type:uuid;not null;index"`
+	InvoiceNo   string     `json:"invoice_no" gorm:"type:varchar(40);not null;uniqueIndex"`
+	Amount      float64    `json:"amount" gorm:"type:decimal(12,2);not null"`
+	Currency    string     `json:"currency" gorm:"type:varchar(10);default:'USD'"`
+	Status      string     `json:"status" gorm:"type:varchar(30);default:'pending';index"`
+	DueAt       *time.Time `json:"due_at,omitempty"`
+	PaidAt      *time.Time `json:"paid_at,omitempty"`
+	Description string     `json:"description" gorm:"type:text"`
+}
+
+type PaymentTransaction struct {
+	UUIDModel
+	UserID            uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;index"`
+	InvoiceID         uuid.UUID  `json:"invoice_id" gorm:"type:uuid;not null;index"`
+	PlanID            uuid.UUID  `json:"plan_id" gorm:"type:uuid;not null;index"`
+	Provider          string     `json:"provider" gorm:"type:varchar(50);not null;index"`
+	ProviderReference string     `json:"provider_reference" gorm:"type:varchar(120);index"`
+	Amount            float64    `json:"amount" gorm:"type:decimal(12,2);not null"`
+	Currency          string     `json:"currency" gorm:"type:varchar(10);default:'USD'"`
+	Status            string     `json:"status" gorm:"type:varchar(30);default:'pending';index"`
+	CheckoutURL       string     `json:"checkout_url" gorm:"type:text"`
+	PaidAt            *time.Time `json:"paid_at,omitempty"`
+	FailureReason     string     `json:"failure_reason" gorm:"type:text"`
+}

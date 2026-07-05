@@ -1,39 +1,78 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React from "react";
 
-const navItems  = ["IELTS Online Test ▾", "Bài mẫu IELTS ▾", "Chép chính tả"];
+interface NavItem {
+  label: string;
+  href?: string;
+}
 
-export default function HeaderNav({ active = "" }) {
+interface HeaderNavProps {
+  /** Nav items to display */
+  navItems?: NavItem[];
+  /** Currently active nav item label */
+  active?: string;
+  /** Short brand name shown in header */
+  brandName?: string;
+  /** Brand logo initial letter */
+  logoLetter?: string;
+  /** Called when logo/brand is clicked */
+  onBrandClick?: () => void;
+  /** Called when search icon is clicked */
+  onSearchClick?: () => void;
+}
+
+export default function HeaderNav({
+  navItems = [],
+  active = "",
+  brandName = "eEnglish",
+  logoLetter = "E",
+  onBrandClick,
+  onSearchClick,
+}: HeaderNavProps) {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+    <header className="bg-surface-container-lowest border-b border-outline-variant px-6 py-3 flex items-center justify-between sticky top-0 z-50">
       {/* Logo */}
-      <div className="flex items-center gap-2 cursor-pointer">
-        <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white font-black text-xs">
-          D
+      <div
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={onBrandClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`${brandName} – về trang chủ`}
+      >
+        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-black text-xs">
+          {logoLetter}
         </div>
-        <span className="font-black text-gray-900 text-sm tracking-tight">UNI TỰ HỌC</span>
+        <span className="font-headline font-black text-on-surface text-sm tracking-tight">
+          {brandName}
+        </span>
       </div>
 
       {/* Nav */}
-      <nav className="hidden md:flex items-center gap-6">
-        {navItems.map((item) => (
-          <button
-            key={item}
-            className={`text-sm font-medium transition-colors hover:text-red-600 ${
-              active === item ? "text-red-600" : "text-gray-600"
-            }`}
-          >
-            {item}
-          </button>
-        ))}
-      </nav>
+      {navItems.length > 0 && (
+        <nav className="hidden md:flex items-center gap-6" aria-label="Điều hướng chính">
+          {navItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              className={`text-sm font-medium transition-colors hover:text-primary ${
+                active === item.label ? "text-primary" : "text-on-surface-variant"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+      )}
 
       {/* Actions */}
       <div className="flex items-center gap-3">
-        <button className="text-gray-500 hover:text-gray-800 transition-colors">🔍</button>
-        <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center text-sm font-bold">
-          P
-        </div>
+        <button
+          type="button"
+          onClick={onSearchClick}
+          aria-label="Tìm kiếm"
+          className="text-on-surface-variant hover:text-on-surface transition-colors"
+        >
+          🔍
+        </button>
       </div>
     </header>
   );

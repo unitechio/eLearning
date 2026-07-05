@@ -93,9 +93,10 @@ const config: Config = {
         },
       },
       fontFamily: {
-        "headline": ["Inter", "sans-serif"],
-        "body": ["Inter", "sans-serif"],
-        "label": ["Inter", "sans-serif"]
+        "headline": ["Plus Jakarta Sans", "sans-serif"],
+        "body": ["Plus Jakarta Sans", "sans-serif"],
+        "label": ["Plus Jakarta Sans", "sans-serif"],
+        "mono": ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       borderRadius: {
         "DEFAULT": "1rem",

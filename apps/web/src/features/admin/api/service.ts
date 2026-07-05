@@ -109,11 +109,42 @@ export interface AdminBillingSubscription {
   is_premium: boolean;
 }
 
+export interface AdminBillingInvoice {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  invoice_no: string;
+  amount: number;
+  currency: string;
+  status: string;
+  due_at?: string;
+  paid_at?: string;
+  description: string;
+  created_at: string;
+}
+
+export interface AdminPaymentTransaction {
+  id: string;
+  user_id: string;
+  invoice_id: string;
+  plan_id: string;
+  provider: string;
+  provider_reference: string;
+  amount: number;
+  currency: string;
+  status: string;
+  checkout_url: string;
+  paid_at?: string;
+  failure_reason: string;
+  created_at: string;
+}
+
 export interface AdminUserQuery {
   page?: number;
   page_size?: number;
   q?: string;
   status?: string;
+  user_id?: string;
 }
 
 export interface EnvironmentPayload {
@@ -318,4 +349,20 @@ export const cancelAdminBillingSubscription = async (id: string): Promise<AdminB
 export const grantPremiumSubscription = async (payload: GrantPremiumPayload): Promise<AdminBillingSubscription> => {
   const response = await apiClient.post<ApiResponse<AdminBillingSubscription>>('/admin/billing/subscriptions/grant-premium', payload);
   return response.data.data;
+};
+
+export const listAdminBillingInvoices = async (
+  query: AdminUserQuery = { page: 1, page_size: 50 }
+): Promise<{ items: AdminBillingInvoice[]; meta?: ApiResponse<AdminBillingInvoice[]>['meta'] }> => {
+  const qs = toQueryString(query);
+  const response = await apiClient.get<ApiResponse<AdminBillingInvoice[]>>(`/admin/billing/invoices${qs ? `?${qs}` : ''}`);
+  return { items: response.data.data, meta: response.data.meta };
+};
+
+export const listAdminPaymentTransactions = async (
+  query: AdminUserQuery = { page: 1, page_size: 50 }
+): Promise<{ items: AdminPaymentTransaction[]; meta?: ApiResponse<AdminPaymentTransaction[]>['meta'] }> => {
+  const qs = toQueryString(query);
+  const response = await apiClient.get<ApiResponse<AdminPaymentTransaction[]>>(`/admin/billing/payments${qs ? `?${qs}` : ''}`);
+  return { items: response.data.data, meta: response.data.meta };
 };

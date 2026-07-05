@@ -1,6 +1,6 @@
 import React from "react";
 
-// ─── Stat card ────────────────────────────────────────────────────────────────
+// ─── Stat Card ────────────────────────────────────────────────────────────────
 type StatCardProps = {
   icon: React.ReactNode;
   value: React.ReactNode;
@@ -10,27 +10,27 @@ type StatCardProps = {
 
 export function StatCard({ icon, value, label, dark = false }: StatCardProps) {
   return (
-    <div
+    <article
       className={`rounded-xl p-4 flex items-center gap-3 ${
         dark
-          ? "bg-gray-900"
-          : "bg-white border border-gray-100 shadow-sm"
+          ? "bg-inverse-surface text-inverse-on-surface"
+          : "bg-surface-container-lowest border border-outline-variant shadow-sm"
       }`}
     >
-      <span className="text-2xl shrink-0">{icon}</span>
+      <span className="text-2xl shrink-0" aria-hidden="true">{icon}</span>
       <div>
-        <p className={`font-bold ${dark ? "text-white" : "text-gray-900"}`}>
+        <p className={`font-bold ${dark ? "text-inverse-on-surface" : "text-on-surface"}`}>
           {value}
         </p>
-        <p className={`text-xs ${dark ? "text-gray-400" : "text-gray-500"}`}>
+        <p className={`text-xs ${dark ? "text-inverse-on-surface/60" : "text-on-surface-variant"}`}>
           {label}
         </p>
       </div>
-    </div>
+    </article>
   );
 }
 
-// ─── Streak badge ──────────────────────────────────────────────────────────────
+// ─── Streak Badge ─────────────────────────────────────────────────────────────
 type StreakBadgeProps = {
   days?: number;
 };
@@ -45,7 +45,7 @@ export function StreakBadge({ days }: StreakBadgeProps) {
   );
 }
 
-// ─── Level badge ───────────────────────────────────────────────────────────────
+// ─── Level Badge ──────────────────────────────────────────────────────────────
 type Level = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 
 type LevelBadgeProps = {
@@ -53,28 +53,26 @@ type LevelBadgeProps = {
   className?: string;
 };
 
-export function LevelBadge({ level, className = "" }: LevelBadgeProps) {
-  const colors: Record<Level, string> = {
-    A1: "bg-gray-200 text-gray-700",
-    A2: "bg-green-100 text-green-700",
-    B1: "bg-blue-100 text-blue-700",
-    B2: "bg-blue-500 text-white",
-    C1: "bg-purple-500 text-white",
-    C2: "bg-red-600 text-white",
-  };
+const levelColorMap: Record<Level, string> = {
+  A1: "bg-surface-container text-on-surface-variant",
+  A2: "bg-green-100 text-green-700",
+  B1: "bg-blue-100 text-blue-700",
+  B2: "bg-blue-500 text-white",
+  C1: "bg-secondary text-secondary-foreground",
+  C2: "bg-primary text-primary-foreground",
+};
 
+export function LevelBadge({ level, className = "" }: LevelBadgeProps) {
   return (
     <span
-      className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-        colors[level]
-      } ${className}`}
+      className={`text-xs font-bold px-1.5 py-0.5 rounded font-label ${levelColorMap[level]} ${className}`}
     >
       {level}
     </span>
   );
 }
 
-// ─── Empty state ───────────────────────────────────────────────────────────────
+// ─── Empty State ──────────────────────────────────────────────────────────────
 type EmptyStateProps = {
   icon?: React.ReactNode;
   title: React.ReactNode;
@@ -88,10 +86,10 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-      <span className="text-5xl mb-3">{icon}</span>
-      <p className="font-bold text-gray-700">{title}</p>
+      <span className="text-5xl mb-3" aria-hidden="true">{icon}</span>
+      <p className="font-bold text-on-surface">{title}</p>
       {description && (
-        <p className="text-sm text-gray-400 mt-1 max-w-xs">
+        <p className="text-sm text-on-surface-variant mt-1 max-w-xs">
           {description}
         </p>
       )}
@@ -99,7 +97,7 @@ export function EmptyState({
   );
 }
 
-// ─── Tab bar (horizontal) ─────────────────────────────────────────────────────
+// ─── Tab Bar (horizontal) ─────────────────────────────────────────────────────
 type TabBarProps<T extends string> = {
   tabs: T[];
   active: T;
@@ -114,26 +112,29 @@ export function TabBar<T extends string>({
   dark = false,
 }: TabBarProps<T>) {
   return (
-    <div
+    <nav
+      aria-label="Tabs"
       className={`flex gap-1 ${
-        dark ? "bg-gray-800" : "bg-gray-100"
+        dark ? "bg-inverse-surface/80" : "bg-surface-container"
       } p-1 rounded-xl`}
     >
       {tabs.map((tab) => (
         <button
           key={tab}
+          type="button"
           onClick={() => onChange?.(tab)}
+          aria-current={active === tab ? "page" : undefined}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
             active === tab
-              ? "bg-red-600 text-white shadow-sm"
+              ? "bg-primary text-primary-foreground shadow-sm"
               : dark
-              ? "text-gray-400 hover:text-white"
-              : "text-gray-500 hover:text-gray-800"
+              ? "text-inverse-on-surface/50 hover:text-inverse-on-surface"
+              : "text-on-surface-variant hover:text-on-surface"
           }`}
         >
           {tab}
         </button>
       ))}
-    </div>
+    </nav>
   );
 }

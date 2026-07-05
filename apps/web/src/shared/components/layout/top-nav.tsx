@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, LogOut, Search, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth, useLogout } from '@/features/auth';
+import { useAuth, useLogout } from '@/domains/auth';
 
 export default function TopNav() {
   const navigate = useNavigate();

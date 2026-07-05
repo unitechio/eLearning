@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -12,8 +13,8 @@ import (
 	"github.com/unitechio/eLearning/apps/api/pkg/apperr"
 )
 
-type BillingUsecase struct{
-	repo repository.BillingRepository
+type BillingUsecase struct {
+	repo     repository.BillingRepository
 	userRepo repository.UserRepository
 }
 
@@ -173,7 +174,7 @@ func (s *BillingUsecase) ListSubscriptions(query dto.AdminBillingSubscriptionLis
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	items, total, err := s.repo.ListSubscriptions(repository.BillingSubscriptionListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
-		Search: query.Search, Status: query.Status,
+		Search:     query.Search, Status: query.Status,
 	})
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -233,6 +234,127 @@ func (s *BillingUsecase) GrantPremium(req dto.GrantPremiumRequest) (*dto.AdminBi
 	return s.createManagedSubscription(userID, req.PlanID, "active")
 }
 
+func (s *BillingUsecase) CreateCheckout(userID uuid.UUID, req dto.CheckoutPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
+	planID, err := uuid.Parse(req.PlanID)
+	if err != nil {
+		return nil, apperr.BadRequest("invalid plan id")
+	}
+	plan, err := s.repo.FindPlanByID(planID)
+	if err != nil {
+		return nil, apperr.NotFound("billing plan", req.PlanID)
+	}
+	provider := strings.ToLower(defaultString(req.Provider, "sandbox"))
+	if provider != "sandbox" {
+		return nil, apperr.BadRequest("unsupported payment provider")
+	}
+	dueAt := time.Now().UTC().Add(30 * time.Minute)
+	invoice := &domain.BillingInvoice{
+		UserID: userID, PlanID: plan.ID, InvoiceNo: newInvoiceNo(), Amount: plan.Price, Currency: plan.Currency,
+		Status: "pending", DueAt: &dueAt, Description: "Subscription: " + plan.Name,
+	}
+	if err := s.repo.CreateInvoice(invoice); err != nil {
+		return nil, apperr.Internal(err)
+	}
+	tx := &domain.PaymentTransaction{
+		UserID: userID, InvoiceID: invoice.ID, PlanID: plan.ID, Provider: provider,
+		ProviderReference: "sandbox_" + invoice.InvoiceNo, Amount: plan.Price, Currency: plan.Currency,
+		Status: "pending", CheckoutURL: "/sandbox/payments/" + invoice.ID.String(),
+	}
+	if err := s.repo.CreatePaymentTransaction(tx); err != nil {
+		return nil, apperr.Internal(err)
+	}
+	return mapCheckout(invoice, tx), nil
+}
+
+func (s *BillingUsecase) ConfirmSandboxPayment(userID uuid.UUID, id string, req dto.ConfirmPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
+	txID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, apperr.BadRequest("invalid payment transaction id")
+	}
+	tx, err := s.repo.FindPaymentTransactionByID(txID)
+	if err != nil {
+		return nil, apperr.NotFound("payment transaction", id)
+	}
+	if tx.UserID != userID {
+		return nil, apperr.Forbidden("payment transaction access denied")
+	}
+	if tx.Provider != "sandbox" {
+		return nil, apperr.BadRequest("only sandbox payments can be confirmed by this endpoint")
+	}
+	invoice, err := s.repo.FindInvoiceByID(tx.InvoiceID)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	status := strings.ToLower(defaultString(req.Status, "paid"))
+	now := time.Now().UTC()
+	switch status {
+	case "paid":
+		tx.Status = "paid"
+		tx.PaidAt = &now
+		invoice.Status = "paid"
+		invoice.PaidAt = &now
+		if req.ProviderReference != "" {
+			tx.ProviderReference = req.ProviderReference
+		}
+		if err := s.repo.UpdatePaymentTransaction(tx); err != nil {
+			return nil, apperr.Internal(err)
+		}
+		if err := s.repo.UpdateInvoice(invoice); err != nil {
+			return nil, apperr.Internal(err)
+		}
+		if _, err := s.createManagedSubscription(userID, tx.PlanID.String(), "active"); err != nil {
+			return nil, err
+		}
+	case "failed", "cancelled":
+		tx.Status = status
+		tx.FailureReason = req.FailureReason
+		invoice.Status = status
+		if err := s.repo.UpdatePaymentTransaction(tx); err != nil {
+			return nil, apperr.Internal(err)
+		}
+		if err := s.repo.UpdateInvoice(invoice); err != nil {
+			return nil, apperr.Internal(err)
+		}
+	default:
+		return nil, apperr.BadRequest("unsupported payment status")
+	}
+	return mapCheckout(invoice, tx), nil
+}
+
+func (s *BillingUsecase) ListInvoices(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminBillingInvoice], error) {
+	query.PaginationQuery = query.PaginationQuery.Normalize()
+	userID, err := optionalUUID(query.UserID)
+	if err != nil {
+		return nil, apperr.BadRequest("invalid user id")
+	}
+	items, total, err := s.repo.ListInvoices(repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	res := make([]dto.AdminBillingInvoice, 0, len(items))
+	for _, item := range items {
+		res = append(res, mapInvoice(&item))
+	}
+	return &dto.PageResult[dto.AdminBillingInvoice]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
+}
+
+func (s *BillingUsecase) ListPaymentTransactions(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminPaymentTransaction], error) {
+	query.PaginationQuery = query.PaginationQuery.Normalize()
+	userID, err := optionalUUID(query.UserID)
+	if err != nil {
+		return nil, apperr.BadRequest("invalid user id")
+	}
+	items, total, err := s.repo.ListPaymentTransactions(repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+	res := make([]dto.AdminPaymentTransaction, 0, len(items))
+	for _, item := range items {
+		res = append(res, mapPaymentTransaction(&item))
+	}
+	return &dto.PageResult[dto.AdminPaymentTransaction]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
+}
+
 func (s *BillingUsecase) createManagedSubscription(userID uuid.UUID, planIDRaw string, status string) (*dto.AdminBillingSubscription, error) {
 	planID, err := uuid.Parse(planIDRaw)
 	if err != nil {
@@ -252,6 +374,49 @@ func (s *BillingUsecase) createManagedSubscription(userID uuid.UUID, planIDRaw s
 		return nil, apperr.Internal(err)
 	}
 	return s.mapSubscription(subscription)
+}
+
+func mapCheckout(invoice *domain.BillingInvoice, tx *domain.PaymentTransaction) *dto.CheckoutPaymentResponse {
+	return &dto.CheckoutPaymentResponse{
+		InvoiceID: invoice.ID.String(), InvoiceNo: invoice.InvoiceNo, TransactionID: tx.ID.String(),
+		Provider: tx.Provider, CheckoutURL: tx.CheckoutURL, Amount: tx.Amount, Currency: tx.Currency, Status: tx.Status,
+	}
+}
+
+func mapInvoice(item *domain.BillingInvoice) dto.AdminBillingInvoice {
+	return dto.AdminBillingInvoice{
+		ID: item.ID.String(), UserID: item.UserID.String(), PlanID: item.PlanID.String(), InvoiceNo: item.InvoiceNo,
+		Amount: item.Amount, Currency: item.Currency, Status: item.Status, DueAt: formatTimePtr(item.DueAt),
+		PaidAt: formatTimePtr(item.PaidAt), Description: item.Description, CreatedAt: item.CreatedAt.Format(time.RFC3339),
+	}
+}
+
+func mapPaymentTransaction(item *domain.PaymentTransaction) dto.AdminPaymentTransaction {
+	return dto.AdminPaymentTransaction{
+		ID: item.ID.String(), UserID: item.UserID.String(), InvoiceID: item.InvoiceID.String(), PlanID: item.PlanID.String(),
+		Provider: item.Provider, ProviderReference: item.ProviderReference, Amount: item.Amount, Currency: item.Currency,
+		Status: item.Status, CheckoutURL: item.CheckoutURL, PaidAt: formatTimePtr(item.PaidAt),
+		FailureReason: item.FailureReason, CreatedAt: item.CreatedAt.Format(time.RFC3339),
+	}
+}
+
+func newInvoiceNo() string {
+	return fmt.Sprintf("INV-%s-%s", time.Now().UTC().Format("20060102"), strings.ToUpper(uuid.NewString()[:8]))
+}
+
+func optionalUUID(raw string) (uuid.UUID, error) {
+	if strings.TrimSpace(raw) == "" {
+		return uuid.Nil, nil
+	}
+	return uuid.Parse(raw)
+}
+
+func formatTimePtr(value *time.Time) *string {
+	if value == nil {
+		return nil
+	}
+	formatted := value.Format(time.RFC3339)
+	return &formatted
 }
 
 func (s *BillingUsecase) mapSubscription(item *domain.BillingSubscription) (*dto.AdminBillingSubscription, error) {

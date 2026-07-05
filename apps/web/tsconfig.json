@@ -22,5 +22,6 @@
     }
   },
   "include": ["src"],
+  "exclude": ["src/_archive", "src/features", "src/prototypes", "src/layouts", "src/routers"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

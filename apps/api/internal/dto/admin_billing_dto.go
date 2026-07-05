@@ -100,16 +100,16 @@ type AdminBillingPlanListQuery struct {
 }
 
 type AdminBillingSubscription struct {
-	ID           string  `json:"id"`
-	UserID       string  `json:"user_id"`
-	UserEmail    string  `json:"user_email"`
-	PlanID       string  `json:"plan_id"`
-	PlanName     string  `json:"plan_name"`
-	Status       string  `json:"status"`
-	StartedAt    string  `json:"started_at"`
-	ExpiresAt    *string `json:"expires_at,omitempty"`
-	CancelledAt  *string `json:"cancelled_at,omitempty"`
-	IsPremium    bool    `json:"is_premium"`
+	ID          string  `json:"id"`
+	UserID      string  `json:"user_id"`
+	UserEmail   string  `json:"user_email"`
+	PlanID      string  `json:"plan_id"`
+	PlanName    string  `json:"plan_name"`
+	Status      string  `json:"status"`
+	StartedAt   string  `json:"started_at"`
+	ExpiresAt   *string `json:"expires_at,omitempty"`
+	CancelledAt *string `json:"cancelled_at,omitempty"`
+	IsPremium   bool    `json:"is_premium"`
 }
 
 type AdminBillingSubscriptionListQuery struct {
@@ -125,4 +125,63 @@ type UpdateSubscriptionStatusRequest struct {
 type GrantPremiumRequest struct {
 	UserID string `json:"user_id" binding:"required"`
 	PlanID string `json:"plan_id" binding:"required"`
+}
+
+type CheckoutPaymentRequest struct {
+	PlanID   string `json:"plan_id" binding:"required"`
+	Provider string `json:"provider"`
+}
+
+type CheckoutPaymentResponse struct {
+	InvoiceID     string  `json:"invoice_id"`
+	InvoiceNo     string  `json:"invoice_no"`
+	TransactionID string  `json:"transaction_id"`
+	Provider      string  `json:"provider"`
+	CheckoutURL   string  `json:"checkout_url"`
+	Amount        float64 `json:"amount"`
+	Currency      string  `json:"currency"`
+	Status        string  `json:"status"`
+}
+
+type ConfirmPaymentRequest struct {
+	Status            string `json:"status"`
+	ProviderReference string `json:"provider_reference"`
+	FailureReason     string `json:"failure_reason"`
+}
+
+type AdminBillingListQuery struct {
+	PaginationQuery
+	Search string `form:"q"`
+	Status string `form:"status"`
+	UserID string `form:"user_id"`
+}
+
+type AdminBillingInvoice struct {
+	ID          string  `json:"id"`
+	UserID      string  `json:"user_id"`
+	PlanID      string  `json:"plan_id"`
+	InvoiceNo   string  `json:"invoice_no"`
+	Amount      float64 `json:"amount"`
+	Currency    string  `json:"currency"`
+	Status      string  `json:"status"`
+	DueAt       *string `json:"due_at,omitempty"`
+	PaidAt      *string `json:"paid_at,omitempty"`
+	Description string  `json:"description"`
+	CreatedAt   string  `json:"created_at"`
+}
+
+type AdminPaymentTransaction struct {
+	ID                string  `json:"id"`
+	UserID            string  `json:"user_id"`
+	InvoiceID         string  `json:"invoice_id"`
+	PlanID            string  `json:"plan_id"`
+	Provider          string  `json:"provider"`
+	ProviderReference string  `json:"provider_reference"`
+	Amount            float64 `json:"amount"`
+	Currency          string  `json:"currency"`
+	Status            string  `json:"status"`
+	CheckoutURL       string  `json:"checkout_url"`
+	PaidAt            *string `json:"paid_at,omitempty"`
+	FailureReason     string  `json:"failure_reason"`
+	CreatedAt         string  `json:"created_at"`
 }

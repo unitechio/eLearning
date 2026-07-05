@@ -16,6 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/unitechio/eLearning/apps/api/internal/config"
+	imgProc "github.com/unitechio/eLearning/apps/api/internal/infrastructure/image"
 )
 
 type IStorage interface {
@@ -33,8 +34,20 @@ type IStorage interface {
 }
 
 type MinioStorage struct {
-	client     *minio.Client
-	bucketName string
+	client       *minio.Client
+	bucketName   string
+	buckets      map[string]string
+	imgProcessor *imgProc.Processor
+}
+
+type UploadedAsset struct {
+	Bucket       string
+	ObjectKey    string
+	URL          string
+	FileName     string
+	OriginalName string
+	FileSize     int64
+	MimeType     string
 }
 
 func NewMinioStorage(cfg config.MinioConfig) (*MinioStorage, error) {
@@ -59,25 +72,120 @@ func NewMinioStorage(cfg config.MinioConfig) (*MinioStorage, error) {
 		return nil, fmt.Errorf("failed to create minio client: %w", err)
 	}
 
-	ctx := context.Background()
-	exists, err := client.BucketExists(ctx, cfg.BucketName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check bucket existence: %w", err)
+	storage := &MinioStorage{
+		client:       client,
+		bucketName:   cfg.BucketName,
+		imgProcessor: imgProc.NewProcessor(),
+		buckets: map[string]string{
+			"default":       cfg.BucketName,
+			"content-image": firstNonEmpty(cfg.ContentBucket, cfg.BucketName),
+			"thumbnail":     firstNonEmpty(cfg.ContentBucket, cfg.BucketName),
+			"audio":         firstNonEmpty(cfg.AudioBucket, cfg.BucketName),
+			"pdf":           firstNonEmpty(cfg.PDFBucket, cfg.BucketName),
+			"vocab-image":   firstNonEmpty(cfg.VocabBucket, cfg.BucketName),
+		},
 	}
-
-	if !exists {
-		err = client.MakeBucket(context.Background(), cfg.BucketName, minio.MakeBucketOptions{})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create bucket '%s': %w", cfg.BucketName, err)
+	for _, bucket := range uniqueBuckets(storage.buckets) {
+		if err := storage.EnsureBucket(context.Background(), bucket); err != nil {
+			return nil, err
 		}
-		log.Printf("✅ Created MinIO bucket: %s", cfg.BucketName)
-	} else {
-		log.Printf("✅ MinIO bucket exists: %s", cfg.BucketName)
+		log.Printf("MinIO bucket ready: %s", bucket)
+	}
+	return storage, nil
+}
+
+func (s *MinioStorage) EnsureBucket(ctx context.Context, bucket string) error {
+	if bucket == "" {
+		return fmt.Errorf("bucket is required")
+	}
+	exists, err := s.client.BucketExists(ctx, bucket)
+	if err != nil {
+		return fmt.Errorf("failed to check bucket '%s': %w", bucket, err)
+	}
+	if exists {
+		return nil
+	}
+	if err := s.client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
+		return fmt.Errorf("failed to create bucket '%s': %w", bucket, err)
+	}
+	return nil
+}
+
+func (s *MinioStorage) optimizeImageIfApplicable(file *multipart.FileHeader, src io.ReadSeeker) (io.Reader, int64, string, string) {
+	contentType := s.getContentType(file)
+	if !strings.HasPrefix(contentType, "image/") || contentType == "image/svg+xml" || contentType == "image/webp" || contentType == "image/gif" {
+		return src, file.Size, contentType, file.Filename
 	}
 
-	return &MinioStorage{
-		client:     client,
-		bucketName: cfg.BucketName,
+	img, format, err := s.imgProcessor.DecodeImage(src)
+	if err == nil {
+		optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, format, 1920, 1920, 85)
+		if err == nil {
+			ext := ".jpg"
+			if format == "png" {
+				ext = ".png"
+			}
+			finalFilename := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename)) + ext
+			finalContentType := "image/" + format
+			if format == "jpeg" {
+				finalContentType = "image/jpeg"
+			}
+			return optimizedBuf, int64(optimizedBuf.Len()), finalContentType, finalFilename
+		}
+	}
+	src.Seek(0, 0)
+	return src, file.Size, contentType, file.Filename
+}
+
+func (s *MinioStorage) UploadTypedAsset(ctx context.Context, file *multipart.FileHeader, kind string, entityType string, entityID uint, uploadedBy uuid.UUID) (*UploadedAsset, error) {
+	if file == nil {
+		return nil, fmt.Errorf("file is required")
+	}
+	if entityType == "" {
+		return nil, fmt.Errorf("entity type is required")
+	}
+	bucket := s.bucketForKind(kind)
+	if bucket == "" {
+		return nil, fmt.Errorf("unsupported asset kind: %s", kind)
+	}
+	if !allowedAssetFileType(file.Filename, kind) {
+		return nil, fmt.Errorf("file type not allowed for %s: %s", kind, filepath.Ext(file.Filename))
+	}
+	src, err := file.Open()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer func() {
+		if closeErr := src.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close file: %v", closeErr)
+		}
+	}()
+
+	uploadReader, uploadSize, contentType, finalFilename := s.optimizeImageIfApplicable(file, src)
+	objectKey := s.generateTypedObjectName(entityType, kind, entityID, finalFilename)
+
+	if _, err := s.client.PutObject(ctx, bucket, objectKey, uploadReader, uploadSize, minio.PutObjectOptions{
+		ContentType: contentType,
+		UserMetadata: map[string]string{
+			"entity-type":   entityType,
+			"entity-id":     fmt.Sprintf("%d", entityID),
+			"asset-kind":    kind,
+			"uploaded-by":   uploadedBy.String(),
+			"original-name": finalFilename,
+			"upload-time":   time.Now().UTC().Format(time.RFC3339),
+		},
+	}); err != nil {
+		return nil, fmt.Errorf("failed to upload typed asset: %w", err)
+	}
+	url, _ := s.client.PresignedGetObject(ctx, bucket, objectKey, 24*time.Hour, nil)
+	return &UploadedAsset{
+		Bucket:       bucket,
+		ObjectKey:    objectKey,
+		URL:          url.String(),
+		FileName:     filepath.Base(objectKey),
+		OriginalName: finalFilename,
+		FileSize:     uploadSize,
+		MimeType:     contentType,
 	}, nil
 }
 
@@ -106,17 +214,15 @@ func (s *MinioStorage) UploadFile(ctx context.Context, file *multipart.FileHeade
 		}
 	}()
 
-	objectName := s.generateObjectName(entityType, entityID, file.Filename)
+	uploadReader, uploadSize, contentType, finalFilename := s.optimizeImageIfApplicable(file, src)
+	objectName := s.generateObjectName(entityType, entityID, finalFilename)
 
-	// Determine content type
-	contentType := s.getContentType(file)
-
-	uploadInfo, err := s.client.PutObject(ctx, s.bucketName, objectName, src, file.Size, minio.PutObjectOptions{
+	uploadInfo, err := s.client.PutObject(ctx, s.bucketName, objectName, uploadReader, uploadSize, minio.PutObjectOptions{
 		ContentType: contentType,
 		UserMetadata: map[string]string{
 			"entity-type":   entityType,
 			"entity-id":     fmt.Sprintf("%d", entityID),
-			"original-name": file.Filename,
+			"original-name": finalFilename,
 			"upload-time":   time.Now().UTC().Format(time.RFC3339),
 		},
 	})
@@ -568,19 +674,16 @@ func (s *MinioStorage) UploadFileWithUUID(ctx context.Context, file *multipart.F
 		}
 	}()
 
-	// Generate unique file path with UUID
-	objectName := s.generateObjectNameWithUUID(entityType, entityID, file.Filename)
-
-	// Determine content type
-	contentType := s.getContentType(file)
+	uploadReader, uploadSize, contentType, finalFilename := s.optimizeImageIfApplicable(file, src)
+	objectName := s.generateObjectNameWithUUID(entityType, entityID, finalFilename)
 
 	// Upload file to MinIO
-	uploadInfo, err := s.client.PutObject(ctx, s.bucketName, objectName, src, file.Size, minio.PutObjectOptions{
+	uploadInfo, err := s.client.PutObject(ctx, s.bucketName, objectName, uploadReader, uploadSize, minio.PutObjectOptions{
 		ContentType: contentType,
 		UserMetadata: map[string]string{
 			"entity-type":   entityType,
 			"entity-id":     entityID.String(),
-			"original-name": file.Filename,
+			"original-name": finalFilename,
 			"upload-time":   time.Now().UTC().Format(time.RFC3339),
 		},
 	})
@@ -613,17 +716,33 @@ func (s *MinioStorage) UploadFileFromBytes(ctx context.Context, content []byte, 
 		return "", fmt.Errorf("file type not allowed: %s", filepath.Ext(filename))
 	}
 
-	// Create reader from content
-	reader := bytes.NewReader(content)
-
-	// Generate unique file path using existing method
-	objectName := s.generateObjectName(entityType, entityID, filename)
-
 	// Determine content type using existing method
 	contentType := s.getContentType(&multipart.FileHeader{
 		Filename: filename,
 		Size:     int64(len(content)),
 	})
+
+	if strings.HasPrefix(contentType, "image/") && contentType != "image/svg+xml" && contentType != "image/webp" && contentType != "image/gif" {
+		img, format, err := s.imgProcessor.DecodeImage(bytes.NewReader(content))
+		if err == nil {
+			optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, format, 1920, 1920, 85)
+			if err == nil {
+				content = optimizedBuf.Bytes()
+				ext := ".jpg"
+				if format == "png" {
+					ext = ".png"
+				}
+				filename = strings.TrimSuffix(filename, filepath.Ext(filename)) + ext
+				contentType = "image/" + format
+				if format == "jpeg" {
+					contentType = "image/jpeg"
+				}
+			}
+		}
+	}
+
+	reader := bytes.NewReader(content)
+	objectName := s.generateObjectName(entityType, entityID, filename)
 
 	// Upload file to MinIO using same options as UploadFile
 	uploadInfo, err := s.client.PutObject(ctx, s.bucketName, objectName, reader, int64(len(content)), minio.PutObjectOptions{
@@ -703,6 +822,82 @@ func (s *MinioStorage) AddFileToForm(ctx context.Context, writer *multipart.Writ
 	}
 
 	return nil
+}
+
+func (s *MinioStorage) bucketForKind(kind string) string {
+	if s == nil {
+		return ""
+	}
+	if kind == "" {
+		kind = "default"
+	}
+	if bucket := s.buckets[kind]; bucket != "" {
+		return bucket
+	}
+	return s.bucketName
+}
+
+func (s *MinioStorage) generateTypedObjectName(entityType string, kind string, entityID uint, filename string) string {
+	if kind == "" {
+		kind = "file"
+	}
+	return fmt.Sprintf("%s/%s/%d/%s-%s",
+		strings.ToLower(entityType),
+		strings.ToLower(kind),
+		entityID,
+		uuid.NewString(),
+		sanitizeFilename(filename),
+	)
+}
+
+func allowedAssetFileType(filename string, kind string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch kind {
+	case "audio":
+		return ext == ".mp3" || ext == ".wav" || ext == ".m4a" || ext == ".ogg"
+	case "pdf":
+		return ext == ".pdf"
+	case "video":
+		return ext == ".mp4" || ext == ".mov" || ext == ".webm" || ext == ".m4v"
+	default:
+		return ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".webp" || ext == ".gif" || ext == ".svg"
+	}
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+func uniqueBuckets(buckets map[string]string) []string {
+	seen := make(map[string]struct{}, len(buckets))
+	result := make([]string, 0, len(buckets))
+	for _, bucket := range buckets {
+		if bucket == "" {
+			continue
+		}
+		if _, ok := seen[bucket]; ok {
+			continue
+		}
+		seen[bucket] = struct{}{}
+		result = append(result, bucket)
+	}
+	return result
+}
+
+func sanitizeFilename(filename string) string {
+	name := strings.ToLower(filepath.Base(filename))
+	name = strings.ReplaceAll(name, " ", "-")
+	return strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.' {
+			return r
+		}
+		return '-'
+	}, name)
 }
 
 // StorageStats represents storage statistics

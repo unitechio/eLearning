@@ -1,16 +1,37 @@
 import { Button } from "@/shared/components/ui/button";
 
-export function CTABanner() {
+interface CTABannerProps {
+  title?: string;
+  description?: string;
+  ctaLabel?: string;
+  onCtaClick?: () => void;
+  emoji?: string;
+}
+
+export function CTABanner({
+  title = "Gia hạn miễn phí!",
+  description = "Tài khoản của bạn đã hết hạn sử dụng. Hãy gia hạn ngay để tiếp tục việc học nhé!",
+  ctaLabel = "Gia hạn miễn phí",
+  onCtaClick,
+  emoji = "📚",
+}: CTABannerProps) {
   return (
-    <div className="bg-red-50 border border-red-100 rounded-2xl p-8 flex items-center justify-between mt-12 mx-4 md:mx-0">
+    <aside
+      aria-label="Thông báo nâng cấp tài khoản"
+      className="bg-surface-container-low border border-outline-variant rounded-2xl p-8 flex items-center justify-between mt-12 mx-4 md:mx-0"
+    >
       <div>
-        <h3 className="text-xl font-extrabold text-gray-900">Gia hạn miễn phí!</h3>
-        <p className="text-gray-500 text-sm mt-1">
-          Tài khoản của bạn đã hết hạn sử dụng. Hãy gia hạn ngay để tiếp tục việc học nhé!
-        </p>
-        <Button className="mt-3 bg-red-600 text-white hover:bg-red-700">Gia hạn miễn phí</Button>
+        <h3 className="font-headline text-xl font-extrabold text-on-surface">
+          {title}
+        </h3>
+        <p className="text-on-surface-variant text-sm mt-1">{description}</p>
+        <Button className="mt-3" onClick={onCtaClick}>
+          {ctaLabel}
+        </Button>
       </div>
-      <div className="text-6xl hidden md:block">📚</div>
-    </div>
+      <span className="text-6xl hidden md:block" aria-hidden="true">
+        {emoji}
+      </span>
+    </aside>
   );
 }
