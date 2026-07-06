@@ -8,8 +8,8 @@ import {
   useSystemSettings,
   useUpdateEnvironment,
   useUpdateSystemSetting,
-} from '@/domains/admin/api/hooks';
-import { PlatformEnvironment, SystemSetting } from '@/domains/admin/api/service';
+} from '@/domains/admin/api/platform';
+import { PlatformEnvironment, SystemSetting } from '@/domains/admin/api/platform';
 
 const emptyEnvironment = { name: '', slug: '', description: '', type: 'general', url: '', color: '', sort_order: 0, is_active: true };
 const emptySetting = { key: '', value: '', type: 'string', category: 'general', description: '', is_public: false, is_editable: true };

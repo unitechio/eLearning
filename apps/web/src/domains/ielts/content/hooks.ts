@@ -1,19 +1,35 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  createAdminIELTSContent,
   createIELTSPassage,
   createIELTSQuestion,
   createIELTSQuestionGroup,
   createIELTSRelatedPost,
   createIELTSVocabulary,
+  deleteAdminIELTSContent,
+  deleteIELTSPassage,
+  deleteIELTSQuestion,
+  deleteIELTSQuestionGroup,
+  deleteIELTSRelatedPost,
+  deleteIELTSVocabulary,
+  getAdminIELTSContent,
   getIELTSContent,
   importIELTSContent,
+  importIELTSPdf,
   listIELTSAttempts,
   listAdminIELTSContent,
   listIELTSContent,
   reviewIELTSContent,
   uploadIELTSAsset,
+  updateAdminIELTSContent,
+  updateIELTSPassage,
+  updateIELTSQuestion,
+  updateIELTSQuestionGroup,
+  updateIELTSRelatedPost,
+  updateIELTSVocabulary,
   type IELTSContentItem,
+  type IELTSContentDetail,
   type IELTSPassagePayload,
   type IELTSPracticeAttempt,
   type IELTSQuestionGroupPayload,
@@ -48,6 +64,14 @@ export function useIELTSContentList(params: Record<string, string | number | und
   }, [stableParams]);
 
   return state;
+}
+
+export function useAdminIELTSContentDetail(id?: number | null) {
+  return useQuery<IELTSContentDetail>({
+    queryKey: ['admin', 'ielts', 'content-detail', id],
+    queryFn: () => getAdminIELTSContent(id as number),
+    enabled: Boolean(id),
+  });
 }
 
 export function useIELTSContent(slug?: string) {
@@ -109,6 +133,43 @@ export function useImportIELTSContent() {
   });
 }
 
+export function useImportIELTSPdf() {
+  return useMutation({
+    mutationFn: importIELTSPdf,
+  });
+}
+
+export function useCreateAdminIELTSContent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAdminIELTSContent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+    },
+  });
+}
+
+export function useUpdateAdminIELTSContent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: Omit<IELTSContentItem, 'id' | 'view_count'> }) => updateAdminIELTSContent(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', variables.id] });
+    },
+  });
+}
+
+export function useDeleteAdminIELTSContent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAdminIELTSContent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+    },
+  });
+}
+
 export function useReviewIELTSContent() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -135,11 +196,55 @@ export function useCreateIELTSPassage() {
   });
 }
 
+export function useUpdateIELTSPassage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: IELTSPassagePayload }) => updateIELTSPassage(id, payload),
+    onSuccess: (item) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', item.content_item_id] });
+    },
+  });
+}
+
+export function useDeleteIELTSPassage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contentId }: { id: number; contentId: number }) => deleteIELTSPassage(id).then(() => contentId),
+    onSuccess: (contentId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', contentId] });
+    },
+  });
+}
+
 export function useCreateIELTSQuestionGroup() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ contentId, payload }: { contentId: number; payload: IELTSQuestionGroupPayload }) => createIELTSQuestionGroup(contentId, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] }),
+  });
+}
+
+export function useUpdateIELTSQuestionGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: IELTSQuestionGroupPayload }) => updateIELTSQuestionGroup(id, payload),
+    onSuccess: (item) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', item.content_item_id] });
+    },
+  });
+}
+
+export function useDeleteIELTSQuestionGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contentId }: { id: number; contentId: number }) => deleteIELTSQuestionGroup(id).then(() => contentId),
+    onSuccess: (contentId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', contentId] });
+    },
   });
 }
 
@@ -151,6 +256,28 @@ export function useCreateIELTSQuestion() {
   });
 }
 
+export function useUpdateIELTSQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: IELTSQuestionPayload }) => updateIELTSQuestion(id, payload),
+    onSuccess: (item) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', item.content_item_id] });
+    },
+  });
+}
+
+export function useDeleteIELTSQuestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contentId }: { id: number; contentId: number }) => deleteIELTSQuestion(id).then(() => contentId),
+    onSuccess: (contentId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', contentId] });
+    },
+  });
+}
+
 export function useCreateIELTSVocabulary() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -159,10 +286,54 @@ export function useCreateIELTSVocabulary() {
   });
 }
 
+export function useUpdateIELTSVocabulary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: IELTSVocabularyPayload }) => updateIELTSVocabulary(id, payload),
+    onSuccess: (item) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', item.content_item_id] });
+    },
+  });
+}
+
+export function useDeleteIELTSVocabulary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contentId }: { id: number; contentId: number }) => deleteIELTSVocabulary(id).then(() => contentId),
+    onSuccess: (contentId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', contentId] });
+    },
+  });
+}
+
 export function useCreateIELTSRelatedPost() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ contentId, payload }: { contentId: number; payload: IELTSRelatedPostPayload }) => createIELTSRelatedPost(contentId, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] }),
+  });
+}
+
+export function useUpdateIELTSRelatedPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: IELTSRelatedPostPayload }) => updateIELTSRelatedPost(id, payload),
+    onSuccess: (item) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', item.content_item_id] });
+    },
+  });
+}
+
+export function useDeleteIELTSRelatedPost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, contentId }: { id: number; contentId: number }) => deleteIELTSRelatedPost(id).then(() => contentId),
+    onSuccess: (contentId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'ielts', 'content-detail', contentId] });
+    },
   });
 }

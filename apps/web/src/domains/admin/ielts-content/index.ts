@@ -1,0 +1,1 @@
+export { AdminIELTSContentPage } from './AdminIELTSContentPage';

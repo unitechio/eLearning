@@ -119,18 +119,12 @@ func (s *MinioStorage) optimizeImageIfApplicable(file *multipart.FileHeader, src
 
 	img, format, err := s.imgProcessor.DecodeImage(src)
 	if err == nil {
-		optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, format, 1920, 1920, 85)
+		optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, "webp", 1920, 1920, 85)
 		if err == nil {
-			ext := ".jpg"
-			if format == "png" {
-				ext = ".png"
+			if format == "jpeg" || format == "jpg" || format == "png" || format == "bmp" {
+				finalFilename := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename)) + ".webp"
+				return optimizedBuf, int64(optimizedBuf.Len()), "image/webp", finalFilename
 			}
-			finalFilename := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename)) + ext
-			finalContentType := "image/" + format
-			if format == "jpeg" {
-				finalContentType = "image/jpeg"
-			}
-			return optimizedBuf, int64(optimizedBuf.Len()), finalContentType, finalFilename
 		}
 	}
 	src.Seek(0, 0)
@@ -725,17 +719,12 @@ func (s *MinioStorage) UploadFileFromBytes(ctx context.Context, content []byte, 
 	if strings.HasPrefix(contentType, "image/") && contentType != "image/svg+xml" && contentType != "image/webp" && contentType != "image/gif" {
 		img, format, err := s.imgProcessor.DecodeImage(bytes.NewReader(content))
 		if err == nil {
-			optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, format, 1920, 1920, 85)
+			optimizedBuf, err := s.imgProcessor.OptimizeImageByFormat(img, "webp", 1920, 1920, 85)
 			if err == nil {
-				content = optimizedBuf.Bytes()
-				ext := ".jpg"
-				if format == "png" {
-					ext = ".png"
-				}
-				filename = strings.TrimSuffix(filename, filepath.Ext(filename)) + ext
-				contentType = "image/" + format
-				if format == "jpeg" {
-					contentType = "image/jpeg"
+				if format == "jpeg" || format == "jpg" || format == "png" || format == "bmp" {
+					content = optimizedBuf.Bytes()
+					filename = strings.TrimSuffix(filename, filepath.Ext(filename)) + ".webp"
+					contentType = "image/webp"
 				}
 			}
 		}

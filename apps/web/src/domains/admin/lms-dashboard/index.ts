@@ -1,0 +1,1 @@
+export { AdminLmsPage } from './AdminLmsPage';

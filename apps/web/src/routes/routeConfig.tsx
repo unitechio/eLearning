@@ -9,6 +9,7 @@ import {
   AdminEmailLogsPage,
   AdminFeatureFlagsPage,
   AdminIELTSContentPage,
+  AdminLmsPage,
   AdminPlatformSettingsPage,
   AdminSupportTicketsPage,
   AdminUsersPage,
@@ -25,6 +26,7 @@ import { BillingPage } from '@/domains/billing';
 import { ToeicHubPage } from '@/domains/course';
 import { AchievementsPage, PlannerPage } from '@/domains/engagement';
 import { DashboardPage } from '@/domains/learning';
+import { LmsDashboardPage } from '@/domains/lms';
 import { SpeakingPage } from '@/domains/speaking';
 import { VocabularyPage } from '@/domains/vocabulary';
 import { WritingPage } from '@/domains/writing';
@@ -37,11 +39,14 @@ import { SpeakingSampleDetailPage, SpeakingSamplesPage, WritingSampleDetailPage,
 import { IeltsSpeakingSimPage } from '@/domains/ielts/speaking-sim';
 import { IeltsWritingCoachPage } from '@/domains/ielts/writing-coach';
 
+// ─── Lazy Layouts ──────────────────────────────────────────────────────────────
 const MarketingLayout = lazy(() => import('./layouts/MarketingLayout').then((m) => ({ default: m.MarketingLayout })));
-const AuthLayout = lazy(() => import('./layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
+const AuthLayout      = lazy(() => import('./layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })));
+const AdminLayout     = lazy(() => import('./layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })));
 
 export const routes: RouteObject[] = [
+  // ─── Public fullscreen pages (no layout) ─────────────────────────────────
   { path: '/tu-hoc-practice', element: <SelfStudyPracticePage /> },
   { path: '/tu-hoc', element: <SelfStudyPracticePage /> },
   { path: '/luyen-thi-ielts/ielts-listening-practice', element: <IeltsListeningPractice /> },
@@ -57,18 +62,16 @@ export const routes: RouteObject[] = [
   { path: '/ielts-speaking-sample/part-1/:slug', element: <SpeakingSampleDetailPage /> },
   { path: '/ielts-writing-sample/general-task-1', element: <WritingSamplesPage /> },
   { path: '/ielts-writing-sample/general-task-1/:slug', element: <WritingSampleDetailPage /> },
+
+  // ─── Marketing (public) ───────────────────────────────────────────────────
   {
     element: <MarketingLayout />,
     children: [
       { path: '/', element: <MarketingPage /> },
-      { path: '/preview/user', element: <UserPage /> },
-      { path: '/preview/user/users', element: <CustomerManagementPage /> },
-      { path: '/preview/user/roles', element: <RoleManagementPage /> },
-      { path: '/preview/user/role-permission', element: <RolePermissionPage /> },
-      { path: '/preview/user/permissions', element: <PermissionPage /> },
-      { path: '/preview/user/menu', element: <MenuManagementPage /> },
     ],
   },
+
+  // ─── Auth ─────────────────────────────────────────────────────────────────
   {
     element: <RequireGuest />,
     children: [
@@ -81,6 +84,36 @@ export const routes: RouteObject[] = [
       },
     ],
   },
+
+  // ─── Admin (requires admin role, dedicated AdminLayout) ───────────────────
+  {
+    element: <RequireAdmin />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/access', element: <AdminAccessPage /> },
+          { path: '/admin/platform-settings', element: <AdminPlatformSettingsPage /> },
+          { path: '/admin/feature-flags', element: <AdminFeatureFlagsPage /> },
+          { path: '/admin/audit-logs', element: <AdminAuditLogsPage /> },
+          { path: '/admin/email-logs', element: <AdminEmailLogsPage /> },
+          { path: '/admin/billing', element: <AdminBillingPage /> },
+          { path: '/admin/ielts', element: <AdminIELTSContentPage /> },
+          { path: '/admin/lms', element: <AdminLmsPage /> },
+          { path: '/admin/support', element: <AdminSupportTicketsPage /> },
+          { path: '/admin/user-access', element: <UserPage /> },
+          { path: '/admin/user-access/users', element: <CustomerManagementPage /> },
+          { path: '/admin/user-access/roles', element: <RoleManagementPage /> },
+          { path: '/admin/user-access/role-permission', element: <RolePermissionPage /> },
+          { path: '/admin/user-access/permissions', element: <PermissionPage /> },
+          { path: '/admin/user-access/menu', element: <MenuManagementPage /> },
+        ],
+      },
+    ],
+  },
+
+  // ─── Authenticated User (requires login, DashboardLayout) ────────────────
   {
     element: <RequireAuth />,
     children: [
@@ -88,6 +121,7 @@ export const routes: RouteObject[] = [
         element: <DashboardLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
+          { path: '/lms', element: <LmsDashboardPage /> },
           { path: '/profile', element: <ProfilePage /> },
           { path: '/billing', element: <BillingPage /> },
           { path: '/planner', element: <PlannerPage /> },
@@ -100,34 +134,11 @@ export const routes: RouteObject[] = [
           { path: '/reading-practice', element: <IeltsReadingPage /> },
           { path: '/speaking-simulation', element: <IeltsSpeakingSimPage /> },
           { path: '/writing-coach', element: <IeltsWritingCoachPage /> },
-          {
-            element: <RequireAdmin />,
-            children: [
-              { path: '/admin/users', element: <AdminUsersPage /> },
-              { path: '/admin/access', element: <AdminAccessPage /> },
-              { path: '/admin/platform-settings', element: <AdminPlatformSettingsPage /> },
-              { path: '/admin/feature-flags', element: <AdminFeatureFlagsPage /> },
-              { path: '/admin/audit-logs', element: <AdminAuditLogsPage /> },
-              { path: '/admin/email-logs', element: <AdminEmailLogsPage /> },
-              { path: '/admin/billing', element: <AdminBillingPage /> },
-              { path: '/admin/ielts-content', element: <AdminIELTSContentPage /> },
-              { path: '/admin/ielts', element: <AdminIELTSContentPage /> },
-              { path: '/admin/support-tickets', element: <AdminSupportTicketsPage /> },
-              { path: '/admin/support', element: <AdminSupportTicketsPage /> },
-              { path: '/admin/user-access', element: <UserPage /> },
-              { path: '/admin/user-access/users', element: <CustomerManagementPage /> },
-              { path: '/admin/user-access/roles', element: <RoleManagementPage /> },
-              { path: '/admin/user-access/role-permission', element: <RolePermissionPage /> },
-              { path: '/admin/user-access/permissions', element: <PermissionPage /> },
-              { path: '/admin/user-access/menu', element: <MenuManagementPage /> },
-            ],
-          },
         ],
       },
     ],
   },
-  {
-    path: '*',
-    element: <Navigate replace to="/" />,
-  },
+
+  // ─── Fallback ─────────────────────────────────────────────────────────────
+  { path: '*', element: <Navigate replace to="/" /> },
 ];

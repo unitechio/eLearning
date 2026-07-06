@@ -68,6 +68,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	engagementRepo := repoimpl.NewEngagementRepository(dbInstance)
 	practiceRepo := repoimpl.NewPracticeRepository(dbInstance)
 	ieltsRepo := repoimpl.NewIELTSRepository(dbInstance)
+	lmsRepo := repoimpl.NewLMSRepository(dbInstance)
 	postRepo := repoimpl.NewPostRepository(dbInstance)
 	supportRepo := repoimpl.NewSupportRepository(dbInstance)
 	authRepo := repoimpl.NewAuthRepository(dbInstance)
@@ -97,6 +98,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	engagementSvc := svcimpl.NewEngagementService(engagementRepo, progressRepo, activityRepo, billingRepo)
 	practiceSvc := svcimpl.NewPracticeService(practiceRepo, vocabularyRepo, llmSvc)
 	ieltsSvc := svcimpl.NewIELTSServiceWithDependencies(ieltsRepo, cache.GetClient(), assetStorage)
+	lmsSvc := svcimpl.NewLMSService(lmsRepo, authorizationSvc)
 	postSvc := svcimpl.NewPostService(postRepo)
 	supportSvc := svcimpl.NewSupportService(supportRepo)
 	writingExtrasSvc := svcimpl.NewWritingExtrasService(writingRepo, llmSvc)
@@ -139,6 +141,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Engagement:       handler.NewEngagementHandler(engagementSvc),
 		Practice:         handler.NewPracticeHandler(practiceSvc),
 		IELTS:            handler.NewIELTSHandler(ieltsSvc),
+		LMS:              handler.NewLMSHandler(lmsSvc),
 		Post:             handler.NewPostHandler(postSvc),
 		Support:          handler.NewSupportHandler(supportSvc),
 		Admin:            handler.NewAdminHandler(adminSvc),

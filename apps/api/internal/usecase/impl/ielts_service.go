@@ -70,6 +70,19 @@ func (s *IELTSService) GetContent(ctx context.Context, slug string) (*domain.IEL
 	return item, err
 }
 
+func (s *IELTSService) GetContentByID(ctx context.Context, id uint) (*domain.IELTSContentItem, error) {
+	cacheKey := "ielts:content:detail:id:" + strconv.FormatUint(uint64(id), 10)
+	var cached domain.IELTSContentItem
+	if s.getCache(ctx, cacheKey, &cached) {
+		return &cached, nil
+	}
+	item, err := s.repo.GetContentByID(ctx, id)
+	if err == nil {
+		s.setCache(ctx, cacheKey, item, 5*time.Minute)
+	}
+	return item, err
+}
+
 func (s *IELTSService) GetAnswerKey(ctx context.Context, slug string) ([]domain.IELTSQuestion, error) {
 	cacheKey := "ielts:content:answers:" + slug
 	var cached []domain.IELTSQuestion
@@ -268,6 +281,13 @@ func (s *IELTSService) ImportContent(ctx context.Context, file *multipart.FileHe
 	s.invalidateContentCache(ctx)
 	s.auditMutation(ctx, audit, 1801, bundle.Content, res, nil, start)
 	return res, nil
+}
+
+func (s *IELTSService) ImportPDF(ctx context.Context, file *multipart.FileHeader, audit dto.IeltsAuditContext) (*dto.IELTSPDFImportResult, error) {
+	start := time.Now()
+	result, err := parseIELTSPDFFile(file)
+	s.auditMutation(ctx, audit, 1802, map[string]string{"filename": file.Filename}, result, err, start)
+	return result, err
 }
 
 func (s *IELTSService) UpdateReview(ctx context.Context, userID uuid.UUID, id uint, req dto.IELTSReviewRequest, audit dto.IeltsAuditContext) (*domain.IELTSContentItem, error) {

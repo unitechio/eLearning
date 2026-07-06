@@ -12,6 +12,7 @@ import (
 type IELTSUsecase interface {
 	ListContent(ctx context.Context, filter dto.IELTSContentFilter) ([]domain.IELTSContentItem, int64, error)
 	GetContent(ctx context.Context, slug string) (*domain.IELTSContentItem, error)
+	GetContentByID(ctx context.Context, id uint) (*domain.IELTSContentItem, error)
 	GetAnswerKey(ctx context.Context, slug string) ([]domain.IELTSQuestion, error)
 	GetVocabulary(ctx context.Context, slug string) ([]domain.IELTSVocabularyItem, error)
 	StartAttempt(ctx context.Context, userID uuid.UUID, slug string, req dto.IELTSStartAttemptRequest, audit dto.IeltsAuditContext) (*domain.IELTSPracticeAttempt, error)
@@ -21,6 +22,7 @@ type IELTSUsecase interface {
 	UpdateContent(ctx context.Context, id uint, req dto.IELTSContentRequest, audit dto.IeltsAuditContext) (*domain.IELTSContentItem, error)
 	DeleteContent(ctx context.Context, id uint, audit dto.IeltsAuditContext) error
 	ImportContent(ctx context.Context, file *multipart.FileHeader, audit dto.IeltsAuditContext) (*dto.IELTSImportResult, error)
+	ImportPDF(ctx context.Context, file *multipart.FileHeader, audit dto.IeltsAuditContext) (*dto.IELTSPDFImportResult, error)
 	UpdateReview(ctx context.Context, userID uuid.UUID, id uint, req dto.IELTSReviewRequest, audit dto.IeltsAuditContext) (*domain.IELTSContentItem, error)
 	CreatePassage(ctx context.Context, contentID uint, req dto.IELTSPassageRequest, audit dto.IeltsAuditContext) (*domain.IELTSPassage, error)
 	UpdatePassage(ctx context.Context, id uint, req dto.IELTSPassageRequest, audit dto.IeltsAuditContext) (*domain.IELTSPassage, error)

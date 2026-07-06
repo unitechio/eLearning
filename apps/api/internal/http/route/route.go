@@ -31,6 +31,7 @@ type Handlers struct {
 	Engagement       *handler.EngagementHandler
 	Practice         *handler.PracticeHandler
 	IELTS            *handler.IELTSHandler
+	LMS              *handler.LMSHandler
 	Post             *handler.PostHandler
 	Support          *handler.SupportHandler
 	Admin            *handler.AdminHandler
@@ -299,6 +300,11 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				ielts.POST("/mock-tests/:id/submit", h.IELTS.SubmitMockTest)
 			}
 
+			lms := protected.Group("/lms")
+			{
+				lms.GET("/dashboard", h.LMS.GetMyDashboard)
+			}
+
 			pronunciation := protected.Group("/pronunciation")
 			{
 				pronunciation.POST("/analyze-word", h.Practice.AnalyzeWord)
@@ -378,6 +384,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 					adminIELTS.GET("/content", h.IELTS.AdminList)
 					adminIELTS.POST("/content", h.IELTS.Create)
 					adminIELTS.POST("/content/import", h.IELTS.Import)
+					adminIELTS.POST("/content/import-pdf", h.IELTS.ImportPDF)
 					adminIELTS.GET("/content/:id", h.IELTS.Get)
 					adminIELTS.PUT("/content/:id", h.IELTS.Update)
 					adminIELTS.DELETE("/content/:id", h.IELTS.Delete)
@@ -398,6 +405,14 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 					adminIELTS.POST("/content/:id/related-posts", h.IELTS.CreateRelatedPost)
 					adminIELTS.PUT("/related-posts/:id", h.IELTS.UpdateRelatedPost)
 					adminIELTS.DELETE("/related-posts/:id", h.IELTS.DeleteRelatedPost)
+				}
+				adminLMS := admin.Group("/lms")
+				{
+					adminLMS.GET("/users/:user_id", h.LMS.GetUserDashboard)
+					adminLMS.PUT("/users/:user_id", h.LMS.UpsertDashboard)
+					adminLMS.POST("/users/:user_id/enrollments", h.LMS.CreateEnrollment)
+					adminLMS.PUT("/enrollments/:id", h.LMS.UpdateEnrollment)
+					adminLMS.DELETE("/enrollments/:id", h.LMS.DeleteEnrollment)
 				}
 			}
 

@@ -63,7 +63,15 @@ func (r *IELTSRepository) GetContentBySlug(ctx context.Context, slug string) (*d
 
 func (r *IELTSRepository) GetContentByID(ctx context.Context, id uint) (*domain.IELTSContentItem, error) {
 	var item domain.IELTSContentItem
-	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
+	err := r.db.WithContext(ctx).
+		Preload("Passages", func(db *gorm.DB) *gorm.DB { return db.Order("sort_order ASC, passage_no ASC") }).
+		Preload("Groups", func(db *gorm.DB) *gorm.DB { return db.Order("sort_order ASC, question_from ASC") }).
+		Preload("Groups.Questions", func(db *gorm.DB) *gorm.DB { return db.Order("sort_order ASC, question_no ASC") }).
+		Preload("Vocabulary", func(db *gorm.DB) *gorm.DB { return db.Order("sort_order ASC, term ASC") }).
+		Preload("RelatedPosts", func(db *gorm.DB) *gorm.DB { return db.Order("sort_order ASC, id ASC") }).
+		Preload("RelatedPosts.Post").
+		First(&item, "id = ?", id).Error
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("ielts content not found")
 		}

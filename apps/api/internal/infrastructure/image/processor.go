@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/disintegration/imaging"
+	"github.com/gen2brain/webp"
 )
 
 // Processor handles image processing operations
@@ -64,6 +65,13 @@ func (p *Processor) EncodePNG(img image.Image) (*bytes.Buffer, error) {
 	return buf, err
 }
 
+// EncodeWebP encodes an image as WebP.
+func (p *Processor) EncodeWebP(img image.Image, quality int) (*bytes.Buffer, error) {
+	buf := new(bytes.Buffer)
+	err := webp.Encode(buf, img, webp.Options{Quality: quality})
+	return buf, err
+}
+
 // OptimizeImage optimizes an image by resizing if too large and compressing
 func (p *Processor) OptimizeImage(img image.Image, maxWidth, maxHeight, quality int) (*bytes.Buffer, error) {
 	return p.OptimizeImageByFormat(img, "jpeg", maxWidth, maxHeight, quality)
@@ -82,6 +90,9 @@ func (p *Processor) OptimizeImageByFormat(img image.Image, format string, maxWid
 
 	if format == "png" {
 		return p.EncodePNG(img)
+	}
+	if format == "webp" {
+		return p.EncodeWebP(img, quality)
 	}
 	return p.EncodeJPEG(img, quality)
 }

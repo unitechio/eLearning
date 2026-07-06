@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAdminPermissions, useAdminRoles } from '@/domains/admin/api/hooks';
+import { useAdminPermissions, useAdminRoles } from '@/domains/admin/api/users';
 import { useAuth } from '@/domains/auth';
 
 export function AdminAccessPage() {

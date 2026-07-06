@@ -61,6 +61,29 @@ type IELTSImportResult struct {
 	VocabularyCount int  `json:"vocabulary_count"`
 }
 
+type IELTSPDFImportPage struct {
+	PageNo       int    `json:"page_no"`
+	Title        string `json:"title"`
+	Text         string `json:"text"`
+	TextLength   int    `json:"text_length"`
+	ImageCount   int    `json:"image_count"`
+	RequiresOCR  bool   `json:"requires_ocr"`
+	HasTextLayer bool   `json:"has_text_layer"`
+}
+
+type IELTSPDFImportResult struct {
+	FileName           string                `json:"file_name"`
+	Title              string                `json:"title"`
+	PageCount          int                   `json:"page_count"`
+	ExtractedText      string                `json:"extracted_text"`
+	ExtractedChars     int                   `json:"extracted_chars"`
+	RequiresOCR        bool                  `json:"requires_ocr"`
+	HasExtractableText bool                  `json:"has_extractable_text"`
+	Pages              []IELTSPDFImportPage  `json:"pages"`
+	SuggestedContent   IELTSContentRequest   `json:"suggested_content"`
+	SuggestedPassages  []IELTSPassageRequest `json:"suggested_passages"`
+}
+
 type IELTSReviewRequest struct {
 	Action string `json:"action" binding:"required"`
 	Note   string `json:"note"`

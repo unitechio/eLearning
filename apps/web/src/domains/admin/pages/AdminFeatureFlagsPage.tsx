@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useCreateFeatureFlag, useDeleteFeatureFlag, useFeatureFlags, useUpdateFeatureFlag } from '@/domains/admin/api/hooks';
-import { FeatureFlag } from '@/domains/admin/api/service';
+import { useCreateFeatureFlag, useDeleteFeatureFlag, useFeatureFlags, useUpdateFeatureFlag } from '@/domains/admin/api/platform';
+import { FeatureFlag } from '@/domains/admin/api/platform';
 import { useAuth } from '@/domains/auth';
 
 const emptyFlag = { name: '', key: '', description: '', category: 'premium', enabled: true, required_tier: 'pro' };

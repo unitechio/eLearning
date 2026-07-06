@@ -7,7 +7,7 @@ import {
   useAssignSupportTicket,
   useUpdateSupportTicketStatus,
 } from '@/domains/support/api/hooks';
-import { useAdminUsers } from '@/domains/admin/api/hooks';
+import { useAdminUsers } from '@/domains/admin/api/users';
 import { HeaderLoadingBar } from '@/shared/components';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'resolved', 'closed'];

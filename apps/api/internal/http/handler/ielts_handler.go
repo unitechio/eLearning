@@ -53,7 +53,12 @@ func (h *IELTSHandler) list(c *gin.Context, query dto.IELTSContentFilter) {
 }
 
 func (h *IELTSHandler) Get(c *gin.Context) {
-	item, err := h.svc.GetContent(requestContext(c), c.Param("id"))
+	id, err := parseUintParam(c, "id")
+	if err != nil {
+		response.FailCode(c, 400, response.CodeBadRequest)
+		return
+	}
+	item, err := h.svc.GetContentByID(requestContext(c), id)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -265,6 +270,24 @@ func (h *IELTSHandler) Import(c *gin.Context) {
 		return
 	}
 	item, err := h.svc.ImportContent(requestContext(c), file, h.auditContext(c, userID))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.CreatedCode(c, response.CodeSuccess, item)
+}
+
+func (h *IELTSHandler) ImportPDF(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	file, err := c.FormFile("file")
+	if err != nil {
+		response.FailCode(c, 400, response.CodeBadRequest)
+		return
+	}
+	item, err := h.svc.ImportPDF(requestContext(c), file, h.auditContext(c, userID))
 	if err != nil {
 		_ = c.Error(err)
 		return

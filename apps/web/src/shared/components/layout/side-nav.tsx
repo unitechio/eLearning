@@ -8,16 +8,17 @@ import {
   Sparkles,
   Trophy,
   Calendar,
-  Shield,
   UserCircle2,
   GraduationCap,
   CreditCard,
+  LineChart,
 } from 'lucide-react';
 import { useAuthStore } from '@/domains/auth';
 import { OptimizedImage } from '@/shared/components/media';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+  { icon: LineChart, label: 'LMS', path: '/lms' },
   { icon: BookOpen, label: 'Vocabulary', path: '/vocabulary' },
   { icon: Mic2, label: 'Speaking', path: '/speaking' },
   { icon: Edit3, label: 'Writing', path: '/writing' },
@@ -30,185 +31,68 @@ const navItems = [
 
 export default function SideNav() {
   const user = useAuthStore((state) => state.user);
-  const accessProfile = useAuthStore((state) => state.accessProfile);
-  const isAdmin = Boolean(accessProfile?.is_admin);
 
   return (
-    <aside className="fixed left-0 top-0 h-screen flex flex-col p-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl w-64 border-r-0 font-inter antialiased text-sm font-medium z-50 transition-all duration-300">
-      <div className="flex items-center gap-3 px-2 mb-10">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-          <Sparkles className="w-5 h-5 fill-white" />
+    <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r-0 bg-slate-50/80 p-4 text-sm font-medium antialiased backdrop-blur-xl transition-all duration-300 dark:bg-slate-950/80 font-inter">
+      {/* Logo */}
+      <div className="mb-10 flex items-center gap-3 px-2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/20 text-white">
+          <Sparkles className="h-5 w-5 fill-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tighter text-slate-900 dark:text-slate-50 leading-none">eEnglish</h1>
-          <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-black opacity-40 mt-1">AI Scholar</p>
+          <h1 className="text-xl font-bold tracking-tighter leading-none text-slate-900 dark:text-slate-50">eEnglish</h1>
+          <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-40">AI Scholar</p>
         </div>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-primary/10 font-bold text-primary shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-200/50 dark:text-slate-400 dark:hover:bg-slate-800/50'
+                }`
+              }
             >
               {({ isActive }) => (
                 <>
-                  <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                  <Icon className={`h-5 w-5 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                   {item.label}
                 </>
               )}
             </NavLink>
           );
         })}
-        {isAdmin ? (
-          <>
-            <NavLink
-              to="/admin/users"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Admin Users
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/access"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Admin Access
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/platform-settings"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Platform Settings
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/feature-flags"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Feature Flags
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/audit-logs"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Audit Logs
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/email-logs"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Email Logs
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/billing"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Billing Admin
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/ielts-content"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                IELTS Content
-              </>
-            </NavLink>
-            <NavLink
-              to="/admin/support-tickets"
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive
-                  ? 'bg-primary/10 text-primary font-bold shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
-              }`}
-            >
-              <>
-                <Shield className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-                Support Tickets
-              </>
-            </NavLink>
-          </>
-        ) : null}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-slate-200/50">
-        <div className="flex items-center gap-3 px-2 mb-6 group cursor-pointer">
+      {/* User footer */}
+      <div className="mt-auto border-t border-slate-200/50 pt-6">
+        <div className="mb-6 flex cursor-pointer items-center gap-3 px-2 group">
           <div className="relative">
             <OptimizedImage
               alt={[user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'User'}
-              aspectClassName="w-10 h-10 rounded-full"
+              aspectClassName="h-10 w-10 rounded-full"
               className="border-2 border-white shadow-sm dark:border-slate-800"
               src={user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&h=100&auto=format&fit=crop'}
               widthHint={96}
             />
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-slate-50 dark:border-slate-900 rounded-full"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-slate-50 bg-green-500 dark:border-slate-900" />
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-slate-900 dark:text-slate-50 truncate">{[user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Guest'}</p>
-            <p className="text-xs text-on-surface-variant opacity-60 truncate">{user?.email ?? ''}</p>
+            <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-50">
+              {[user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Guest'}
+            </p>
+            <p className="truncate text-xs text-on-surface-variant opacity-60">{user?.email ?? ''}</p>
           </div>
         </div>
-        <button className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm active:scale-95 duration-150 shadow-lg shadow-primary/20">
+        <button className="w-full rounded-xl bg-gradient-to-r from-primary to-secondary py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 active:scale-95 duration-150">
           Start Practice
         </button>
       </div>

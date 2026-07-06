@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useAdminUsers, useUpdateAdminUserStatus } from '@/domains/admin/api/hooks';
+import { useAdminUsers, useUpdateAdminUserStatus } from '@/domains/admin/api/users';
 import { useAuth } from '@/domains/auth';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';

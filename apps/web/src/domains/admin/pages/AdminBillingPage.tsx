@@ -7,10 +7,11 @@ import {
   useCancelAdminBillingSubscription,
   useCreateAdminBillingPlan,
   useDeleteAdminBillingPlan,
-  useGrantPremiumSubscription,
+  useUpdateAdminBillingPlan,
   useUpdateAdminBillingSubscriptionStatus,
-} from '@/domains/admin/api/hooks';
-import { useAdminUsers } from '@/domains/admin/api/hooks';
+  useGrantPremiumSubscription,
+} from '@/domains/admin/api/billing';
+import { useAdminUsers } from '@/domains/admin/api/users';
 
 export function AdminBillingPage() {
   const plansQuery = useAdminBillingPlans();

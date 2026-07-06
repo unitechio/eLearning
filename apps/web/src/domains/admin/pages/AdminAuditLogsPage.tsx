@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuditLogs, useCleanupAuditLogs } from '@/domains/admin/api/hooks';
+import { useAuditLogs, useCleanupAuditLogs } from '@/domains/admin/api/platform';
 import { useAuth } from '@/domains/auth';
 
 export function AdminAuditLogsPage() {

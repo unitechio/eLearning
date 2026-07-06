@@ -74,6 +74,8 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.IELTSPracticeAttempt{},
 		&domain.IELTSLearningProgress{},
 		&domain.IELTSMockTestSession{},
+		&domain.LMSStudentDashboard{},
+		&domain.LMSCourseEnrollment{},
 		&domain.SupportTicket{},
 		&domain.SupportTicketComment{},
 		&domain.WsAudit{},

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useEmailLogs, useSendPlatformEmail } from '@/domains/admin/api/hooks';
+import { useEmailLogs, useSendPlatformEmail } from '@/domains/admin/api/platform';
 import { useAuth } from '@/domains/auth';
 
 export function AdminEmailLogsPage() {
