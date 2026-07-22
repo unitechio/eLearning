@@ -172,6 +172,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Realtime:         handler.NewRealtimeHandler(),
 		Media:            handler.NewMediaHandler(assetStorage),
 		TTS:              handler.NewTTSHandler(ttsSvc),
+		Document:         handler.NewDocumentHandler(assetStorage),
 	}
 
 	router := newRouter(cfg, logger, handlers, route.Guards{

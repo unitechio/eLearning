@@ -273,6 +273,18 @@ func (h *BillingHandler) History(c *gin.Context) {
 	response.OKWithMeta(c, "billing history fetched", res.Items, &res.Meta)
 }
 
+// Checkout godoc
+// @Summary      Create a payment checkout session
+// @Description  Initiates a payment for a billing plan. Returns a checkout session with payment URL.
+// @Tags         billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.CheckoutPaymentRequest true  "Checkout payload"
+// @Success      201  {object}  response.Envelope{data=dto.CheckoutResponse}
+// @Failure      400  {object}  response.Envelope
+// @Failure      401  {object}  response.Envelope
+// @Router       /billing/payments/checkout [post]
 func (h *BillingHandler) Checkout(c *gin.Context) {
 	var req dto.CheckoutPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -291,6 +303,18 @@ func (h *BillingHandler) Checkout(c *gin.Context) {
 	response.Created(c, "payment checkout created", item)
 }
 
+// ConfirmSandboxPayment godoc
+// @Summary      Confirm a payment in sandbox/test mode
+// @Description  Marks a sandbox payment as completed, for testing purposes.
+// @Tags         billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  string                    true  "Payment ID"
+// @Param        body  body  dto.ConfirmPaymentRequest true  "Confirmation payload"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Router       /billing/payments/{id}/sandbox-confirm [post]
 func (h *BillingHandler) ConfirmSandboxPayment(c *gin.Context) {
 	var req dto.ConfirmPaymentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -503,6 +527,20 @@ func (h *BillingHandler) GrantPremium(c *gin.Context) {
 	response.OK(c, "premium granted", item)
 }
 
+// AdminInvoices godoc
+// @Summary      List all invoices (admin)
+// @Description  Returns paginated list of all invoices across all users. Supports filtering by status and date range.
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page       query  int     false  "Page number"
+// @Param        page_size  query  int     false  "Page size"
+// @Param        q          query  string  false  "Search by user email or invoice number"
+// @Param        status     query  string  false  "Filter by status: pending, paid, failed, refunded"
+// @Param        from_date  query  string  false  "From date (YYYY-MM-DD)"
+// @Param        to_date    query  string  false  "To date (YYYY-MM-DD)"
+// @Success      200  {object}  response.Envelope{data=[]dto.BillingInvoice}
+// @Router       /admin/billing/invoices [get]
 func (h *BillingHandler) AdminInvoices(c *gin.Context) {
 	var query dto.AdminBillingListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -517,6 +555,19 @@ func (h *BillingHandler) AdminInvoices(c *gin.Context) {
 	response.OKWithMeta(c, "billing invoices fetched", res.Items, &res.Meta)
 }
 
+// AdminPaymentTransactions godoc
+// @Summary      List all payment transactions (admin)
+// @Description  Returns paginated list of all payment transactions including success, failed, and refunded payments.
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page       query  int     false  "Page number"
+// @Param        page_size  query  int     false  "Page size"
+// @Param        q          query  string  false  "Search by user email or transaction ID"
+// @Param        status     query  string  false  "Filter by status: pending, success, failed, refunded"
+// @Param        method     query  string  false  "Payment method: card, bank_transfer, momo, vnpay"
+// @Success      200  {object}  response.Envelope{data=[]dto.PaymentTransaction}
+// @Router       /admin/billing/payments [get]
 func (h *BillingHandler) AdminPaymentTransactions(c *gin.Context) {
 	var query dto.AdminBillingListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {

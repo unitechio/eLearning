@@ -49,6 +49,7 @@ type Handlers struct {
 	Realtime         *handler.RealtimeHandler
 	Media            *handler.MediaHandler
 	TTS              *handler.TTSHandler
+	Document         *handler.DocumentHandler
 }
 
 type Guards struct {
@@ -430,6 +431,17 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 					adminLMS.POST("/users/:user_id/enrollments", h.LMS.CreateEnrollment)
 					adminLMS.PUT("/enrollments/:id", h.LMS.UpdateEnrollment)
 					adminLMS.DELETE("/enrollments/:id", h.LMS.DeleteEnrollment)
+				}
+				adminWriting := admin.Group("/writing")
+				{
+					adminWriting.GET("/submissions", h.Writing.AdminListSubmissions)
+					adminWriting.GET("/submissions/:submissionId", h.Writing.AdminGetSubmission)
+					adminWriting.POST("/submissions/:submissionId/review", h.Writing.AdminReviewSubmission)
+				}
+				adminDocs := admin.Group("/documents")
+				{
+					adminDocs.POST("/upload", h.Document.Upload)
+					adminDocs.POST("/upload-public", h.Document.UploadPublicAsset)
 				}
 			}
 

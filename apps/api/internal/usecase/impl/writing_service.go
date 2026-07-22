@@ -48,7 +48,7 @@ func (s *WritingUsecase) Submit(ctx context.Context, userID uuid.UUID, req useca
 		WordCount:       wc,
 		AIScore:         eval.Score,
 		AIFeedback:      eval.Feedback,
-		TeacherAudioURL: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", // sample audio
+		TeacherAudioURL: "",
 		AnnotatedText:   compress.CompressedText(annotatedJSON),
 		CriteriaScores:  compress.CompressedText(criteriaJSON),
 		IsGraded:        true,
@@ -97,6 +97,84 @@ func (s *WritingUsecase) GetSubmissionByID(ctx context.Context, userID, submissi
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("submission", submissionID.String())
 		}
+		return nil, apperr.Internal(err)
+	}
+	return item, nil
+}
+
+// AdminListSubmissions lists all writing submissions regardless of user.
+func (s *WritingUsecase) AdminListSubmissions(ctx context.Context, page, pageSize int) (*usecase.HistoryResponse, error) {
+	_ = ctx
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+	items, total, err := s.repo.ListAllSubmissions(pageSize, offset)
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	totalPages := int(total) / pageSize
+	if int(total)%pageSize != 0 {
+		totalPages++
+	}
+
+	return &usecase.HistoryResponse{
+		Items: items,
+		Meta: response.Meta{
+			Page:       page,
+			PageSize:   pageSize,
+			TotalItems: total,
+			TotalPages: totalPages,
+		},
+	}, nil
+}
+
+// AdminGetSubmissionByID fetches a single submission by ID for admin/teacher review.
+func (s *WritingUsecase) AdminGetSubmissionByID(ctx context.Context, submissionID uuid.UUID) (*domain.WritingSubmission, error) {
+	_ = ctx
+	item, err := s.repo.FindSubmissionByID(submissionID)
+	if err != nil {
+		if isNotFoundErr(err) {
+			return nil, apperr.NotFound("submission", submissionID.String())
+		}
+		return nil, apperr.Internal(err)
+	}
+	return item, nil
+}
+
+// AdminReviewSubmission saves teacher review: audio URL, notes, and optional score/annotations override.
+func (s *WritingUsecase) AdminReviewSubmission(ctx context.Context, reviewerID, submissionID uuid.UUID, req usecase.ReviewWritingRequest) (*domain.WritingSubmission, error) {
+	_ = ctx
+	item, err := s.repo.FindSubmissionByID(submissionID)
+	if err != nil {
+		if isNotFoundErr(err) {
+			return nil, apperr.NotFound("submission", submissionID.String())
+		}
+		return nil, apperr.Internal(err)
+	}
+
+	// Apply teacher overrides
+	if req.TeacherAudioURL != "" {
+		item.TeacherAudioURL = req.TeacherAudioURL
+	}
+	if req.ScoreOverride != nil {
+		item.AIScore = *req.ScoreOverride
+	}
+	if req.AnnotatedText != "" {
+		item.AnnotatedText = compress.CompressedText(req.AnnotatedText)
+	}
+	if req.CriteriaScores != "" {
+		item.CriteriaScores = compress.CompressedText(req.CriteriaScores)
+	}
+	// Mark as reviewed
+	item.IsGraded = true
+
+	if err := s.repo.UpdateSubmission(item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return item, nil

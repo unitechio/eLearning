@@ -20,6 +20,20 @@ func NewIELTSHandler(svc usecase.IELTSUsecase) *IELTSHandler {
 	return &IELTSHandler{svc: svc}
 }
 
+// PublicList godoc
+// @Summary      List published IELTS content
+// @Description  Returns paginated list of published IELTS content items filtered by skill, level, module, etc.
+// @Tags         ielts-public
+// @Produce      json
+// @Param        skill        query  string  false  "Skill: reading, listening, writing, speaking"
+// @Param        module       query  string  false  "Module: ielts, sat, toeic"
+// @Param        level        query  string  false  "Level: band5, band6, band7"
+// @Param        content_type query  string  false  "Content type"
+// @Param        page         query  int     false  "Page number (default 1)"
+// @Param        page_size    query  int     false  "Page size (default 20)"
+// @Param        q            query  string  false  "Search by title"
+// @Success      200  {object}  response.Envelope{data=[]domain.IELTSContentItem}
+// @Router       /public/ielts/content [get]
 func (h *IELTSHandler) PublicList(c *gin.Context) {
 	setPublicCache(c, 60, 300)
 	var query dto.IELTSContentFilter
@@ -32,6 +46,21 @@ func (h *IELTSHandler) PublicList(c *gin.Context) {
 	h.list(c, query)
 }
 
+// AdminList godoc
+// @Summary      List all IELTS content (admin)
+// @Description  Returns all IELTS content items regardless of status, for admin management.
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        skill        query  string  false  "Skill filter"
+// @Param        module       query  string  false  "Module filter"
+// @Param        status       query  string  false  "Status: draft, published, archived"
+// @Param        review_status query string false   "Review status: draft, approved, rejected"
+// @Param        level        query  string  false  "Level filter"
+// @Param        page         query  int     false  "Page number"
+// @Param        page_size    query  int     false  "Page size"
+// @Success      200  {object}  response.Envelope{data=[]domain.IELTSContentItem}
+// @Router       /admin/ielts/content [get]
 func (h *IELTSHandler) AdminList(c *gin.Context) {
 	var query dto.IELTSContentFilter
 	if !bindQueryOrAbort(c, &query) {
@@ -52,6 +81,16 @@ func (h *IELTSHandler) list(c *gin.Context, query dto.IELTSContentFilter) {
 	response.OKWithMetaCode(c, response.CodeSuccess, items, &meta)
 }
 
+// Get godoc
+// @Summary      Get IELTS content by ID (admin)
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  int  true  "Content ID"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSContentItem}
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /admin/ielts/content/{id} [get]
 func (h *IELTSHandler) Get(c *gin.Context) {
 	id, err := parseUintParam(c, "id")
 	if err != nil {
@@ -66,6 +105,14 @@ func (h *IELTSHandler) Get(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// PublicGet godoc
+// @Summary      Get published IELTS content by slug
+// @Tags         ielts-public
+// @Produce      json
+// @Param        id  path  string  true  "Content slug"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSContentItem}
+// @Failure      404  {object}  response.Envelope
+// @Router       /public/ielts/content/{id} [get]
 func (h *IELTSHandler) PublicGet(c *gin.Context) {
 	setPublicCache(c, 120, 600)
 	item, err := h.svc.GetContent(requestContext(c), c.Param("id"))
@@ -80,6 +127,14 @@ func (h *IELTSHandler) PublicGet(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// AnswerKey godoc
+// @Summary      Get answer key for IELTS content
+// @Tags         ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  string  true  "Content slug"
+// @Success      200  {object}  response.Envelope{data=[]domain.IELTSQuestion}
+// @Router       /ielts/content/{id}/answer-key [get]
 func (h *IELTSHandler) AnswerKey(c *gin.Context) {
 	items, err := h.svc.GetAnswerKey(requestContext(c), c.Param("id"))
 	if err != nil {
@@ -122,6 +177,18 @@ func (h *IELTSHandler) PublicVocabulary(c *gin.Context) {
 	h.Vocabulary(c)
 }
 
+// StartAttempt godoc
+// @Summary      Start a practice attempt for IELTS content
+// @Tags         ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  string                       true  "Content slug"
+// @Param        body  body  dto.IELTSStartAttemptRequest true  "Attempt options"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSPracticeAttempt}
+// @Failure      400  {object}  response.Envelope
+// @Failure      401  {object}  response.Envelope
+// @Router       /ielts/content/{id}/attempts [post]
 func (h *IELTSHandler) StartAttempt(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -139,6 +206,18 @@ func (h *IELTSHandler) StartAttempt(c *gin.Context) {
 	response.CreatedCode(c, response.CodeSuccess, item)
 }
 
+// SubmitAttempt godoc
+// @Summary      Submit answers for an IELTS practice attempt
+// @Tags         ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                           true  "Attempt ID"
+// @Param        body  body  dto.IELTSSubmitAttemptRequest true  "Answers"
+// @Success      200  {object}  response.Envelope{data=dto.IELTSAttemptResult}
+// @Failure      400  {object}  response.Envelope
+// @Failure      401  {object}  response.Envelope
+// @Router       /ielts/attempts/{id}/submit [post]
 func (h *IELTSHandler) SubmitAttempt(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -203,6 +282,17 @@ func (h *IELTSHandler) UpdateProgress(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// Create godoc
+// @Summary      Create new IELTS content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.IELTSContentRequest true  "Content data"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSContentItem}
+// @Failure      400  {object}  response.Envelope
+// @Failure      401  {object}  response.Envelope
+// @Router       /admin/ielts/content [post]
 func (h *IELTSHandler) Create(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -220,6 +310,17 @@ func (h *IELTSHandler) Create(c *gin.Context) {
 	response.CreatedCode(c, response.CodeSuccess, item)
 }
 
+// Update godoc
+// @Summary      Update IELTS content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                     true  "Content ID"
+// @Param        body  body  dto.IELTSContentRequest true  "Updated content"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSContentItem}
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/{id} [put]
 func (h *IELTSHandler) Update(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -242,6 +343,14 @@ func (h *IELTSHandler) Update(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// Delete godoc
+// @Summary      Delete IELTS content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Param        id  path  int  true  "Content ID"
+// @Success      200  {object}  response.Envelope
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/{id} [delete]
 func (h *IELTSHandler) Delete(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -259,6 +368,16 @@ func (h *IELTSHandler) Delete(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, gin.H{"deleted": true})
 }
 
+// Import godoc
+// @Summary      Import IELTS content from JSON file
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        file  formData  file  true  "JSON file to import"
+// @Success      201  {object}  response.Envelope{data=dto.IELTSImportResult}
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/import [post]
 func (h *IELTSHandler) Import(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -277,6 +396,16 @@ func (h *IELTSHandler) Import(c *gin.Context) {
 	response.CreatedCode(c, response.CodeSuccess, item)
 }
 
+// ImportPDF godoc
+// @Summary      Import IELTS content from PDF file
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        file  formData  file  true  "PDF file to parse and import"
+// @Success      201  {object}  response.Envelope{data=dto.IELTSPDFImportResult}
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/import-pdf [post]
 func (h *IELTSHandler) ImportPDF(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -295,6 +424,17 @@ func (h *IELTSHandler) ImportPDF(c *gin.Context) {
 	response.CreatedCode(c, response.CodeSuccess, item)
 }
 
+// Review godoc
+// @Summary      Update review status of IELTS content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                    true  "Content ID"
+// @Param        body  body  dto.IELTSReviewRequest true  "Review decision"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSContentItem}
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/{id}/review [post]
 func (h *IELTSHandler) Review(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -317,6 +457,17 @@ func (h *IELTSHandler) Review(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// Attempts godoc
+// @Summary      List user's IELTS practice attempts
+// @Tags         ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        content_item_id  query  int     false  "Filter by content ID"
+// @Param        status           query  string  false  "Filter by status: started, completed"
+// @Param        page             query  int     false  "Page number"
+// @Param        page_size        query  int     false  "Page size"
+// @Success      200  {object}  response.Envelope{data=[]domain.IELTSPracticeAttempt}
+// @Router       /ielts/attempts [get]
 func (h *IELTSHandler) Attempts(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -337,6 +488,16 @@ func (h *IELTSHandler) Attempts(c *gin.Context) {
 	response.OKWithMetaCode(c, response.CodeSuccess, items, &meta)
 }
 
+// StartMockTest godoc
+// @Summary      Start a full IELTS mock test session (4 skills)
+// @Tags         ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.IELTSMockStartRequest true  "Mock test configuration"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSMockTestSession}
+// @Failure      400  {object}  response.Envelope
+// @Router       /ielts/mock-tests [post]
 func (h *IELTSHandler) StartMockTest(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -354,6 +515,15 @@ func (h *IELTSHandler) StartMockTest(c *gin.Context) {
 	response.CreatedCode(c, response.CodeSuccess, item)
 }
 
+// SubmitMockTest godoc
+// @Summary      Submit/finish a mock test session
+// @Tags         ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id  path  int  true  "Mock test session ID"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSMockTestSession}
+// @Failure      400  {object}  response.Envelope
+// @Router       /ielts/mock-tests/{id}/submit [post]
 func (h *IELTSHandler) SubmitMockTest(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
@@ -372,6 +542,16 @@ func (h *IELTSHandler) SubmitMockTest(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// CreatePassage godoc
+// @Summary      Add a reading passage to content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                    true  "Content ID"
+// @Param        body  body  dto.IELTSPassageRequest true  "Passage data"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSPassage}
+// @Router       /admin/ielts/content/{id}/passages [post]
 func (h *IELTSHandler) CreatePassage(c *gin.Context) {
 	h.withContentChild(c, func(userID uuid.UUID, contentID uint) (any, error) {
 		var req dto.IELTSPassageRequest
@@ -382,6 +562,16 @@ func (h *IELTSHandler) CreatePassage(c *gin.Context) {
 	})
 }
 
+// UpdatePassage godoc
+// @Summary      Update a reading passage
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                    true  "Passage ID"
+// @Param        body  body  dto.IELTSPassageRequest true  "Updated passage"
+// @Success      200  {object}  response.Envelope{data=domain.IELTSPassage}
+// @Router       /admin/ielts/passages/{id} [put]
 func (h *IELTSHandler) UpdatePassage(c *gin.Context) {
 	h.withItem(c, func(userID uuid.UUID, id uint) (any, error) {
 		var req dto.IELTSPassageRequest
@@ -392,10 +582,27 @@ func (h *IELTSHandler) UpdatePassage(c *gin.Context) {
 	})
 }
 
+// DeletePassage godoc
+// @Summary      Delete a reading passage
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Param        id  path  int  true  "Passage ID"
+// @Success      200  {object}  response.Envelope
+// @Router       /admin/ielts/passages/{id} [delete]
 func (h *IELTSHandler) DeletePassage(c *gin.Context) {
 	h.deleteItem(c, h.svc.DeletePassage)
 }
 
+// CreateQuestionGroup godoc
+// @Summary      Add a question group to content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                          true  "Content ID"
+// @Param        body  body  dto.IELTSQuestionGroupRequest true  "Question group data"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSQuestionGroup}
+// @Router       /admin/ielts/content/{id}/question-groups [post]
 func (h *IELTSHandler) CreateQuestionGroup(c *gin.Context) {
 	h.withContentChild(c, func(userID uuid.UUID, contentID uint) (any, error) {
 		var req dto.IELTSQuestionGroupRequest
@@ -420,6 +627,16 @@ func (h *IELTSHandler) DeleteQuestionGroup(c *gin.Context) {
 	h.deleteItem(c, h.svc.DeleteQuestionGroup)
 }
 
+// CreateQuestion godoc
+// @Summary      Add a question to content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                      true  "Content ID"
+// @Param        body  body  dto.IELTSQuestionRequest true  "Question data"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSQuestion}
+// @Router       /admin/ielts/content/{id}/questions [post]
 func (h *IELTSHandler) CreateQuestion(c *gin.Context) {
 	h.withContentChild(c, func(userID uuid.UUID, contentID uint) (any, error) {
 		var req dto.IELTSQuestionRequest
@@ -444,6 +661,16 @@ func (h *IELTSHandler) DeleteQuestion(c *gin.Context) {
 	h.deleteItem(c, h.svc.DeleteQuestion)
 }
 
+// CreateVocabulary godoc
+// @Summary      Add vocabulary item to content
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                        true  "Content ID"
+// @Param        body  body  dto.IELTSVocabularyRequest true  "Vocabulary data"
+// @Success      201  {object}  response.Envelope{data=domain.IELTSVocabularyItem}
+// @Router       /admin/ielts/content/{id}/vocabulary [post]
 func (h *IELTSHandler) CreateVocabulary(c *gin.Context) {
 	h.withContentChild(c, func(userID uuid.UUID, contentID uint) (any, error) {
 		var req dto.IELTSVocabularyRequest
@@ -492,6 +719,19 @@ func (h *IELTSHandler) DeleteRelatedPost(c *gin.Context) {
 	h.deleteItem(c, h.svc.DeleteRelatedPost)
 }
 
+// UploadAsset godoc
+// @Summary      Upload asset (audio/image/pdf) for IELTS content
+// @Description  Uploads a file and attaches it to the content item. kind values: thumbnail, audio, pdf, preview.
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id    path      int     true  "Content ID"
+// @Param        kind  query     string  true  "Asset kind: thumbnail, audio, pdf, preview"
+// @Param        file  formData  file    true  "File to upload"
+// @Success      201  {object}  response.Envelope{data=dto.IELTSAssetUploadResponse}
+// @Failure      400  {object}  response.Envelope
+// @Router       /admin/ielts/content/{id}/assets [post]
 func (h *IELTSHandler) UploadAsset(c *gin.Context) {
 	userID, ok := currentUserIDOrAbort(c)
 	if !ok {
