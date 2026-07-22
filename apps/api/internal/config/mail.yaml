@@ -1,0 +1,23 @@
+mail:
+  branding:
+    app_name: IELTS Academy
+    app_url: https://ieltsacademy.vn
+    logo_text: IELTS Academy
+    logo_url: https://cdn.xxx/logo.png
+
+  company:
+    name: Công ty TNHH IELTS Academy
+    address: TP HCM
+    phone: 1900xxxx
+    email: support@academy.vn
+
+  social:
+    facebook: ...
+    youtube: ...
+    linkedin: ...
+
+  support:
+    help_center: ...
+    support: ...
+    privacy: ...
+    terms: ...

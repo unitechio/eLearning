@@ -14,6 +14,28 @@ func IsEmpty(s string) bool {
 	return strings.TrimSpace(s) == ""
 }
 
+func IsNotEmpty(s string) bool {
+	return !IsEmpty(s)
+}
+
+func AnyEmpty(values ...string) bool {
+	for _, v := range values {
+		if IsEmpty(v) {
+			return true
+		}
+	}
+	return false
+}
+
+func AllNotEmpty(values ...string) bool {
+	for _, v := range values {
+		if IsEmpty(v) {
+			return false
+		}
+	}
+	return true
+}
+
 func Contains(s, sub string) bool {
 	return strings.Contains(s, sub)
 }
@@ -37,6 +59,32 @@ func Equal(a, b any) bool {
 	return reflect.DeepEqual(a, b)
 }
 
-func IsEmptyString(s string) bool {
-	return strings.TrimSpace(s) == ""
+// IsNil checks whether the given value is nil.
+// Works for pointer, interface, map, slice, func and chan.
+func IsNil(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+
+	switch rv.Kind() {
+	case reflect.Ptr,
+		reflect.Interface,
+		reflect.Map,
+		reflect.Slice,
+		reflect.Func,
+		reflect.Chan:
+		return rv.IsNil()
+	}
+
+	return false
+}
+
+func IsZero(v any) bool {
+	if v == nil {
+		return true
+	}
+
+	return reflect.ValueOf(v).IsZero()
 }

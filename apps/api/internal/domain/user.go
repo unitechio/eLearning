@@ -27,6 +27,7 @@ type User struct {
 	Password         string     `gorm:"not null" json:"-"`
 	FirstName        string     `gorm:"size:100" json:"first_name"`
 	LastName         string     `gorm:"size:100" json:"last_name"`
+	FullName         string     `gorm:"size:100" json:"full_name"`
 	Phone            string     `gorm:"size:20" json:"phone"`
 	Avatar           string     `json:"avatar"`
 	DepartmentID     *uint      `gorm:"index" json:"department_id,omitempty"` // Foreign key to departments table

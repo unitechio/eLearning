@@ -16,7 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/unitechio/eLearning/apps/api/internal/config"
-	imgProc "github.com/unitechio/eLearning/apps/api/internal/infrastructure/image"
+	imgProc "github.com/unitechio/eLearning/apps/api/pkg/image"
 )
 
 type IStorage interface {
@@ -190,9 +190,9 @@ func (s *MinioStorage) UploadFile(ctx context.Context, file *multipart.FileHeade
 	if entityType == "" {
 		return "", fmt.Errorf("entity type is required")
 	}
-	// if entityID == 0 {
-	// 	return "", fmt.Errorf("entity ID is required")
-	// }
+	if entityID == 0 {
+		return "", fmt.Errorf("entity ID is required")
+	}
 
 	if !s.IsAllowedFileType(file.Filename) {
 		return "", fmt.Errorf("file type not allowed: %s", filepath.Ext(file.Filename))
@@ -224,7 +224,7 @@ func (s *MinioStorage) UploadFile(ctx context.Context, file *multipart.FileHeade
 		return "", fmt.Errorf("failed to upload file to minio: %w", err)
 	}
 
-	log.Printf("✅ File uploaded successfully: %s (Size: %d, ETag: %s)",
+	log.Printf("File uploaded successfully: %s (Size: %d, ETag: %s)",
 		objectName, uploadInfo.Size, uploadInfo.ETag)
 
 	return objectName, nil
@@ -331,7 +331,7 @@ func (s *MinioStorage) DownloadToTemp(ctx context.Context, storagePath string) (
 		return "", fmt.Errorf("file size mismatch: expected %d, got %d", objInfo.Size, bytesWritten)
 	}
 
-	log.Printf("✅ File downloaded to temp location: %s (Size: %d bytes)", tempPath, bytesWritten)
+	log.Printf("File downloaded to temp location: %s (Size: %d bytes)", tempPath, bytesWritten)
 	return tempPath, nil
 }
 
@@ -367,7 +367,7 @@ func (s *MinioStorage) DeleteFile(ctx context.Context, storagePath string) error
 		return fmt.Errorf("failed to delete file from minio: %w", err)
 	}
 
-	log.Printf("✅ File deleted successfully: %s", storagePath)
+	log.Printf("File deleted successfully: %s", storagePath)
 	return nil
 }
 
@@ -383,7 +383,7 @@ func (s *MinioStorage) GetPresignedURL(ctx context.Context, storagePath string, 
 	}
 
 	if expiry <= 0 {
-		expiry = 24 * time.Hour // Default 24 hours
+		expiry = 24 * time.Hour
 	}
 
 	// Validate that the object exists first
@@ -398,7 +398,7 @@ func (s *MinioStorage) GetPresignedURL(ctx context.Context, storagePath string, 
 		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}
 
-	log.Printf("✅ Generated presigned URL for: %s (expires in %v)", storagePath, expiry)
+	log.Printf("Generated presigned URL for: %s (expires in %v)", storagePath, expiry)
 	return url.String(), nil
 }
 
@@ -418,7 +418,7 @@ func (s *MinioStorage) GetPresignedUploadURL(ctx context.Context, objectName str
 		return "", fmt.Errorf("failed to generate presigned upload URL: %w", err)
 	}
 
-	log.Printf("✅ Generated presigned upload URL for: %s (expires in %v)", objectName, expiry)
+	log.Printf("Generated presigned upload URL for: %s (expires in %v)", objectName, expiry)
 	return url.String(), nil
 }
 
@@ -685,7 +685,7 @@ func (s *MinioStorage) UploadFileWithUUID(ctx context.Context, file *multipart.F
 		return "", fmt.Errorf("failed to upload file to minio: %w", err)
 	}
 
-	log.Printf("✅ File uploaded successfully: %s (Size: %d, ETag: %s)",
+	log.Printf("File uploaded successfully: %s (Size: %d, ETag: %s)",
 		objectName, uploadInfo.Size, uploadInfo.ETag)
 
 	return objectName, nil
@@ -748,7 +748,7 @@ func (s *MinioStorage) UploadFileFromBytes(ctx context.Context, content []byte, 
 		return "", fmt.Errorf("failed to upload file to minio: %w", err)
 	}
 
-	log.Printf("✅ File uploaded successfully: %s (Size: %d, ETag: %s)",
+	log.Printf("File uploaded successfully: %s (Size: %d, ETag: %s)",
 		objectName, uploadInfo.Size, uploadInfo.ETag)
 
 	return objectName, nil

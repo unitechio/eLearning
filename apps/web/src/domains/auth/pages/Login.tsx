@@ -3,14 +3,29 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLogin, useAuthStore } from "@/domains/auth";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Sparkles, ArrowRight, HelpCircle, Check } from "lucide-react";
+import { 
+  Sparkles, 
+  HelpCircle, 
+  Check, 
+  ClipboardList, 
+  Volume2, 
+  BookMarked, 
+  Dumbbell, 
+  PenTool, 
+  BookOpen, 
+  Compass, 
+  GraduationCap, 
+  Award,
+  Lock
+} from "lucide-react";
+import mascotReader from "@/assets/mascot_reader.png";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const loginMutation = useLogin();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -22,173 +37,212 @@ export function LoginPage() {
       const data = await loginMutation.mutateAsync({ email, password });
       if (data && data.user) {
         setAuth(data);
-        navigate("/dashboard");
+        navigate("/lms");
       } else {
-        setError("Invalid login credentials.");
+        setError("Thông tin đăng nhập không hợp lệ.");
       }
-    } catch (error: any) {
-      setError(error.response?.data?.message || "Something went wrong. Please try again.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
     }
   };
 
+  // Mock Google sign in
+  const handleGoogleLogin = () => {
+    // For demo/dev purposes, log in using default credential
+    setEmail("admin@eenglish.com");
+    setPassword("AdminPass123!");
+    setShowEmailForm(true);
+  };
+
+  const practiceFeatures = [
+    { name: "Online tests", icon: ClipboardList },
+    { name: "Dictation", icon: Volume2 },
+    { name: "Vocabulary", icon: BookMarked },
+    { name: "Exercises", icon: Dumbbell },
+    { name: "Sample W/S", icon: PenTool },
+    { name: "Blogs", icon: BookOpen },
+    { name: "AI mock test", icon: Sparkles },
+    { name: "Extra road", icon: Compass },
+    { name: "Assignments", icon: GraduationCap },
+    { name: "Final...", icon: Award },
+  ];
+
   return (
-    <main className="min-h-screen w-full flex items-center justify-center relative px-6 py-12 mesh-gradient overflow-hidden">
-      {/* Abstract Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/20 blur-[120px] rounded-full"></div>
+    <main className="min-h-screen w-full flex items-center justify-center bg-slate-50 font-sans p-4 sm:p-8 md:p-12">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-red-50/60 blur-[150px] rounded-full"></div>
+        <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-blue-50/60 blur-[150px] rounded-full"></div>
       </div>
 
-      {/* Auth Container */}
-      <div className="w-full max-w-[1100px] grid grid-cols-1 md:grid-cols-2 glass-card rounded-lg overflow-hidden shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-700">
+      <section className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 bg-white rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden min-h-[600px]">
         
-        {/* Left Side: Visual/Editorial */}
-        <div className="hidden md:flex flex-col justify-between p-12 bg-black/5 relative overflow-hidden">
-          <div className="relative z-20">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                <Sparkles className="w-5 h-5 fill-white" />
+        {/* Left Side: Auth Forms */}
+        <article className="lg:col-span-6 p-8 sm:p-12 md:p-16 flex flex-col justify-center border-r border-slate-100">
+          <header className="mb-8 space-y-6">
+            {/* DOL Logo */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-600 text-white font-black text-2xl shadow-md">
+                D
               </div>
-              <span className="text-xl font-extrabold tracking-tighter text-on-surface">eEnglish</span>
+              <div className="flex flex-col">
+                <span className="text-base font-black tracking-tight text-slate-900 leading-none">DOL IELTS</span>
+                <span className="text-[10px] font-black tracking-widest text-slate-400 leading-none mt-1">ĐÌNH LỰC</span>
+              </div>
+              <hr className="h-6 w-px bg-slate-200 mx-2" aria-hidden="true" />
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">Super LMS</span>
             </div>
-            
-            <h1 className="text-4xl font-headline font-bold leading-tight tracking-tight mb-6 text-on-surface">
-              Master the art of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">cognitive insight.</span>
-            </h1>
-            
-            <p className="text-on-surface-variant body-lg max-w-md opacity-80 leading-relaxed">
-              The world&apos;s most advanced IELTS research engine, designed for those who seek clarity in a world of noise.
-            </p>
-          </div>
 
-          <div className="relative z-20 mt-12 p-6 bg-surface-container-low/50 backdrop-blur-md rounded-2xl border border-white/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-4 h-4 text-secondary fill-secondary" />
-              <span className="label-md font-bold uppercase tracking-widest text-secondary">New Feature</span>
+            <div className="space-y-3">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Đăng nhập vào DOL superLMS</h1>
+              <p className="text-sm font-semibold text-slate-500 leading-relaxed">
+                Vui lòng đăng nhập bằng Gmail bạn đã đăng ký khóa học tại DOL English để vào khóa học.
+              </p>
             </div>
-            <p className="text-on-surface body-md font-medium italic opacity-90">
-              &quot;The way eEnglish organizes unstructured thoughts into logical frameworks has completely changed how our team approach research.&quot;
-            </p>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-white/40">
-                <img 
-                  alt="Testimonial User" 
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&h=150&auto=format&fit=crop" 
+          </header>
+
+          {/* Error alert */}
+          {error && (
+            <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-xs font-black" role="alert">
+              {error}
+            </div>
+          )}
+
+          {/* Primary Action: Google Login */}
+          {!showEmailForm ? (
+            <div className="space-y-6">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-2xl transition shadow-lg shadow-red-600/20"
+              >
+                <img alt="Google" className="w-5 h-5 bg-white rounded-full p-0.5" src="https://www.svgrepo.com/show/475656/google-color.svg" />
+                Sign in with Google
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowEmailForm(true)}
+                className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition"
+              >
+                Hoặc sử dụng tài khoản Email / Mật khẩu
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 px-1" htmlFor="email">
+                  Địa chỉ Email
+                </label>
+                <Input
+                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
-              <span className="label-md font-semibold text-on-surface-variant">Elena Vance, Head of R&amp;D</span>
-            </div>
-          </div>
 
-          {/* Decorative Background Pattern */}
-          <div className="absolute top-0 right-0 opacity-5 pointer-events-none">
-             <div className="w-[500px] h-[500px] border-[50px] border-primary rounded-full translate-x-1/2 -translate-y-1/2"></div>
-          </div>
-        </div>
-
-        {/* Right Side: Auth Form */}
-        <div className="p-8 md:p-16 flex flex-col justify-center bg-white/40 backdrop-blur-md">
-          <div className="mb-10">
-            <h2 className="text-2xl font-headline font-semibold mb-2">Welcome back</h2>
-            <p className="text-on-surface-variant body-md">Enter your details to access your atelier.</p>
-          </div>
-
-          {/* Social Login Cluster */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <Button variant="outline" className="flex items-center justify-center gap-3 py-6 bg-surface-container-low hover:bg-surface-container-high transition-all rounded-xl border-none shadow-sm">
-              <img alt="Google" className="w-5 h-5" src="https://www.svgrepo.com/show/475656/google-color.svg" />
-              <span className="label-md font-bold text-on-surface">Google</span>
-            </Button>
-            <Button variant="outline" className="flex items-center justify-center gap-3 py-6 bg-surface-container-low hover:bg-surface-container-high transition-all rounded-xl border-none shadow-sm">
-              <img alt="Apple" className="w-5 h-5" src="https://www.svgrepo.com/show/442921/apple.svg" />
-              <span className="label-md font-bold text-on-surface">Apple</span>
-            </Button>
-          </div>
-
-          <div className="relative flex items-center mb-8">
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-            <span className="flex-shrink mx-4 text-outline label-md uppercase tracking-widest font-bold opacity-50">or continue with email</span>
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-          </div>
-
-          {/* Email Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block label-md font-bold text-on-surface mb-2 px-1 opacity-70" htmlFor="email">Email address</label>
-              <Input 
-                className="w-full px-4 py-6 bg-surface-container-low border-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all rounded-xl placeholder:text-outline/40 font-medium" 
-                id="email" 
-                type="email" 
-                placeholder="name@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div>
-              <div className="flex justify-between items-center mb-2 px-1">
-                <label className="block label-md font-bold text-on-surface opacity-70" htmlFor="password">Password</label>
-                <Link className="label-md text-primary hover:text-secondary transition-colors font-bold" to="#">Forgot password?</Link>
-              </div>
-              <Input 
-                className="w-full px-4 py-6 bg-surface-container-low border-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all rounded-xl placeholder:text-outline/40 font-medium" 
-                id="password" 
-                type="password" 
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="flex items-center gap-3 px-1">
-              <div className="relative flex items-center">
-                <input 
-                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-outline-variant/30 transition-all checked:bg-primary checked:border-primary" 
-                  id="remember" 
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 px-1" htmlFor="password">
+                  Mật khẩu
+                </label>
+                <Input
+                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
-                <Check className="absolute w-3.5 h-3.5 text-white left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
               </div>
-              <label className="label-md text-on-surface-variant font-medium cursor-pointer" htmlFor="remember">Remember me for 30 days</label>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
+                  type="submit"
+                  disabled={loginMutation.isPending}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-2xl transition shadow-lg shadow-red-600/20"
+                >
+                  {loginMutation.isPending ? "Đang xác thực..." : "Đăng nhập ngay"}
+                </Button>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowEmailForm(false)}
+                  className="px-6 py-3 border border-slate-200 hover:bg-slate-50 text-slate-600 font-black text-sm rounded-2xl transition"
+                >
+                  Quay lại
+                </button>
+              </div>
+            </form>
+          )}
+
+          <footer className="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400">
+            <span>© {new Date().getFullYear()} DOL English</span>
+            <div className="flex gap-4">
+              <Link to="#" className="hover:text-slate-600 transition">Điều khoản</Link>
+              <Link to="#" className="hover:text-slate-600 transition">Bảo mật</Link>
+            </div>
+          </footer>
+        </article>
+
+        {/* Right Side: Features showcase & Mascot */}
+        <article className="lg:col-span-6 bg-slate-50/50 p-8 sm:p-12 md:p-16 flex flex-col justify-between relative overflow-hidden">
+          
+          <header className="space-y-6">
+            {/* Tag badge */}
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-4 py-1.5 text-xs font-black text-red-600 border border-red-100">
+                <Sparkles className="h-3.5 w-3.5 fill-red-600/20 animate-pulse" /> Hơn 10 tính năng luyện tập
+              </span>
             </div>
 
-            {error && (
-               <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs font-bold animate-in shake duration-300">
-                  {error}
-               </div>
-            )}
+            {/* Grid layout for features */}
+            <div className="grid grid-cols-2 gap-3" role="list">
+              {practiceFeatures.map((feat) => {
+                const IconComponent = feat.icon;
+                return (
+                  <div 
+                    key={feat.name}
+                    className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/20 transition-all duration-300 group"
+                    role="listitem"
+                  >
+                    <div className="h-9 w-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-600 group-hover:text-white transition">
+                      <IconComponent className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-black text-slate-700 tracking-tight">{feat.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </header>
 
-            <Button 
-              className="w-full py-8 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-full shadow-xl shadow-primary/20 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all duration-300" 
-              type="submit"
-              disabled={loginMutation.isPending}
-            >
-              {loginMutation.isPending ? "Authenticating..." : "Sign in to account"}
-            </Button>
-          </form>
+          {/* Mascot Illustration */}
+          <figure className="relative z-20 mt-12 flex justify-end items-end h-48 sm:h-56">
+            <img 
+              alt="DOL superLMS Space Mascot Reading Book" 
+              src={mascotReader}
+              className="h-full object-contain drop-shadow-2xl animate-bounce-slow"
+            />
+          </figure>
 
-          <p className="mt-10 text-center text-on-surface-variant label-md font-medium">
-            Don&apos;t have an account? 
-            <Link className="text-primary font-bold hover:underline underline-offset-4 ml-1" to="/register">Create an account</Link>
-          </p>
+        </article>
 
-          {/* Footer Links */}
-          <div className="mt-auto pt-10 flex justify-center gap-6 text-outline label-md font-bold opacity-40">
-            <Link className="hover:text-on-surface-variant transition-colors" to="#">Privacy Policy</Link>
-            <Link className="hover:text-on-surface-variant transition-colors" to="#">Terms of Service</Link>
-          </div>
-        </div>
-      </div>
+      </section>
 
-      {/* Floating Support Action */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-white text-on-surface rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
-        <HelpCircle className="w-6 h-6 group-hover:text-primary transition-colors" />
+      {/* Floating help action */}
+      <button 
+        type="button"
+        title="Trợ giúp"
+        aria-label="Help Button"
+        className="fixed bottom-8 right-8 w-12 h-12 bg-white text-slate-700 border border-slate-200 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
+      >
+        <HelpCircle className="w-5 h-5 group-hover:text-red-600 transition" />
       </button>
     </main>
   );
 }
+

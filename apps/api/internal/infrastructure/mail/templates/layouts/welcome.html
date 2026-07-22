@@ -1,0 +1,74 @@
+{{define "content"}}
+<tr>
+  <td class="mobile-px" style="padding: 36px 40px 8px 40px;">
+    <h1 class="mobile-h1" style="margin:0 0 12px 0; font-family:Arial, Helvetica, sans-serif; font-size:24px; line-height:32px; font-weight:800; color:#111827;">
+      Chào mừng đến với {{.AppName}}, {{.FirstName}}! 🎉
+    </h1>
+    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14.5px; line-height:23px; color:#6b7280;">
+      Tài khoản của bạn đã sẵn sàng. Dưới đây là những bước đầu tiên để bắt đầu hành trình chinh phục
+      band điểm <strong style="color:#111827;">{{.TargetBand}}</strong> cùng chúng tôi.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td width="40" valign="top" style="padding-bottom:16px;">
+          <div style="width:28px; height:28px; background-color:#fef2f2; border-radius:50%; text-align:center; line-height:28px; font-family:Arial; font-size:13px; font-weight:800; color:#dc2626;">1</div>
+        </td>
+        <td valign="top" style="padding-bottom:16px; font-family:Arial, Helvetica, sans-serif;">
+          <p style="margin:0 0 2px 0; font-size:14.5px; font-weight:700; color:#111827;">Làm bài kiểm tra đầu vào</p>
+          <p style="margin:0; font-size:13.5px; line-height:20px; color:#6b7280;">Xác định trình độ hiện tại để hệ thống gợi ý lộ trình phù hợp.</p>
+        </td>
+      </tr>
+      <tr>
+        <td width="40" valign="top" style="padding-bottom:16px;">
+          <div style="width:28px; height:28px; background-color:#fef2f2; border-radius:50%; text-align:center; line-height:28px; font-family:Arial; font-size:13px; font-weight:800; color:#dc2626;">2</div>
+        </td>
+        <td valign="top" style="padding-bottom:16px; font-family:Arial, Helvetica, sans-serif;">
+          <p style="margin:0 0 2px 0; font-size:14.5px; font-weight:700; color:#111827;">Khám phá khoá học trong LMS</p>
+          <p style="margin:0; font-size:13.5px; line-height:20px; color:#6b7280;">Video bài giảng, bài tập, và luyện đề 4 kỹ năng Nghe – Nói – Đọc – Viết.</p>
+        </td>
+      </tr>
+      <tr>
+        <td width="40" valign="top">
+          <div style="width:28px; height:28px; background-color:#fef2f2; border-radius:50%; text-align:center; line-height:28px; font-family:Arial; font-size:13px; font-weight:800; color:#dc2626;">3</div>
+        </td>
+        <td valign="top" style="font-family:Arial, Helvetica, sans-serif;">
+          <p style="margin:0 0 2px 0; font-size:14.5px; font-weight:700; color:#111827;">Tham gia lớp học cùng giáo viên</p>
+          <p style="margin:0; font-size:13.5px; line-height:20px; color:#6b7280;">Đặt lịch học thử hoặc vào nhóm học tập để được hỗ trợ trực tiếp.</p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 8px 40px 8px 40px;" align="center">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="btn-fallback" style="border-radius:8px; background-color:#dc2626;">
+          <a href="{{.DashboardURL}}" style="display:inline-block; padding:14px 36px; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:700; color:#ffffff; border-radius:8px;">
+            Vào khoá học của tôi
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 28px 40px 36px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f3f4f6; padding-top:20px;">
+      <tr>
+        <td style="padding-top:20px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#6b7280;">
+          Cần hỗ trợ? Trả lời trực tiếp email này hoặc ghé
+          <a href="{{.HelpCenterURL}}" style="color:#dc2626; font-weight:600;">Trung tâm trợ giúp</a>.
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{{end}}

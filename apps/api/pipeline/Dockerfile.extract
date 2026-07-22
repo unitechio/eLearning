@@ -1,0 +1,11 @@
+FROM python:3.10-slim
+
+# Cài đặt ffmpeg (bắt buộc để Whisper có thể đọc và trích xuất âm thanh từ file mp4)
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+# Cài đặt OpenAI Whisper mã nguồn mở
+RUN pip install --no-cache-dir openai-whisper
+
+WORKDIR /app
+
+ENTRYPOINT ["whisper"]

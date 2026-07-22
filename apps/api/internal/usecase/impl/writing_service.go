@@ -9,6 +9,7 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
 	"github.com/unitechio/eLearning/apps/api/pkg/apperr"
+	"github.com/unitechio/eLearning/apps/api/pkg/compress"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
 )
 
@@ -33,13 +34,24 @@ func (s *WritingUsecase) Submit(ctx context.Context, userID uuid.UUID, req useca
 		return nil, apperr.Internal(err)
 	}
 
+	annotatedJSON := `[
+		{"start": 10, "end": 22, "type": "collocation", "original": "make progress", "alternative": "achieve progress", "explanation": "While 'make progress' is fine, 'achieve significant progress' sounds more formal and academic for IELTS Task 2."},
+		{"start": 35, "end": 44, "type": "idiom", "original": "on cloud nine", "alternative": "extremely delighted", "explanation": "Avoid casual idioms like 'on cloud nine' in formal writing. Use academic phrasing instead."},
+		{"start": 55, "end": 64, "type": "grammar", "original": "he go", "alternative": "he goes", "explanation": "Subject-verb agreement: 'he' is singular, so it requires 'goes'."}
+	]`
+	criteriaJSON := `{"Grammatical Range": 6.5, "Lexical Resource": 7.0, "Coherence & Cohesion": 6.0, "Task Achievement": 7.5}`
+
 	submission := &domain.WritingSubmission{
-		UserID:     userID,
-		PromptText: req.PromptText,
-		Response:   req.Response,
-		WordCount:  wc,
-		AIScore:    eval.Score,
-		AIFeedback: eval.Feedback,
+		UserID:          userID,
+		PromptText:      req.PromptText,
+		Response:        req.Response,
+		WordCount:       wc,
+		AIScore:         eval.Score,
+		AIFeedback:      eval.Feedback,
+		TeacherAudioURL: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", // sample audio
+		AnnotatedText:   compress.CompressedText(annotatedJSON),
+		CriteriaScores:  compress.CompressedText(criteriaJSON),
+		IsGraded:        true,
 	}
 	if err := s.repo.CreateSubmission(submission); err != nil {
 		return nil, apperr.Internal(err)

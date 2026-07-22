@@ -12,10 +12,10 @@ import (
 )
 
 type EmailHandler struct {
-	svc usecase.EmailUsecase
+	svc usecase.MailUsecase
 }
 
-func NewEmailHandler(svc usecase.EmailUsecase) *EmailHandler {
+func NewEmailHandler(svc usecase.MailUsecase) *EmailHandler {
 	return &EmailHandler{svc: svc}
 }
 
@@ -131,7 +131,7 @@ func (h *EmailHandler) SendBulkEmail(c *gin.Context) {
 			CC:       item.CC,
 			BCC:      item.BCC,
 			Subject:  item.Subject,
-			Body:     item.Body,
+			TextBody: item.Body,
 			HTMLBody: item.HTMLBody,
 			ReplyTo:  item.ReplyTo,
 			Headers:  item.Headers,
@@ -198,7 +198,7 @@ func (h *EmailHandler) ScheduleEmail(c *gin.Context) {
 		CC:       req.Email.CC,
 		BCC:      req.Email.BCC,
 		Subject:  req.Email.Subject,
-		Body:     req.Email.Body,
+		TextBody: req.Email.Body,
 		HTMLBody: req.Email.HTMLBody,
 		ReplyTo:  req.Email.ReplyTo,
 		Headers:  req.Email.Headers,
@@ -230,7 +230,7 @@ func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
 	if !ok {
 		return
 	}
-	items, err := h.svc.ListEmailLogs(requestContext(c), filter)
+	items, total, err := h.svc.ListLogs(requestContext(c), filter)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -238,8 +238,8 @@ func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
 	meta := response.Meta{
 		Page:       filter.Page,
 		PageSize:   filter.PageSize,
-		TotalItems: int64(len(items)),
-		TotalPages: calcTotalPages(int64(len(items)), filter.PageSize),
+		TotalItems: total,
+		TotalPages: calcTotalPages(total, filter.PageSize),
 	}
 	response.OKWithMeta(c, "email logs fetched", items, &meta)
 }

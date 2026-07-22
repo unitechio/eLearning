@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/unitechio/eLearning/apps/api/pkg/compress"
 	"gorm.io/datatypes"
 )
 
@@ -57,31 +58,31 @@ func (IELTSPassage) TableName() string { return "ielts_passages" }
 
 type IELTSQuestionGroup struct {
 	BaseModel
-	ContentItemID uint            `gorm:"not null;index" json:"content_item_id"`
-	PassageID     *uint           `gorm:"index" json:"passage_id,omitempty"`
-	GroupNo       int             `gorm:"not null;index" json:"group_no"`
-	QuestionFrom  int             `gorm:"not null;index" json:"question_from"`
-	QuestionTo    int             `gorm:"not null;index" json:"question_to"`
-	QuestionType  string          `gorm:"size:120;not null;index" json:"question_type"`
-	Instruction   string          `gorm:"type:text" json:"instruction"`
-	Payload       datatypes.JSON  `gorm:"type:jsonb;default:'{}'" json:"payload"`
-	SortOrder     int             `gorm:"default:0;index" json:"sort_order"`
-	Questions     []IELTSQuestion `gorm:"foreignKey:GroupID" json:"questions,omitempty"`
+	ContentItemID uint                    `gorm:"not null;index" json:"content_item_id"`
+	PassageID     *uint                   `gorm:"index" json:"passage_id,omitempty"`
+	GroupNo       int                     `gorm:"not null;index" json:"group_no"`
+	QuestionFrom  int                     `gorm:"not null;index" json:"question_from"`
+	QuestionTo    int                     `gorm:"not null;index" json:"question_to"`
+	QuestionType  string                  `gorm:"size:120;not null;index" json:"question_type"`
+	Instruction   string                  `gorm:"type:text" json:"instruction"`
+	Payload       compress.CompressedJSON `gorm:"type:blob" json:"payload"`
+	SortOrder     int                     `gorm:"default:0;index" json:"sort_order"`
+	Questions     []IELTSQuestion         `gorm:"foreignKey:GroupID" json:"questions,omitempty"`
 }
 
 func (IELTSQuestionGroup) TableName() string { return "ielts_question_groups" }
 
 type IELTSQuestion struct {
 	BaseModel
-	ContentItemID uint           `gorm:"not null;index" json:"content_item_id"`
-	GroupID       uint           `gorm:"not null;index" json:"group_id"`
-	QuestionNo    int            `gorm:"not null;index" json:"question_no"`
-	Prompt        string         `gorm:"type:text" json:"prompt"`
-	Answer        string         `gorm:"type:text" json:"answer"`
-	Options       datatypes.JSON `gorm:"type:jsonb;default:'[]'" json:"options"`
-	Explanation   datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"explanation"`
-	Payload       datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"payload"`
-	SortOrder     int            `gorm:"default:0;index" json:"sort_order"`
+	ContentItemID uint                    `gorm:"not null;index" json:"content_item_id"`
+	GroupID       uint                    `gorm:"not null;index" json:"group_id"`
+	QuestionNo    int                     `gorm:"not null;index" json:"question_no"`
+	Prompt        string                  `gorm:"type:text" json:"prompt"`
+	Answer        string                  `gorm:"type:text" json:"answer"`
+	Options       datatypes.JSON          `gorm:"type:jsonb;default:'[]'" json:"options"`
+	Explanation   compress.CompressedJSON `gorm:"type:blob" json:"explanation"`
+	Payload       compress.CompressedJSON `gorm:"type:blob" json:"payload"`
+	SortOrder     int                     `gorm:"default:0;index" json:"sort_order"`
 }
 
 func (IELTSQuestion) TableName() string { return "ielts_questions" }

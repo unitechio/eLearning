@@ -5,9 +5,11 @@ type PracticeModesResponse struct {
 }
 
 type PracticeStartRequest struct {
-	Mode    string `json:"mode"`
-	SubMode string `json:"sub_mode"`
-	Prompt  string `json:"prompt"`
+	Mode       string `json:"mode"`
+	SubMode    string `json:"sub_mode"`
+	Prompt     string `json:"prompt"`
+	Topic      string `json:"topic"`
+	Difficulty string `json:"difficulty"`
 }
 
 type PracticeSubmitRequest struct {
@@ -22,6 +24,9 @@ type PracticeSessionItem struct {
 	Status       string  `json:"status"`
 	Prompt       string  `json:"prompt"`
 	ExpectedText string  `json:"expected_text,omitempty"`
+	AudioURL     string  `json:"audio_url,omitempty"`
+	Topic        string  `json:"topic,omitempty"`
+	Difficulty   string  `json:"difficulty,omitempty"`
 	Score        float64 `json:"score,omitempty"`
 	Feedback     string  `json:"feedback,omitempty"`
 	StartedAt    string  `json:"started_at"`

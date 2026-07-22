@@ -1,0 +1,52 @@
+{{define "content"}}
+<tr>
+  <td class="mobile-px" style="padding: 36px 40px 8px 40px;">
+    <h1 class="mobile-h1" style="margin:0 0 10px 0; font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:30px; font-weight:800; color:#111827;">
+      {{.EventTitle}}
+    </h1>
+    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14.5px; line-height:23px; color:#6b7280;">
+      {{.EventDescription}}
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 22px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb; border-radius:8px;">
+      <tr>
+        <td style="padding:16px 20px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#374151; line-height:24px;">
+          <strong style="color:#111827;">Thoi gian:</strong> {{.EventTime}}<br>
+          <strong style="color:#111827;">Dia diem:</strong> {{.EventLocation}}<br>
+          <strong style="color:#111827;">Nguoi phu trach:</strong> {{.EventHost}}
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 22px 40px 8px 40px;" align="center">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="btn-fallback" style="border-radius:8px; background-color:#dc2626;">
+          <a href="{{.EventURL}}" style="display:inline-block; padding:14px 34px; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:700; color:#ffffff; border-radius:8px;">
+            Xem chi tiet
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 24px 40px 36px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f3f4f6; padding-top:18px;">
+      <tr>
+        <td style="padding-top:18px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:19px; color:#9ca3af; text-align:center;">
+          Ban nhan duoc email nay vi dang theo doi thong bao tu {{.AppName}}.
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{{end}}

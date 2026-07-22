@@ -1,0 +1,69 @@
+{{define "layout"}}
+<!DOCTYPE html>
+<html lang="vi" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{.EmailTitle}}</title>
+<!--[if mso]>
+<style>table {border-collapse: collapse;} .btn-fallback {background-color:#dc2626 !important;}</style>
+<![endif]-->
+<style>
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+  body { margin: 0; padding: 0; width: 100% !important; background-color: #f3f4f6; }
+  a { text-decoration: none; }
+
+  @media only screen and (max-width: 500px) {
+    .email-container { width: 100% !important; border-radius: 0 !important; }
+    .mobile-px { padding-left: 24px !important; padding-right: 24px !important; }
+    .otp-box { font-size: 26px !important; letter-spacing: 6px !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; color:#f3f4f6;">
+    {{.Preheader}}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="width:480px; max-width:480px;">
+
+          <tr>
+            <td align="center" style="padding-bottom:20px; font-family:Arial, Helvetica, sans-serif; font-size:17px; font-weight:800; color:#111827;">
+              {{.LogoText}}<span style="color:#dc2626;">.</span>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="email-container" style="background-color:#ffffff; border-radius:12px; padding: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="height:4px; background-color:#dc2626; border-radius:4px; line-height:4px; font-size:4px;">&nbsp;</td></tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                {{template "content" .}}
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding: 24px 16px 0 16px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#9ca3af;">
+              © {{.CurrentYear}} {{.CompanyName}} · {{.AppName}}<br>
+              Email tự động, vui lòng không trả lời trực tiếp.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+{{end}}

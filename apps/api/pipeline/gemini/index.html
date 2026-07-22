@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Control Panel</title>
+    <style>
+        :root {
+            --bg-color: #131314;
+            --chat-bg: #1e1f20;
+            --text-color: #e3e3e3;
+            --primary-blue: #1a73e8;
+            --accent-color: #4fc3f7;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: var(--chat-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid #3c4043;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 { margin: 0; font-size: 1.2rem; color: var(--accent-color); }
+        .server-status { font-size: 0.85rem; color: #9aa0a6; }
+        
+        #chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .user-msg {
+            background-color: var(--primary-blue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-msg {
+            background-color: var(--chat-bg);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #3c4043;
+        }
+        
+        #input-container {
+            background-color: var(--chat-bg);
+            padding: 15px 20px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #3c4043;
+        }
+        textarea {
+            flex: 1;
+            background-color: #282a2d;
+            border: 1px solid #3c4043;
+            border-radius: 24px;
+            color: var(--text-color);
+            padding: 12px 20px;
+            resize: none;
+            height: 24px;
+            font-family: inherit;
+            outline: none;
+        }
+        button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 0 24px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #1557b0; }
+        button:disabled { background-color: #3c4043; color: #80868b; cursor: not-allowed; }
+        
+        .loading {
+            align-self: flex-start;
+            color: #9aa0a6;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Gemini Control Bridge</h1>
+        <div class="server-status" id="server-url">Đang xác định endpoint...</div>
+    </header>
+
+    <div id="chat-container">
+        <div class="message bot-msg">Hệ thống đã sẵn sàng. Hãy nhập tin nhắn để gửi tới Gemini qua API.</div>
+    </div>
+
+    <div id="input-container">
+        <textarea id="msg-input" placeholder="Nhập tin nhắn tại đây..." rows="1"></textarea>
+        <button id="send-btn" onclick="processConversation()">Gửi & Nhận</button>
+    </div>
+
+    <script>
+        // TỰ ĐỘNG LẤY IP/HOST CỦA TRANG HIỆN TẠI VÀ CHUYỂN QUA PORT 8000
+        // Nếu mở file local (file://), nó sẽ mặc định trỏ về localhost
+        const currentHost = window.location.hostname || "localhost";
+        const API_BASE_URL = `http://${currentHost}:8000`;
+        
+        document.getElementById('server-url').innerText = `API Target: ${API_BASE_URL}`;
+
+        const chatContainer = document.getElementById('chat-container');
+        const msgInput = document.getElementById('msg-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Hàm phụ trợ tự động cuộn xuống cuối màn hình chat
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Hàm hiển thị tin nhắn lên giao diện
+        function appendMessage(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-msg' : 'bot-msg'}`;
+            msgDiv.textContent = text;
+            chatContainer.appendChild(msgDiv);
+            scrollToBottom();
+            return msgDiv;
+        }
+
+        // Quy trình Động: Gửi lệnh -> Chờ đợi -> Lấy kết quả
+        async function processConversation() {
+            const message = msgInput.value.trim();
+            if (!message) return;
+
+            // Vô hiệu hóa input khi đang xử lý
+            msgInput.value = '';
+            msgInput.disabled = true;
+            sendBtn.disabled = true;
+
+            // 1. Hiển thị tin nhắn của người dùng
+            appendMessage(message, true);
+
+            // 2. Gọi API gửi tin nhắn lên Gemini
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerText = '⚡ Đang ra lệnh cho Chrome gửi dữ liệu...';
+            chatContainer.appendChild(loadingDiv);
+            scrollToBottom();
+
+            try {
+                const encodedMsg = encodeURIComponent(message);
+                const sendResponse = await fetch(`${API_BASE_URL}/send?msg=${encodedMsg}`);
+                const sendData = await sendResponse.json();
+                
+                if (sendData.status === "success") {
+                    loadingDiv.innerText = '⏳ Chrome đã click gửi! Đang đợi Gemini phản hồi... (Polling sau 5s)';
+                    
+                    // Đợi 5 giây để Gemini kịp suy nghĩ và gõ câu trả lời
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    
+                    // 3. Gọi API lấy dữ liệu về
+                    const getResponse = await fetch(`${API_BASE_URL}/get`);
+                    const getData = await getResponse.json();
+                    
+                    loadingDiv.remove(); // Xóa dòng loading
+                    appendMessage(getData.data || "Không nhận được phản hồi.");
+                } else {
+                    loadingDiv.innerText = `❌ Lỗi script điều khiển: ${sendData.detail}`;
+                }
+            } catch (error) {
+                loadingDiv.innerText = '❌ Không thể kết nối tới API Server. Bạn đã chạy script Python chưa?';
+                console.error(error);
+            } finally {
+                // Mở khóa lại ô nhập liệu
+                msgInput.disabled = false;
+                sendBtn.disabled = false;
+                msgInput.focus();
+            }
+        }
+
+        // Hỗ trợ bấm Enter để gửi tin nhắn nhanh
+        msgInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processConversation();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -15,6 +15,9 @@ type PracticeSession struct {
 	Status       string     `json:"status" gorm:"type:varchar(50);default:'started';index"`
 	Prompt       string     `json:"prompt" gorm:"type:text"`
 	ExpectedText string     `json:"expected_text" gorm:"type:text"`
+	AudioURL     string     `json:"audio_url" gorm:"type:text"`
+	Topic        string     `json:"topic" gorm:"type:varchar(100)"`
+	Difficulty   string     `json:"difficulty" gorm:"type:varchar(50)"`
 	Answer       string     `json:"answer" gorm:"type:text"`
 	Score        *float64   `json:"score,omitempty" gorm:"type:decimal(5,2)"`
 	Feedback     string     `json:"feedback" gorm:"type:text"`

@@ -26,7 +26,7 @@ import { BillingPage } from '@/domains/billing';
 import { ToeicHubPage } from '@/domains/course';
 import { AchievementsPage, PlannerPage } from '@/domains/engagement';
 import { DashboardPage } from '@/domains/learning';
-import { LmsDashboardPage } from '@/domains/lms';
+import { LmsDashboardPage, AssignmentReviewPage } from '@/domains/lms';
 import { SpeakingPage } from '@/domains/speaking';
 import { VocabularyPage } from '@/domains/vocabulary';
 import { WritingPage } from '@/domains/writing';
@@ -38,6 +38,10 @@ import { DictationPracticePage, DictationShadowingPage, DictationVocabularyPage 
 import { SpeakingSampleDetailPage, SpeakingSamplesPage, WritingSampleDetailPage, WritingSamplesPage } from '@/domains/ielts/samples';
 import { IeltsSpeakingSimPage } from '@/domains/ielts/speaking-sim';
 import { IeltsWritingCoachPage } from '@/domains/ielts/writing-coach';
+import { StoryExerciseView } from '@/domains/practice/StoryExerciseView';
+import { UniGrammarPage } from '@/domains/ecosystem/UniGrammarPage';
+import { UniDictionaryPage } from '@/domains/ecosystem/UniDictionaryPage';
+import { IeltsKnowledgePage } from '@/domains/ecosystem/IeltsKnowledgePage';
 
 // ─── Lazy Layouts ──────────────────────────────────────────────────────────────
 const MarketingLayout = lazy(() => import('./layouts/MarketingLayout').then((m) => ({ default: m.MarketingLayout })));
@@ -122,11 +126,16 @@ export const routes: RouteObject[] = [
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/lms', element: <LmsDashboardPage /> },
+          { path: '/assignment-review/:id', element: <AssignmentReviewPage /> },
+          { path: '/grammar', element: <UniGrammarPage /> },
+          { path: '/dictionary', element: <UniDictionaryPage /> },
+          { path: '/ielts-knowledge', element: <IeltsKnowledgePage /> },
           { path: '/profile', element: <ProfilePage /> },
           { path: '/billing', element: <BillingPage /> },
           { path: '/planner', element: <PlannerPage /> },
           { path: '/achievements', element: <AchievementsPage /> },
           { path: '/speaking', element: <SpeakingPage /> },
+          { path: '/story-practice', element: <StoryExerciseView /> },
           { path: '/vocabulary', element: <VocabularyPage /> },
           { path: '/writing', element: <WritingPage /> },
           { path: '/toeic', element: <ToeicHubPage /> },

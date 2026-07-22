@@ -17,6 +17,7 @@ import (
 	storage "github.com/unitechio/eLearning/apps/api/internal/infrastructure/filestorage"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"github.com/unitechio/eLearning/apps/api/internal/utils/constants"
+	"github.com/unitechio/eLearning/apps/api/pkg/compress"
 	"gorm.io/datatypes"
 )
 
@@ -678,7 +679,7 @@ func questionGroupFromRequest(contentID uint, req dto.IELTSQuestionGroupRequest)
 		QuestionTo:    req.QuestionTo,
 		QuestionType:  req.QuestionType,
 		Instruction:   req.Instruction,
-		Payload:       jsonOrDefault(req.Payload, "{}"),
+		Payload:       compress.CompressedJSON(jsonOrDefault(req.Payload, "{}")),
 		SortOrder:     req.SortOrder,
 	}
 }
@@ -691,8 +692,8 @@ func questionFromRequest(contentID uint, req dto.IELTSQuestionRequest) *domain.I
 		Prompt:        req.Prompt,
 		Answer:        req.Answer,
 		Options:       jsonOrDefault(req.Options, "[]"),
-		Explanation:   jsonOrDefault(req.Explanation, "{}"),
-		Payload:       jsonOrDefault(req.Payload, "{}"),
+		Explanation:   compress.CompressedJSON(jsonOrDefault(req.Explanation, "{}")),
+		Payload:       compress.CompressedJSON(jsonOrDefault(req.Payload, "{}")),
 		SortOrder:     req.SortOrder,
 	}
 }

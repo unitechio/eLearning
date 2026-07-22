@@ -6,5 +6,3 @@ const (
 	MediaTypeSOAP           = "application/soap+xml; charset=utf-8"
 	MediaTypeMultipart      = "multipart/form-data"
 )
-
-const ()

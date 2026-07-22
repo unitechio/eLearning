@@ -1,0 +1,115 @@
+{{define "content"}}
+<tr>
+  <td class="mobile-px" style="padding: 36px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td valign="top">
+          <h1 class="mobile-h1" style="margin:0 0 6px 0; font-family:Arial, Helvetica, sans-serif; font-size:21px; font-weight:800; color:#111827;">
+            Hoá đơn #{{.InvoiceNumber}}
+          </h1>
+          <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#6b7280;">
+            Ngày lập: {{.IssueDate}}
+          </p>
+        </td>
+        <td valign="top" align="right">
+          <table role="presentation" cellpadding="0" cellspacing="0">
+            <tr><td style="background-color:#dcfce7; border-radius:20px; padding:6px 14px; font-family:Arial, Helvetica, sans-serif; font-size:12px; font-weight:700; color:#166534;">
+              Đã thanh toán
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb; border-radius:8px;">
+      <tr>
+        <td width="50%" style="padding:16px 18px; font-family:Arial, Helvetica, sans-serif; vertical-align:top;">
+          <p style="margin:0 0 4px 0; font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Người mua</p>
+          <p style="margin:0; font-size:13.5px; color:#111827; font-weight:600;">{{.FullName}}</p>
+          <p style="margin:0; font-size:13px; color:#6b7280;">{{.Email}}</p>
+        </td>
+        <td width="50%" style="padding:16px 18px; font-family:Arial, Helvetica, sans-serif; vertical-align:top;">
+          <p style="margin:0 0 4px 0; font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; font-weight:700;">Thanh toán</p>
+          <p style="margin:0; font-size:13.5px; color:#111827; font-weight:600;">{{.PaymentMethod}}</p>
+          <p style="margin:0; font-size:13px; color:#6b7280;">Mã GD: {{.TransactionID}}</p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:0 0 10px 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #111827;">Mục</td>
+        <td align="right" style="padding:0 0 10px 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #111827;">Thành tiền</td>
+      </tr>
+      {{range .LineItems}}
+      <tr>
+        <td style="padding:12px 0; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#111827; border-bottom:1px solid #f3f4f6;">
+          {{.Name}}
+          <br><span style="font-size:12px; color:#9ca3af;">{{.Description}}</span>
+        </td>
+        <td align="right" style="padding:12px 0; font-family:Arial, Helvetica, sans-serif; font-size:14px; color:#111827; border-bottom:1px solid #f3f4f6; white-space:nowrap;">
+          {{.Amount}}
+        </td>
+      </tr>
+      {{end}}
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 4px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="right" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#6b7280;">Tạm tính</td>
+        <td align="right" width="120" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#111827;">{{.Subtotal}}</td>
+      </tr>
+      <tr>
+        <td align="right" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#6b7280;">Giảm giá {{.DiscountLabel}}</td>
+        <td align="right" width="120" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#dc2626;">-{{.DiscountAmount}}</td>
+      </tr>
+      <tr>
+        <td align="right" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#6b7280;">Thuế VAT</td>
+        <td align="right" width="120" style="padding:6px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#111827;">{{.TaxAmount}}</td>
+      </tr>
+      <tr>
+        <td align="right" style="padding:14px 0 0 0; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:800; color:#111827; border-top:2px solid #111827;">Tổng cộng</td>
+        <td align="right" width="120" style="padding:14px 0 0 0; font-family:Arial, Helvetica, sans-serif; font-size:17px; font-weight:800; color:#dc2626; border-top:2px solid #111827;">{{.TotalAmount}}</td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 40px 8px 40px;" align="center">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="btn-fallback" style="border-radius:8px; background-color:#dc2626;">
+          <a href="{{.InvoicePDFURL}}" style="display:inline-block; padding:13px 32px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; color:#ffffff; border-radius:8px;">
+            Tải hoá đơn (PDF)
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 24px 40px 36px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f3f4f6; padding-top:18px;">
+      <tr>
+        <td style="padding-top:18px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:19px; color:#9ca3af; text-align:center;">
+          {{.CompanyName}} · MST: {{.TaxID}} · Có thắc mắc về hoá đơn? Liên hệ <a href="{{.SupportURL}}" style="color:#dc2626;">bộ phận hỗ trợ</a>.
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{{end}}

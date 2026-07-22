@@ -6,7 +6,6 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/config"
 )
 
-// CorsMiddleware sets up CORS headers.
 func CorsMiddleware(cfg config.CORSConfig) gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowOrigins:     cfg.AllowedOrigins,

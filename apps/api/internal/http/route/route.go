@@ -47,6 +47,8 @@ type Handlers struct {
 	Permission       *handler.PermissionHandler
 	Menu             *handler.MenuHandler
 	Realtime         *handler.RealtimeHandler
+	Media            *handler.MediaHandler
+	TTS              *handler.TTSHandler
 }
 
 type Guards struct {
@@ -74,6 +76,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 			authRoutes.POST("/login", h.Auth.Login)
 			authRoutes.POST("/refresh", h.AuthWorkflow.Refresh)
 			authRoutes.POST("/verify-email", h.AuthWorkflow.VerifyEmail)
+			authRoutes.POST("/resend-verification", h.AuthWorkflow.ResendVerificationEmail)
 			authRoutes.POST("/forgot-password", h.AuthWorkflow.ForgotPassword)
 			authRoutes.POST("/reset-password", h.AuthWorkflow.ResetPassword)
 		}
@@ -92,9 +95,23 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 			publicPosts.GET("/:slug", h.Post.PublicGet)
 		}
 
+		publicMedia := v1.Group("/public/media")
+		{
+			publicMedia.GET("/serve", h.Media.Serve)
+			publicMedia.GET("/thumbnail", h.Media.ServeThumbnail)
+		}
+
+		publicTTS := v1.Group("/public/practice")
+		{
+			publicTTS.POST("/tts", h.TTS.Synthesize)
+		}
+
 		protected := v1.Group("/", middleware.JWTAuth(cfg.JWT.Secret))
 		{
 			protected.POST("/auth/logout", h.AuthWorkflow.Logout)
+			protected.POST("/auth/2fa/setup", h.AuthWorkflow.SetupTOTP)
+			protected.POST("/auth/2fa/enable", h.AuthWorkflow.EnableTOTP)
+			protected.POST("/auth/2fa/disable", h.AuthWorkflow.DisableTOTP)
 
 			users := protected.Group("/users")
 			{

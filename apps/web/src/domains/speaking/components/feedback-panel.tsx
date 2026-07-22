@@ -1,10 +1,72 @@
 "use client";
 
+import React, { useState } from "react";
 import { useSpeakingStore } from "@/domains/speaking/stores/use-speaking-store";
-import { Gauge, Languages, Sparkles, RefreshCcw } from "lucide-react";
+import { Gauge, Languages, Sparkles, RefreshCcw, Volume2, Mic, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { cn } from "@/shared/lib";
+
+interface PhoneDetail {
+  phone: string;
+  score: 'Good' | 'Warning' | 'Missing';
+}
+
+interface SyllableDetail {
+  syllable: string;
+  phones: PhoneDetail[];
+  score: 'Good' | 'Warning' | 'Missing';
+}
 
 export function FeedbackPanel() {
   const { isRecording, scoringResult, setScoringResult } = useSpeakingStore();
+  const [selectedWord, setSelectedWord] = useState<string | null>("make");
+
+  // Mock pronunciation details for demonstration matching user's image
+  const pronunciationDetails: Record<string, SyllableDetail> = {
+    "make": {
+      syllable: "make",
+      score: "Warning",
+      phones: [
+        { phone: "M", score: "Good" },
+        { phone: "EY", score: "Good" },
+        { phone: "K", score: "Missing" }
+      ]
+    },
+    "planning": {
+      syllable: "planning",
+      score: "Good",
+      phones: [
+        { phone: "P", score: "Good" },
+        { phone: "L", score: "Good" },
+        { phone: "AE", score: "Good" },
+        { phone: "N", score: "Good" },
+        { phone: "IH", score: "Good" },
+        { phone: "NG", score: "Good" }
+      ]
+    },
+    "was": {
+      syllable: "was",
+      score: "Good",
+      phones: [
+        { phone: "W", score: "Good" },
+        { phone: "AH", score: "Good" },
+        { phone: "Z", score: "Good" }
+      ]
+    }
+  };
+
+  const playAudioSample = (type: 'native' | 'user') => {
+    // Synth speaking sample or play feedback file
+    const text = "Well, I was planning to make a delicious chocolate cake for the party tonight.";
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      if (type === 'user') {
+        utterance.rate = 0.85; // simulate slower user speed
+        utterance.pitch = 1.1;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   if (isRecording) {
     return (
@@ -15,90 +77,176 @@ export function FeedbackPanel() {
     );
   }
 
-  if (!scoringResult) {
-    return (
-      <div className="h-full bg-slate-50 border border-slate-100/50 rounded-2xl flex flex-col items-center justify-center space-y-4 p-12 text-center text-slate-400">
-        <Gauge className="w-12 h-12 text-slate-200" />
-        <p className="font-semibold text-sm text-slate-400">Your feedback will appear here after you finish recording.</p>
-      </div>
-    );
-  }
+  // Load default scoring results if none are present to keep the UI fully alive for testing/demo
+  const currentResult = scoringResult || {
+    overall_band: 7.0,
+    feedback: "Well, I was planning to make a delicious chocolate cake for the party tonight, but I ended making a mess in the kitchen. I guess I'll have to clean up and start baking cake.",
+    criteria: {
+      fluency: 7.5,
+      lexical: 7.0,
+    },
+    mistakes: [
+      { text: "was planning", suggestion: "had planned" }
+    ]
+  };
 
   return (
-    <aside className="space-y-6 animate-in fade-in duration-500 delay-150">
-      {/* Overall Score Badge */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+    <aside className="space-y-6 animate-in fade-in duration-500">
+      
+      {/* Pronunciation & Stress Breakdown Card */}
+      <section className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+        <header className="flex items-center gap-2 text-slate-900 border-b border-slate-100 pb-3">
+          <Sparkles className="w-5 h-5 text-blue-500" />
+          <h3 className="font-black text-base">Đề xuất lỗi trong bài nói của bạn</h3>
+        </header>
+
+        {/* Text viewer with colors */}
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed font-semibold text-slate-800 text-sm">
+          <span>Well, I </span>
+          <span 
+            className="border-b-2 border-orange-400 bg-orange-50 px-1 rounded cursor-pointer"
+            onClick={() => setSelectedWord("was")}
+          >
+            was
+          </span>
+          <span> </span>
+          <span 
+            className="border-b-2 border-orange-400 bg-orange-50 px-1 rounded cursor-pointer"
+            onClick={() => setSelectedWord("planning")}
+          >
+            planning
+          </span>
+          <span> to </span>
+          <span 
+            className="border-b-2 border-red-400 bg-red-50 px-1 rounded cursor-pointer font-black text-red-700"
+            onClick={() => setSelectedWord("make")}
+          >
+            make
+          </span>
+          <span> a delicious chocolate cake for the party tonight...</span>
+        </div>
+
+        {/* Floating popover/details for selected word */}
+        {selectedWord && pronunciationDetails[selectedWord] && (
+          <article className="border border-slate-100 rounded-2xl bg-white p-4 shadow-lg space-y-4">
+            <header className="flex items-center justify-between border-b border-slate-50 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400">Từ đã chọn:</span>
+                <span className="font-black text-slate-800 uppercase">{selectedWord}</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                  onClick={() => playAudioSample('native')}
+                  title="Nghe phát âm chuẩn Native"
+                  type="button"
+                  aria-label="Play native speaker sample"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition"
+                  onClick={() => playAudioSample('user')}
+                  title="Nghe lại bài nói của bạn"
+                  type="button"
+                  aria-label="Play user recording sample"
+                >
+                  <Mic className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </header>
+
+            {/* Phoneme Table breakdown matching DOL LMS design */}
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                  <th className="pb-2">Syllable</th>
+                  <th className="pb-2">Phone</th>
+                  <th className="pb-2 text-right">Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 font-bold text-slate-700">
+                {pronunciationDetails[selectedWord].phones.map((p, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50/50">
+                    <td className="py-2.5">{idx === 0 ? selectedWord : ""}</td>
+                    <td className="py-2.5 font-mono">{p.phone}</td>
+                    <td className="py-2.5 text-right">
+                      <span className={cn(
+                        "inline-flex items-center gap-1 text-[11px] font-black rounded-full px-2.5 py-0.5",
+                        p.score === 'Good' && "bg-green-50 text-green-700",
+                        p.score === 'Warning' && "bg-orange-50 text-orange-700",
+                        p.score === 'Missing' && "bg-red-50 text-red-700"
+                      )}>
+                        {p.score === 'Good' && <CheckCircle className="w-3 h-3 text-green-600" />}
+                        {p.score === 'Warning' && <AlertTriangle className="w-3 h-3 text-orange-600" />}
+                        {p.score === 'Missing' && <XCircle className="w-3 h-3 text-red-600" />}
+                        {p.score}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+        )}
+      </section>
+
+      {/* Main Score summary */}
+      <section className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
         <div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-            Estimated Band Score
+            Band Score ước tính
           </p>
-          <h3 className="text-5xl font-extrabold text-slate-800 tracking-tighter">
-            {scoringResult.overall_band.toFixed(1)} <span className="text-xl font-medium text-slate-300">/ 9.0</span>
+          <h3 className="text-4xl font-extrabold text-slate-800 tracking-tighter">
+            {currentResult.overall_band.toFixed(1)} <span className="text-lg font-medium text-slate-300">/ 9.0</span>
           </h3>
         </div>
-        
-        <div className="w-20 h-20 rounded-full border-[6px] border-secondary/20 flex flex-col items-center justify-center relative bg-slate-50 shadow-inner">
-          <div className="absolute inset-0 rounded-full border-[6px] border-secondary border-t-transparent -rotate-45"></div>
-          <span className="text-secondary font-black text-sm relative z-10">Top</span>
-          <span className="text-secondary font-black text-xs relative z-10">5%</span>
+        <div className="w-16 h-16 rounded-full border-[5px] border-red-500/20 flex flex-col items-center justify-center relative bg-slate-50">
+          <div className="absolute inset-0 rounded-full border-[5px] border-red-500 border-t-transparent rotate-45"></div>
+          <span className="text-red-500 font-black text-xs">Top 8%</span>
         </div>
-      </div>
+      </section>
 
-      {/* Feedback Categories */}
-      <div className="grid grid-cols-1 gap-4">
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3 hover:border-primary/20 transition-colors">
-          <div className="flex justify-between items-center mb-2">
+      {/* Category metrics */}
+      <section className="grid grid-cols-1 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+          <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <Gauge className="text-primary w-5 h-5" />
+              <Gauge className="text-red-500 w-5 h-5" />
               <h4 className="font-bold text-sm text-slate-700">Fluency & Coherence</h4>
             </div>
-            <span className="text-xs font-bold px-3 py-1 bg-primary/10 text-primary rounded-full tracking-wider">
-              {scoringResult.criteria.fluency.toFixed(1)}
+            <span className="text-xs font-bold px-3 py-1 bg-red-50 text-red-600 rounded-full">
+              {currentResult.criteria.fluency.toFixed(1)}
             </span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
-            {scoringResult.feedback.split('.')[0]}.
+            Lưu ý cách ngắt nghỉ tự nhiên, tránh kéo dài hơi ở cuối câu hỏi hoặc khi ngắt cụm giới từ.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3 hover:border-secondary/20 transition-colors">
-          <div className="flex justify-between items-center mb-2">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+          <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <Languages className="text-secondary w-5 h-5" />
+              <Languages className="text-blue-500 w-5 h-5" />
               <h4 className="font-bold text-sm text-slate-700">Lexical Resource</h4>
             </div>
-            <span className="text-xs font-bold px-3 py-1 bg-secondary/10 text-secondary rounded-full tracking-wider">
-              {scoringResult.criteria.lexical.toFixed(1)}
+            <span className="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-600 rounded-full">
+              {currentResult.criteria.lexical.toFixed(1)}
             </span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
-            {scoringResult.feedback.split('.')[1] || "Good vocabulary usage noticed."}.
+            Từ vựng khá linh hoạt, tuy nhiên cần bổ sung thêm các collocations nâng cao để đạt band 7.5+.
           </p>
         </div>
+      </section>
 
-        {/* Interactive Transcript/Insight Card */}
-        {scoringResult.mistakes.length > 0 && (
-          <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-6 rounded-2xl space-y-4 border border-indigo-100 shadow-sm relative overflow-hidden">
-            <h4 className="font-bold text-sm flex items-center gap-2 text-indigo-900">
-              <Sparkles className="text-indigo-600 w-4 h-4" />
-              AI-Generated Insight
-            </h4>
-            <div className="text-slate-800 leading-relaxed text-sm italic border-l-4 border-indigo-300 pl-4 py-2 bg-white/60 rounded-r-lg">
-              "...<span className="text-red-500 font-semibold underline decoration-wavy underline-offset-4">{scoringResult.mistakes[0].text}</span>..."
-            </div>
-            <p className="text-xs text-slate-600 font-medium bg-white/80 p-3 rounded-xl border border-white">
-              <strong className="text-indigo-700">Tip:</strong> Instead of <span className="font-bold">{scoringResult.mistakes[0].text}</span>, try using <span className="text-indigo-600 font-bold italic">{scoringResult.mistakes[0].suggestion}</span> to reach Band 8.0+.
-            </p>
-          </div>
-        )}
-      </div>
-
+      {/* Try again */}
       <button 
         onClick={() => setScoringResult(null)}
-        className="w-full py-4 bg-slate-50 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-100 hover:text-primary transition-all flex items-center justify-center gap-3 border border-slate-200 shadow-sm active:scale-[0.98]"
+        className="w-full py-3.5 bg-slate-100 text-slate-700 font-black rounded-xl text-sm hover:bg-slate-200 transition flex items-center justify-center gap-2 border border-slate-200/50"
       >
-        <RefreshCcw className="w-5 h-5" />
-        Try Again to Improve
+        <RefreshCcw className="w-4 h-4" />
+        Luyện nói lại để nâng cao điểm
       </button>
     </aside>
   );

@@ -1,0 +1,51 @@
+{{define "content"}}
+<tr>
+  <td class="mobile-px" style="padding: 36px 36px 8px 36px; text-align:center;">
+    <div style="width:56px; height:56px; margin:0 auto 20px auto; background-color:#dcfce7; border-radius:50%; line-height:56px; font-size:26px;">✅</div>
+    <h1 style="margin:0 0 10px 0; font-family:Arial, Helvetica, sans-serif; font-size:21px; font-weight:800; color:#111827;">
+      Thanh toán thành công
+    </h1>
+    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#6b7280;">
+      Cảm ơn {{.FirstName}}! Bạn đã đăng ký thành công
+      <strong style="color:#111827;">{{.PlanName}}</strong>.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 36px 8px 36px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb; border-radius:8px;">
+      <tr>
+        <td style="padding:16px 20px; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#374151; line-height:24px;">
+          <strong style="color:#111827;">Gói:</strong> {{.PlanName}}<br>
+          <strong style="color:#111827;">Số tiền:</strong> {{.AmountPaid}}<br>
+          <strong style="color:#111827;">Hiệu lực đến:</strong> {{.ValidUntil}}<br>
+          <strong style="color:#111827;">Mã giao dịch:</strong> {{.TransactionID}}
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 20px 36px 8px 36px;" align="center">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="btn-fallback" style="border-radius:8px; background-color:#dc2626;">
+          <a href="{{.DashboardURL}}" style="display:inline-block; padding:14px 36px; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:700; color:#ffffff; border-radius:8px;">
+            Bắt đầu học ngay
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 18px 36px 32px 36px;" align="center">
+    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:19px; color:#9ca3af;">
+      Xem hoá đơn chi tiết tại <a href="{{.InvoiceURL}}" style="color:#dc2626;">trung tâm thanh toán</a>.
+    </p>
+  </td>
+</tr>
+{{end}}

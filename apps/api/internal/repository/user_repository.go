@@ -22,4 +22,6 @@ type UserRepository interface {
 	RemovePermissionIDs(ctx context.Context, userID uuid.UUID, permissionIDs []uint) error
 	ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error
 	ResetPassword(ctx context.Context, userID, newPassword string) error
+	UpdateEmailVerification(ctx context.Context, userID uuid.UUID, verified bool) error
+	UpdateTwoFactor(ctx context.Context, userID uuid.UUID, enabled bool, secret string) error
 }

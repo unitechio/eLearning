@@ -1,0 +1,71 @@
+{{define "content"}}
+<tr>
+  <td class="mobile-px" style="padding: 36px 40px 8px 40px; text-align:center;">
+    <div style="font-size:34px; margin-bottom:8px;">🏆</div>
+    <h1 class="mobile-h1" style="margin:0 0 10px 0; font-family:Arial, Helvetica, sans-serif; font-size:23px; font-weight:800; color:#111827;">
+      Chúc mừng, {{.FirstName}}!
+    </h1>
+    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14.5px; line-height:23px; color:#6b7280;">
+      Bạn đã hoàn thành xuất sắc khoá học <strong style="color:#111827;">{{.CourseName}}</strong>
+      và nhận được chứng chỉ hoàn thành.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 24px 40px 8px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #dc2626; border-radius:12px;">
+      <tr>
+        <td style="padding:28px 24px; text-align:center; background-color:#fef2f2; border-radius:10px;">
+          <p style="margin:0 0 4px 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:2px; font-weight:700; color:#dc2626; text-transform:uppercase;">
+            Chứng chỉ hoàn thành
+          </p>
+          <p style="margin:0 0 14px 0; font-family:Georgia, 'Times New Roman', serif; font-size:20px; font-weight:700; color:#111827;">
+            {{.CourseName}}
+          </p>
+          <p style="margin:0 0 4px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#374151;">
+            Cấp cho <strong>{{.FullName}}</strong>
+          </p>
+          <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:12px; color:#9ca3af;">
+            Điểm tổng kết: {{.FinalScore}} · Ngày cấp: {{.IssueDate}}
+          </p>
+          <p style="margin:12px 0 0 0; font-family:'Courier New', monospace; font-size:11px; color:#9ca3af;">
+            Mã chứng chỉ: {{.CertificateID}}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 24px 40px 8px 40px;" align="center">
+    <table role="presentation" cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="btn-fallback" style="border-radius:8px; background-color:#dc2626; padding-right:10px;">
+          <a href="{{.DownloadURL}}" style="display:inline-block; padding:13px 28px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; color:#ffffff; border-radius:8px;">
+            Tải chứng chỉ (PDF)
+          </a>
+        </td>
+        <td style="border-radius:8px; border:1px solid #e5e7eb;">
+          <a href="{{.ShareURL}}" style="display:inline-block; padding:13px 28px; font-family:Arial, Helvetica, sans-serif; font-size:14px; font-weight:700; color:#111827; border-radius:8px;">
+            Chia sẻ
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr>
+  <td class="mobile-px" style="padding: 28px 40px 36px 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #f3f4f6; padding-top:18px;">
+      <tr>
+        <td style="padding-top:18px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; color:#6b7280; text-align:center;">
+          Sẵn sàng cho thử thách tiếp theo? <a href="{{.NextCourseURL}}" style="color:#dc2626; font-weight:600;">Khám phá khoá học nâng cao →</a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{{end}}

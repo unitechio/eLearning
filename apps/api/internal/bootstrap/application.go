@@ -17,11 +17,13 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/cache"
 	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	storage "github.com/unitechio/eLearning/apps/api/internal/infrastructure/filestorage"
+	mailinfra "github.com/unitechio/eLearning/apps/api/internal/infrastructure/mail"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	repoimpl "github.com/unitechio/eLearning/apps/api/internal/repository/impl"
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	svcimpl "github.com/unitechio/eLearning/apps/api/internal/usecase/impl"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
+	"github.com/unitechio/eLearning/apps/api/pkg/tts"
 )
 
 type Application struct {
@@ -80,6 +82,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	licenseRepo := repoimpl.NewLicenseRepository(dbInstance)
 	auditRepo := repoimpl.NewAuditRepository(dbInstance)
 	emailRepo := repoimpl.NewEmailRepository(dbInstance)
+	emailTemplateRepo := repoimpl.NewTemplateRepository(dbInstance)
 	userSettingsRepo := repository.NewUserSettingsRepository(dbInstance)
 
 	llmSvc := ai.NewLLMService()
@@ -110,14 +113,25 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	academyAISvc := svcimpl.NewAIService(llmSvc)
 	vocabularySvc := svcimpl.NewVocabularyService(vocabularyRepo)
 	userSvc := svcimpl.NewUserService(userRepo)
+	emailProvider := mailProvider(cfg)
+	emailRenderer := mailinfra.NewRenderer(emailTemplateRepo, mailBaseContext(cfg))
+	defaultFrom := cfg.Email.FromEmail
+	if defaultFrom == "" {
+		defaultFrom = cfg.Mail.Company.Email
+	}
+	if defaultFrom == "" {
+		defaultFrom = "noreply@eenglish.local"
+	}
+	emailSvc := svcimpl.NewMailUsecase(emailRepo, emailTemplateRepo, emailProvider, emailRenderer, defaultFrom)
+	svcimpl.SetMailer(emailSvc)
 	authSvc := svcimpl.NewAuthService(userRepo, authRepo, sessionRepo, loginAttemptRepo, &cfg.JWT)
 	environmentSvc := svcimpl.NewEnvironmentUsecase(environmentRepo)
 	featureFlagSvc := svcimpl.NewFeatureFlagUsecase(featureFlagRepo)
 	systemSettingSvc := usecase.NewSystemSettingUsecase(systemSettingRepo)
 	licenseSvc := svcimpl.NewLicenseUsecase(licenseRepo)
 	auditSvc := svcimpl.NewAuditUsecase(auditRepo)
-	emailSvc := svcimpl.NewEmailUsecase(emailRepo)
 	userSettingsSvc := svcimpl.NewUserSettingsUsecase(userSettingsRepo)
+	ttsSvc := tts.NewPiperTTS()
 
 	handlers := route.Handlers{
 		Auth:             handler.NewAuthHandler(authSvc),
@@ -156,6 +170,8 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Role:             handler.NewRoleHandler(roleSvc),
 		Permission:       handler.NewPermissionHandler(permissionSvc),
 		Realtime:         handler.NewRealtimeHandler(),
+		Media:            handler.NewMediaHandler(assetStorage),
+		TTS:              handler.NewTTSHandler(ttsSvc),
 	}
 
 	router := newRouter(cfg, logger, handlers, route.Guards{
@@ -215,4 +231,32 @@ func resolveAddress(cfg *config.Config) string {
 		return cfg.Server.Host + ":" + port
 	}
 	return ":" + port
+}
+
+func mailProvider(cfg *config.Config) mailinfra.Provider {
+	if cfg.Email.Host == "" {
+		return mailinfra.NewNoopProvider()
+	}
+	return mailinfra.NewSMTPProvider(cfg.Email)
+}
+
+func mailBaseContext(cfg *config.Config) mailinfra.BaseContext {
+	return mailinfra.BaseContext{
+		AppName:        cfg.Mail.Branding.AppName,
+		AppURL:         cfg.Mail.Branding.AppURL,
+		LogoURL:        cfg.Mail.Branding.LogoURL,
+		LogoText:       cfg.Mail.Branding.LogoText,
+		CompanyName:    cfg.Mail.Company.Name,
+		CompanyAddress: cfg.Mail.Company.Address,
+		CompanyPhone:   cfg.Mail.Company.Phone,
+		CompanyEmail:   cfg.Mail.Company.Email,
+		SupportEmail:   cfg.Mail.Company.Email,
+		SupportURL:     cfg.Mail.Support.Support,
+		HelpCenterURL:  cfg.Mail.Support.HelpCenter,
+		PrivacyURL:     cfg.Mail.Support.Privacy,
+		TermsURL:       cfg.Mail.Support.Terms,
+		FacebookURL:    cfg.Mail.Social.Facebook,
+		YoutubeURL:     cfg.Mail.Social.Youtube,
+		LinkedInURL:    cfg.Mail.Social.LinkedIn,
+	}
 }

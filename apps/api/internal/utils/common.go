@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"encoding/base32"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -138,4 +139,12 @@ func Distance(lat1, lon1, lat2, lon2 float64) float64 {
 
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 	return R * c
+}
+
+func GenerateSecret() (string, error) {
+	secret := make([]byte, 20)
+	if _, err := rand.Read(secret); err != nil {
+		return "", err
+	}
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(secret), nil
 }

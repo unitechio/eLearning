@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -9,12 +10,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/unitechio/eLearning/apps/api/internal/config"
+	"github.com/unitechio/eLearning/apps/api/internal/utils/constants"
 )
 
-// Client is the global Redis client
 var Client *redis.Client
 
-// Init initializes the Redis connection
 func Init(cfg *config.RedisConfig) error {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	Client = redis.NewClient(&redis.Options{
@@ -24,7 +24,6 @@ func Init(cfg *config.RedisConfig) error {
 		PoolSize: cfg.PoolSize,
 	})
 
-	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -40,7 +39,6 @@ func Init(cfg *config.RedisConfig) error {
 	return nil
 }
 
-// Close closes the Redis connection
 func Close() error {
 	if Client != nil {
 		return Client.Close()
@@ -48,27 +46,22 @@ func Close() error {
 	return nil
 }
 
-// GetClient returns the Redis client
 func GetClient() *redis.Client {
 	return Client
 }
 
-// Set sets a key-value pair with expiration
 func Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
 	return Client.Set(ctx, key, value, expiration).Err()
 }
 
-// Get gets a value by key
 func Get(ctx context.Context, key string) (string, error) {
 	return Client.Get(ctx, key).Result()
 }
 
-// Delete deletes a key
 func Delete(ctx context.Context, keys ...string) error {
 	return Client.Del(ctx, keys...).Err()
 }
 
-// Exists checks if a key exists
 func Exists(ctx context.Context, keys ...string) (int64, error) {
 	return Client.Exists(ctx, keys...).Result()
 }
@@ -128,16 +121,6 @@ func FlushDB(ctx context.Context) error {
 	return Client.FlushDB(ctx).Err()
 }
 
-// Cache key prefixes
-const (
-	PrefixUser       = "user:"
-	PrefixSession    = "session:"
-	PrefixOTP        = "otp:"
-	PrefixPermission = "permission:"
-	PrefixRateLimit  = "ratelimit:"
-	PrefixCache      = "cache:"
-)
-
 // BuildKey builds a cache key with prefix
 func BuildKey(prefix, id string) string {
 	return prefix + id
@@ -145,43 +128,41 @@ func BuildKey(prefix, id string) string {
 
 // CacheUserSession caches a user session
 func CacheUserSession(ctx context.Context, sessionID string, userID uuid.UUID, expiration time.Duration) error {
-	key := BuildKey(PrefixSession, sessionID)
+	key := BuildKey(constants.PrefixSession, sessionID)
 	return Set(ctx, key, userID.String(), expiration)
 }
 
 // GetUserSession gets a user session
 func GetUserSession(ctx context.Context, sessionID string) (string, error) {
-	key := BuildKey(PrefixSession, sessionID)
+	key := BuildKey(constants.PrefixSession, sessionID)
 	return Get(ctx, key)
 }
 
 // DeleteUserSession deletes a user session
 func DeleteUserSession(ctx context.Context, sessionID string) error {
-	key := BuildKey(PrefixSession, sessionID)
+	key := BuildKey(constants.PrefixSession, sessionID)
 	return Delete(ctx, key)
 }
 
-// CacheOTP caches an OTP
-func CacheOTP(ctx context.Context, email, otp string, expiration time.Duration) error {
-	key := BuildKey(PrefixOTP, email)
-	return Set(ctx, key, otp, expiration)
+func SaveOTP(
+	ctx context.Context, scope string, id string, otp string, ttl time.Duration) error {
+	key := BuildKey(constants.PrefixOTP, scope+":"+id)
+	return Client.Set(ctx, key, otp, ttl).Err()
 }
 
-// GetOTP gets an OTP
-func GetOTP(ctx context.Context, email string) (string, error) {
-	key := BuildKey(PrefixOTP, email)
-	return Get(ctx, key)
+func GetOTP(ctx context.Context, scope string, id string) (string, error) {
+	key := BuildKey(constants.PrefixOTP, scope+":"+id)
+	return Client.Get(ctx, key).Result()
 }
 
-// DeleteOTP deletes an OTP
-func DeleteOTP(ctx context.Context, email string) error {
-	key := BuildKey(PrefixOTP, email)
-	return Delete(ctx, key)
+func DeleteOTP(ctx context.Context, scope string, id string) error {
+	key := BuildKey(constants.PrefixOTP, scope+":"+id)
+	return Client.Del(ctx, key).Err()
 }
 
 // CachePermissions caches user permissions
 func CachePermissions(ctx context.Context, userID uuid.UUID, permissions []string, expiration time.Duration) error {
-	key := BuildKey(PrefixPermission, userID.String())
+	key := BuildKey(constants.PrefixPermission, userID.String())
 	// Store as hash for efficient access
 	values := make([]interface{}, 0, len(permissions)*2)
 	for _, perm := range permissions {
@@ -195,31 +176,229 @@ func CachePermissions(ctx context.Context, userID uuid.UUID, permissions []strin
 
 // GetPermissions gets cached user permissions
 func GetPermissions(ctx context.Context, userID uuid.UUID) (map[string]string, error) {
-	key := BuildKey(PrefixPermission, userID.String())
+	key := BuildKey(constants.PrefixPermission, userID.String())
 	return HGetAll(ctx, key)
 }
 
 // InvalidatePermissions invalidates user permissions cache
 func InvalidatePermissions(ctx context.Context, userID uuid.UUID) error {
-	key := BuildKey(PrefixPermission, userID.String())
+	key := BuildKey(constants.PrefixPermission, userID.String())
 	return Delete(ctx, key)
 }
 
-// CheckRateLimit checks rate limit for a key
-func CheckRateLimit(ctx context.Context, key string, limit int64, window time.Duration) (bool, error) {
-	rateLimitKey := BuildKey(PrefixRateLimit, key)
+// CheckRateLimit increments the request counter and checks whether
+// the request is still within the allowed limit.
+//
+// Returns:
+//   - allowed: whether the request is allowed
+//   - current: current request count within the window
+//   - remaining: remaining requests before reaching the limit
+func CheckRateLimit(ctx context.Context, key string, limit int64, window time.Duration) (allowed bool, current int64, remaining int64, err error) {
+	rateLimitKey := BuildKey(constants.PrefixRateLimit, key)
+	pipe := Client.TxPipeline()
+	incr := pipe.Incr(ctx, rateLimitKey)
+	ttl := pipe.TTL(ctx, rateLimitKey)
 
-	count, err := Incr(ctx, rateLimitKey)
-	if err != nil {
-		return false, err
+	if _, err = pipe.Exec(ctx); err != nil {
+		return false, 0, 0, err
 	}
 
-	if count == 1 {
-		// First request, set expiration
-		if err := Expire(ctx, rateLimitKey, window); err != nil {
-			return false, err
+	current = incr.Val()
+
+	// First request -> set expiration
+	if ttl.Val() < 0 {
+		if err = Client.Expire(ctx, rateLimitKey, window).Err(); err != nil {
+			return false, current, 0, err
 		}
 	}
 
-	return count <= limit, nil
+	allowed = current <= limit
+	if current >= limit {
+		remaining = 0
+	} else {
+		remaining = limit - current
+	}
+
+	return
+}
+
+func SetJSON[T any](ctx context.Context, key string, value T, ttl time.Duration) error {
+	b, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return Client.Set(ctx, key, b, ttl).Err()
+}
+
+func GetJSON[T any](ctx context.Context, key string) (*T, error) {
+	val, err := Client.Get(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var obj T
+	if err := json.Unmarshal([]byte(val), &obj); err != nil {
+		return nil, err
+	}
+
+	return &obj, nil
+}
+
+func HSetJSON[T any](ctx context.Context, key, field string, value T) error {
+	b, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return Client.HSet(ctx, key, field, b).Err()
+}
+
+// HGetJSON retrieves json from hash.
+func HGetJSON[T any](ctx context.Context, key, field string) (*T, error) {
+	val, err := Client.HGet(ctx, key, field).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var obj T
+	if err := json.Unmarshal([]byte(val), &obj); err != nil {
+		return nil, err
+	}
+
+	return &obj, nil
+}
+
+// GetOrSet tries Redis first.
+// If missing, calls loader() then caches result.
+func GetOrSet[T any](
+	ctx context.Context,
+	key string,
+	ttl time.Duration,
+	loader func() (*T, error),
+) (*T, error) {
+
+	obj, err := GetJSON[T](ctx, key)
+	if err == nil {
+		return obj, nil
+	}
+
+	obj, err = loader()
+	if err != nil {
+		return nil, err
+	}
+
+	if obj != nil {
+		_ = SetJSON(ctx, key, *obj, ttl)
+	}
+
+	return obj, nil
+}
+
+//
+// ========================
+// Distributed Lock
+// ========================
+//
+
+func AcquireLock(
+	ctx context.Context,
+	key string,
+	ttl time.Duration,
+) (bool, error) {
+
+	return Client.SetNX(ctx, "lock:"+key, "1", ttl).Result()
+}
+
+func ReleaseLock(
+	ctx context.Context,
+	key string,
+) error {
+
+	return Client.Del(ctx, "lock:"+key).Err()
+}
+
+//
+// ========================
+// Counter
+// ========================
+//
+
+// IncrementWithTTL increments a counter.
+// First increment will automatically set ttl.
+func IncrementWithTTL(
+	ctx context.Context,
+	key string,
+	ttl time.Duration,
+) (int64, error) {
+
+	n, err := Client.Incr(ctx, key).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	if n == 1 {
+		_ = Client.Expire(ctx, key, ttl).Err()
+	}
+
+	return n, nil
+}
+
+//
+// ========================
+// Rate Limit
+// ========================
+//
+
+func ScanKeys(
+	ctx context.Context,
+	pattern string,
+) ([]string, error) {
+
+	var (
+		cursor uint64
+		keys   []string
+	)
+
+	for {
+		k, next, err := Client.Scan(ctx, cursor, pattern, 200).Result()
+		if err != nil {
+			return nil, err
+		}
+
+		keys = append(keys, k...)
+
+		cursor = next
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return keys, nil
+}
+
+func DeleteByPattern(ctx context.Context, pattern string) error {
+	keys, err := ScanKeys(ctx, pattern)
+	if err != nil {
+		return err
+	}
+
+	if len(keys) == 0 {
+		return nil
+	}
+
+	return Client.Del(ctx, keys...).Err()
+}
+
+func Remember[T any](
+	ctx context.Context,
+	prefix string,
+	id any,
+	ttl time.Duration,
+	loader func() (*T, error),
+) (*T, error) {
+
+	key := fmt.Sprintf("%s:%v", prefix, id)
+
+	return GetOrSet(ctx, key, ttl, loader)
 }

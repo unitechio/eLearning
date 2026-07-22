@@ -90,6 +90,18 @@ func (h *AuthWorkflowHandler) VerifyEmail(c *gin.Context) {
 	response.OK(c, "email verified", gin.H{"verified": true})
 }
 
+func (h *AuthWorkflowHandler) ResendVerificationEmail(c *gin.Context) {
+	var req dto.ResendVerificationEmailRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	if err := h.svc.ResendVerificationEmail(requestContext(c), req); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "verification email requested", gin.H{"sent": true})
+}
+
 // ForgotPassword godoc
 // @Summary      Request password reset
 // @Tags         auth
@@ -130,6 +142,51 @@ func (h *AuthWorkflowHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 	response.OK(c, "password reset successful", gin.H{"updated": true})
+}
+
+func (h *AuthWorkflowHandler) SetupTOTP(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	res, err := h.svc.SetupTOTP(requestContext(c), userID.String())
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "two-factor setup initialized", res)
+}
+
+func (h *AuthWorkflowHandler) EnableTOTP(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.TOTPVerifyRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	if err := h.svc.EnableTOTP(requestContext(c), userID.String(), req); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "two-factor authentication enabled", gin.H{"enabled": true})
+}
+
+func (h *AuthWorkflowHandler) DisableTOTP(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.TOTPVerifyRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	if err := h.svc.DisableTOTP(requestContext(c), userID.String(), req); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "two-factor authentication disabled", gin.H{"enabled": false})
 }
 
 // GetProgress godoc

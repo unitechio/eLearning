@@ -204,7 +204,7 @@ export function useIELTSContentEditor() {
   const applyPdfDraft = (result: IELTSPdfImportResult, replaceOnlyPassages = false) => {
     if (!replaceOnlyPassages) {
       setSelectedContentId(null);
-      setContentForm(buildContentFormState(result.suggested_content as Partial<IELTSContentItem>));
+      setContentForm(buildContentFormState(result.suggested_content as any));
       setGroups([]);
       setQuestions([]);
       setVocabulary([]);

@@ -1,0 +1,22 @@
+FROM python:3.10-slim
+
+# Cài đặt ffmpeg, wget và tar (các thư viện hệ thống cần thiết)
+RUN apt-get update && apt-get install -y ffmpeg wget tar && rm -rf /var/lib/apt/lists/*
+
+# Cài đặt thư viện pydub để xử lý dòng thời gian âm thanh
+RUN pip install --no-cache-dir pydub
+
+# Tải và cài đặt công cụ Piper TTS Offline (Linux x86_64)
+RUN wget -q https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz -O /tmp/piper.tar.gz && \
+    tar -xzf /tmp/piper.tar.gz -C /opt && \
+    rm /tmp/piper.tar.gz
+
+# Tải Model Tiếng Việt chất lượng cao (vi_VN-vais1000-medium) dạng ONNX lưu thẳng vào Container
+RUN mkdir -p /opt/piper/models && \
+    wget -q https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx -O /opt/piper/models/vi_VN-vais1000-medium.onnx && \
+    wget -q https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx.json -O /opt/piper/models/vi_VN-vais1000-medium.onnx.json
+
+WORKDIR /app
+COPY process.py /app/process.py
+
+ENTRYPOINT ["python", "process.py"]

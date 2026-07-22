@@ -1,9 +1,6 @@
 package domain
 
 import (
-	"strings"
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -98,94 +95,4 @@ func GetDefaultSettings(userID string) *UserSettings {
 		TableDensity:       "comfortable",
 		ShowOnlineStatus:   true,
 	}
-}
-
-type EmailStatus string
-
-const (
-	EmailStatusPending   EmailStatus = "pending"
-	EmailStatusSent      EmailStatus = "sent"
-	EmailStatusDelivered EmailStatus = "delivered"
-	EmailStatusFailed    EmailStatus = "failed"
-	EmailStatusBounced   EmailStatus = "bounced"
-)
-
-type EmailPriority string
-
-const (
-	EmailPriorityLow    EmailPriority = "low"
-	EmailPriorityNormal EmailPriority = "normal"
-	EmailPriorityHigh   EmailPriority = "high"
-)
-
-type EmailAttachment struct {
-	Filename    string `json:"filename"`
-	Content     []byte `json:"content"`
-	ContentType string `json:"content_type"`
-	Inline      bool   `json:"inline"`
-	ContentID   string `json:"content_id,omitempty"`
-}
-
-type EmailData struct {
-	To          []string          `json:"to"`
-	CC          []string          `json:"cc,omitempty"`
-	BCC         []string          `json:"bcc,omitempty"`
-	From        string            `json:"from,omitempty"`
-	Subject     string            `json:"subject"`
-	Body        string            `json:"body,omitempty"`
-	HTMLBody    string            `json:"html_body,omitempty"`
-	Template    string            `json:"template,omitempty"`
-	Data        map[string]any    `json:"data,omitempty"`
-	ReplyTo     string            `json:"reply_to,omitempty"`
-	Headers     map[string]string `json:"headers,omitempty"`
-	Priority    EmailPriority     `json:"priority,omitempty"`
-	Attachments []EmailAttachment `json:"attachments,omitempty"`
-}
-
-type EmailLogFilter struct {
-	Page     int
-	PageSize int
-	Status   EmailStatus
-	From     string
-	To       string
-	Template string
-	DateFrom *time.Time
-	DateTo   *time.Time
-}
-
-func (f EmailLogFilter) Normalize() EmailLogFilter {
-	if f.Page < 1 {
-		f.Page = 1
-	}
-	if f.PageSize < 1 {
-		f.PageSize = 20
-	}
-	if f.PageSize > 100 {
-		f.PageSize = 100
-	}
-	f.From = strings.TrimSpace(f.From)
-	f.To = strings.TrimSpace(f.To)
-	f.Template = strings.TrimSpace(f.Template)
-	return f
-}
-
-type EmailTemplateFilter struct {
-	Page     int
-	PageSize int
-	Type     *string
-	Category *string
-	IsActive *bool
-}
-
-func (f EmailTemplateFilter) Normalize() EmailTemplateFilter {
-	if f.Page < 1 {
-		f.Page = 1
-	}
-	if f.PageSize < 1 {
-		f.PageSize = 20
-	}
-	if f.PageSize > 100 {
-		f.PageSize = 100
-	}
-	return f
 }

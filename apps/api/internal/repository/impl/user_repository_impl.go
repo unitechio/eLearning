@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
@@ -154,4 +155,22 @@ func (r *UserRepository) ResetPassword(ctx context.Context, userID, newPassword 
 		return err
 	}
 	return r.db.WithContext(ctx).Model(&domain.User{}).Where("id = ?", parsedID).Update("password", newPassword).Error
+}
+
+func (r *UserRepository) UpdateEmailVerification(ctx context.Context, userID uuid.UUID, verified bool) error {
+	updates := map[string]any{"email_verified": verified}
+	if verified {
+		now := time.Now()
+		updates["email_verified_at"] = &now
+	} else {
+		updates["email_verified_at"] = nil
+	}
+	return r.db.WithContext(ctx).Model(&domain.User{}).Where("id = ?", userID).Updates(updates).Error
+}
+
+func (r *UserRepository) UpdateTwoFactor(ctx context.Context, userID uuid.UUID, enabled bool, secret string) error {
+	return r.db.WithContext(ctx).Model(&domain.User{}).Where("id = ?", userID).Updates(map[string]any{
+		"two_factor_enabled": enabled,
+		"two_factor_secret":  secret,
+	}).Error
 }

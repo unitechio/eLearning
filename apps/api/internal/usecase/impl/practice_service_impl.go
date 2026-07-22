@@ -35,18 +35,64 @@ func (s *PracticeUsecase) Start(ctx context.Context, userID uuid.UUID, req dto.P
 	if mode == "" {
 		return nil, apperr.BadRequest("mode is required")
 	}
+
 	expected := "Academy English helps me build fluent communication every day."
+	audioURL := "https://cdn.eenglish.local/audio/dictation/default.mp3"
+	topic := fallback(req.Topic, "General")
+	difficulty := fallback(req.Difficulty, "intermediate")
+
 	if mode == "dictation" {
-		expected = "Consistent dictation practice strengthens listening accuracy and spelling memory."
+		// Dictation template database
+		templates := map[string]map[string]struct {
+			text string
+			audio string
+		}{
+			"science": {
+				"beginner":     {text: "The sun provides light and energy to all living things on Earth.", audio: "https://cdn.eenglish.local/audio/dictation/science-beginner.mp3"},
+				"intermediate": {text: "Carbon dioxide emissions contribute significantly to global warming and climate change.", audio: "https://cdn.eenglish.local/audio/dictation/science-intermediate.mp3"},
+				"advanced":     {text: "Photosynthesis is a fundamental biochemical process whereby autotrophic organisms convert solar energy into chemical energy.", audio: "https://cdn.eenglish.local/audio/dictation/science-advanced.mp3"},
+			},
+			"technology": {
+				"beginner":     {text: "Modern computers are fast and help us do homework quickly.", audio: "https://cdn.eenglish.local/audio/dictation/tech-beginner.mp3"},
+				"intermediate": {text: "Artificial intelligence is reshaping various industries by automating repetitive tasks.", audio: "https://cdn.eenglish.local/audio/dictation/tech-intermediate.mp3"},
+				"advanced":     {text: "Quantum computing introduces revolutionary paradigm shifts in cryptographic algorithms and parallel processing capabilities.", audio: "https://cdn.eenglish.local/audio/dictation/tech-advanced.mp3"},
+			},
+			"education": {
+				"beginner":     {text: "Students study many different subjects in primary school.", audio: "https://cdn.eenglish.local/audio/dictation/edu-beginner.mp3"},
+				"intermediate": {text: "Academic success is often associated with disciplined study habits and effective time management.", audio: "https://cdn.eenglish.local/audio/dictation/edu-intermediate.mp3"},
+				"advanced":     {text: "Pedagogical paradigms are shifting towards self-directed learning models, fostering critical thinking and cognitive autonomy.", audio: "https://cdn.eenglish.local/audio/dictation/edu-advanced.mp3"},
+			},
+		}
+
+		tLower := strings.ToLower(topic)
+		dLower := strings.ToLower(difficulty)
+
+		if levels, exists := templates[tLower]; exists {
+			if item, exists := levels[dLower]; exists {
+				expected = item.text
+				audioURL = item.audio
+			} else if item, exists := levels["intermediate"]; exists {
+				expected = item.text
+				audioURL = item.audio
+			}
+		} else {
+			// fallback default dictation
+			expected = "Consistent dictation practice strengthens listening accuracy and spelling memory."
+			audioURL = "https://cdn.eenglish.local/audio/dictation/general-dictation.mp3"
+		}
 	}
+
 	session := &domain.PracticeSession{
 		UserID:       userID,
 		TenantID:     uuid.Nil,
 		Mode:         "practice",
 		SubMode:      fallback(req.SubMode, mode),
 		Status:       "started",
-		Prompt:       fallback(req.Prompt, "Practice with Academy English adaptive coach."),
+		Prompt:       fallback(req.Prompt, "Practice with eEnglish adaptive dictation coach."),
 		ExpectedText: expected,
+		AudioURL:     audioURL,
+		Topic:        topic,
+		Difficulty:   difficulty,
 		StartedAt:    time.Now().UTC(),
 	}
 	if err := s.repo.CreateSession(session); err != nil {
@@ -347,6 +393,9 @@ func mapPracticeSession(item *domain.PracticeSession) *dto.PracticeSessionItem {
 		Status:       item.Status,
 		Prompt:       item.Prompt,
 		ExpectedText: item.ExpectedText,
+		AudioURL:     item.AudioURL,
+		Topic:        item.Topic,
+		Difficulty:   item.Difficulty,
 		StartedAt:    item.StartedAt.Format(time.RFC3339),
 		Feedback:     item.Feedback,
 	}

@@ -17,6 +17,7 @@ type Config struct {
 	JWT       JWTConfig
 	CORS      CORSConfig
 	Email     EmailConfig
+	Mail      MailConfig
 	Storage   StorageConfig
 	Cache     RedisConfig
 	Minio     MinioConfig
@@ -65,6 +66,40 @@ type EmailConfig struct {
 	FromEmail  string
 	UseSSL     bool
 	UseMSGraph bool
+}
+
+type MailConfig struct {
+	Branding MailBrandingConfig `yaml:"branding"`
+	Company  MailCompanyConfig  `yaml:"company"`
+	Social   MailSocialConfig   `yaml:"social"`
+	Support  MailSupportConfig  `yaml:"support"`
+}
+
+type MailBrandingConfig struct {
+	AppName  string `yaml:"app_name"`
+	AppURL   string `yaml:"app_url"`
+	LogoText string `yaml:"logo_text"`
+	LogoURL  string `yaml:"logo_url"`
+}
+
+type MailCompanyConfig struct {
+	Name    string `yaml:"name"`
+	Address string `yaml:"address"`
+	Phone   string `yaml:"phone"`
+	Email   string `yaml:"email"`
+}
+
+type MailSocialConfig struct {
+	Facebook string `yaml:"facebook"`
+	Youtube  string `yaml:"youtube"`
+	LinkedIn string `yaml:"linkedin"`
+}
+
+type MailSupportConfig struct {
+	HelpCenter string `yaml:"help_center"`
+	Support    string `yaml:"support"`
+	Privacy    string `yaml:"privacy"`
+	Terms      string `yaml:"terms"`
 }
 
 type JWTConfig struct {
@@ -299,6 +334,7 @@ func LoadConfig(configPath string) (*Config, error) {
 			Output: getEnv("LOG_OUTPUT", "stdout"),
 		},
 	}
+	config.Mail = loadMailConfig()
 
 	return config, nil
 }

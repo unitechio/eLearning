@@ -1,0 +1,706 @@
+{
+  "id": "6a4bb609eec13924f784005f",
+  "createdAt": "2026-07-06T14:04:57.097+0000",
+  "lastModifiedAt": "2026-07-06T14:04:57.097+0000",
+  "userId": "wMQZHJU98Me9Vtjei2KfOOtISjG2",
+  "status": "IN_PROGRESS",
+  "testTakenTimeInSeconds": 0,
+  "testType": "PRACTICE_TEST",
+  "nonPremiumPreventAccess": false,
+  "premium": false,
+  "testSection": {
+    "id": "6a390a09ea67c92f7e85879e",
+    "createdAt": "2026-07-06T14:04:57.097+0000",
+    "lastModifiedAt": "2026-07-06T14:04:57.097+0000",
+    "testSectionId": "CAM21_R3_P2",
+    "name": "The problems of getting around the city of Dar es Salaam",
+    "coverImage": {
+      "fileType": "PRIVATE",
+      "path": "PUBLIC/MEDIA/CAM21_R3_P2.jpg",
+      "url": "https://suijm9clouobj.vcdn.cloud/PUBLIC/MEDIA/CAM21_R3_P2.jpg",
+      "name": "CAM21_R3_P2.jpg",
+      "uploadedDate": "2026-06-25T07:08:07.356+0000",
+      "size": 503247
+    },
+    "skill": "READING",
+    "duration": 20,
+    "examSource": "CAMBRIDGE",
+    "serialNumber": 21,
+    "testSeries": 3,
+    "status": "PUBLISHED",
+    "testType": "PRACTICE_TEST",
+    "vocab": {
+      "vocabs": [
+        {
+          "type": "NOUN",
+          "meaning": "Dar es Salaam",
+          "pronounce": "ˌdɑːr es səˈlɑːm",
+          "example": "Dar es Salaam is growing very quickly.",
+          "image": "https://images.pexels.com/photos/17732553/pexels-photo-17732553.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "Dar es Salaam",
+          "group": "General"
+        },
+        {
+          "type": "VERB",
+          "meaning": "tăng lên, phình ra",
+          "pronounce": "swelz",
+          "example": "The city swells by many people each year.",
+          "image": "https://images.pexels.com/photos/28177033/pexels-photo-28177033.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "swells",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "dự báo",
+          "pronounce": "prəˈdʒekʃnz",
+          "example": "Population projections show rapid growth.",
+          "image": "https://www.billdu.com/wp-content/uploads/2024/07/Financial-projections-business-plan.png",
+          "value": "projections",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "siêu đô thị",
+          "pronounce": "ˈmeɡəsɪti",
+          "example": "The city may become a megacity soon.",
+          "image": "https://images.pexels.com/photos/25381384/pexels-photo-25381384.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "megacity",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "khu định cư tạm một tầng",
+          "pronounce": "ˈsɪŋɡl ˈstɔːri ɪnˈfɔːml ˈsetlmənts",
+          "example": "Many residents live in single-storey informal settlements.",
+          "image": "https://images.pexels.com/photos/30565236/pexels-photo-30565236.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "single-storey informal settlements",
+          "group": "15"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "đường đất",
+          "pronounce": "dɜːt rəʊdz",
+          "example": "Rain turns the dirt roads to mud.",
+          "image": "https://images.pexels.com/photos/14470622/pexels-photo-14470622.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "dirt roads",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "ngã tư, giao lộ",
+          "pronounce": "ˌɪntəˈsekʃn",
+          "example": "Cars queue at a key intersection.",
+          "image": "https://images.pexels.com/photos/31468393/pexels-photo-31468393.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "intersection",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "tuyến đường sắt ngoại ô",
+          "pronounce": "səˈbɜːbən reɪl laɪn",
+          "example": "A suburban rail line serves some residents.",
+          "image": "https://images.pexels.com/photos/34189029/pexels-photo-34189029.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "suburban rail line",
+          "group": "16"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "đường bùn nhiều ổ gà",
+          "pronounce": "ˈpɒthəʊld mʌd rəʊdz",
+          "example": "Motorbikes travel along potholed mud roads.",
+          "image": "https://images.pexels.com/photos/24827286/pexels-photo-24827286.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "potholed mud roads",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "đô thị lớn",
+          "pronounce": "məˈtrɒpəlɪs",
+          "example": "The metropolis is expanding quickly.",
+          "image": "https://images.pexels.com/photos/4449213/pexels-photo-4449213.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "metropolis",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "sự phụ thuộc vào",
+          "pronounce": "rɪˈlaɪəns ɒn",
+          "example": "The city’s reliance on arterial roads causes problems.",
+          "image": "https://media.licdn.com/dms/image/v2/D4E12AQEG07JNLVcI-A/article-cover_image-shrink_720_1280/B4EZeM0BnSHgAM-/0/1750414141207?e=2147483647&v=beta&t=1--e0iIc8nDPnO3DWSvrWbH74uNBKuR4YmYhiYN1ylY",
+          "value": "reliance on",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "đường huyết mạch",
+          "pronounce": "ɑːˈtɪəriəl rəʊdz",
+          "example": "Four arterial roads lead into the city.",
+          "image": "https://images.pexels.com/photos/6347297/pexels-photo-6347297.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "arterial roads",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "di sản, tàn dư",
+          "pronounce": "ˈleɡəsi",
+          "example": "The road system is a colonial legacy.",
+          "image": "https://images.pexels.com/photos/14065221/pexels-photo-14065221.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "legacy",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "vùng ven",
+          "pronounce": "pəˈrɪfəri",
+          "example": "Most expansion is happening on the periphery.",
+          "image": "https://cdn.shopify.com/s/files/1/0259/5825/2610/files/aerial-view-outer-banks-nc-barrier-islands_1024x1024.jpg?v=1587568633",
+          "value": "periphery",
+          "group": "17"
+        },
+        {
+          "type": "ADV",
+          "meaning": "một cách không chính thức, tự phát",
+          "pronounce": "ɪnˈfɔːməli",
+          "example": "Much development takes place informally.",
+          "image": "https://images.pexels.com/photos/9656177/pexels-photo-9656177.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "informally",
+          "group": "17"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "tàu điện ngầm",
+          "pronounce": "ˈmetrəʊ",
+          "example": "The city is not trying to build a metro.",
+          "image": "https://images.pexels.com/photos/15921368/pexels-photo-15921368.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "metro",
+          "group": "18"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "hệ thống xe buýt nhanh",
+          "pronounce": "bʌs ˈræpɪd ˈtrænzɪt",
+          "example": "Bus rapid transit can reduce travel times.",
+          "image": "https://images.pexels.com/photos/18152901/pexels-photo-18152901.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "bus rapid transit",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "làn đường xe buýt",
+          "pronounce": "bʌs leɪnz",
+          "example": "The buses use designated bus lanes.",
+          "image": "https://images.pexels.com/photos/18191128/pexels-photo-18191128.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "bus lanes",
+          "group": "19"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "sự dừng lại, ách tắc",
+          "pronounce": "ˈstɒpɪdʒɪz",
+          "example": "Separate lanes reduce stoppages.",
+          "image": "https://images.pexels.com/photos/7355364/pexels-photo-7355364.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "stoppages",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "việc lên xe",
+          "pronounce": "ˈbɔːdɪŋ",
+          "example": "Passengers pay before boarding.",
+          "image": "https://www.travelandleisure.com/thmb/XQPxQi7H376y_NyV01x42yJOy30=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/TAL-walking-on-airplane-BOARDFIRSTATSI0525-05243eb4d2474d67bab680f88f363e55.jpg",
+          "value": "boarding",
+          "group": "20"
+        },
+        {
+          "type": "ADJ",
+          "meaning": "không có bậc, dễ tiếp cận",
+          "pronounce": "step friː",
+          "example": "The buses are step-free.",
+          "image": "https://www.ianvisits.co.uk/articles/wp-content/uploads/sites/2/2024/02/tottenham-hale-miniature-boarding-ramp-04.jpg",
+          "value": "step-free",
+          "group": "General"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "xe lăn",
+          "pronounce": "ˈwiːltʃeəz",
+          "example": "People in wheelchairs can use the system.",
+          "image": "https://images.pexels.com/photos/6763713/pexels-photo-6763713.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "wheelchairs",
+          "group": "21"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "máy điều hòa",
+          "pronounce": "eə kənˈdɪʃənɪŋ",
+          "example": "Drivers sometimes refuse to turn on the air conditioning.",
+          "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcST-cx4SzvdBWgQ43GpWkarDZSGPCtmPSIulalDtT2KeHPkPYpsHkxKzYA&s=10",
+          "value": "air conditioning",
+          "group": "22"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "nhiên liệu",
+          "pronounce": "ˈfjuːəl",
+          "example": "They save fuel by not using air conditioning.",
+          "image": "https://images.pexels.com/photos/12377481/pexels-photo-12377481.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "fuel",
+          "group": "22"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "bãi/nhà kho xe",
+          "pronounce": "ˈdepəʊ",
+          "example": "A flood damaged the main depot.",
+          "image": "https://images.pexels.com/photos/30858911/pexels-photo-30858911.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "depot",
+          "group": "23"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "thẻ thông minh",
+          "pronounce": "ˈsmɑːtkɑːdz",
+          "example": "Passengers cannot use smartcards.",
+          "image": "https://images.pexels.com/photos/10330118/pexels-photo-10330118.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "smartcards",
+          "group": "24"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "cổng",
+          "pronounce": "ɡeɪts",
+          "example": "Staff check tickets at the gates.",
+          "image": "https://images.pexels.com/photos/28705340/pexels-photo-28705340.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "gates",
+          "group": "25"
+        },
+        {
+          "type": "NOUN",
+          "meaning": "hàng chờ",
+          "pronounce": "kjuːz",
+          "example": "Queues build up at peak times.",
+          "image": "https://images.pexels.com/photos/13753893/pexels-photo-13753893.jpeg?auto=compress&cs=tinysrgb&fit=crop&h=627&w=1200",
+          "value": "queues",
+          "group": "26"
+        }
+      ],
+      "vocabUrl": "https://docs.google.com/spreadsheets/d/11KZQxHyk58V5nZjweiVopBefIokMSLx3pe-Vlql-QbM/edit?gid=1007846332#gid=1007846332",
+      "totalWords": 28
+    },
+    "publishFor": "FOR_ALL",
+    "used": true,
+    "totalAnswer": 13,
+    "totalExplanation": 13,
+    "noOfVocab": 28,
+    "totalQuestion": 13,
+    "questionGroups": [
+      {
+        "id": "365fba38-6e23-11f1-8829-f90adc4bb2e5",
+        "questions": [
+          {
+            "uuid": "365fba39-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "TFN_ANSWER_V2",
+            "question": "The population of Dar es Salaam is rising more rapidly than was previously predicted.",
+            "userAnswers": [],
+            "notes": [],
+            "options": [
+              {
+                "key": 0,
+                "value": "True"
+              },
+              {
+                "key": 1,
+                "value": "False"
+              },
+              {
+                "key": 2,
+                "value": "Not given"
+              }
+            ],
+            "correctOptions": [],
+            "maxSelectedOptions": 1
+          },
+          {
+            "uuid": "3662a06a-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "TFN_ANSWER_V2",
+            "question": "Most of the residents of Dar es Salaam live in high-rise blocks on the edge of the city.",
+            "userAnswers": [],
+            "notes": [],
+            "options": [
+              {
+                "key": 0,
+                "value": "True"
+              },
+              {
+                "key": 1,
+                "value": "False"
+              },
+              {
+                "key": 2,
+                "value": "Not given"
+              }
+            ],
+            "correctOptions": [],
+            "maxSelectedOptions": 1
+          },
+          {
+            "uuid": "36633cab-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "TFN_ANSWER_V2",
+            "question": "Residents have been consulted about their views on the suburban rail line in Dar es Salaam.",
+            "userAnswers": [],
+            "notes": [],
+            "options": [
+              {
+                "key": 0,
+                "value": "True"
+              },
+              {
+                "key": 1,
+                "value": "False"
+              },
+              {
+                "key": 2,
+                "value": "Not given"
+              }
+            ],
+            "correctOptions": [],
+            "maxSelectedOptions": 1
+          },
+          {
+            "uuid": "36649c3c-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "TFN_ANSWER_V2",
+            "question": "The majority of the present residential development in Dar es Salaam is unplanned.",
+            "userAnswers": [],
+            "notes": [],
+            "options": [
+              {
+                "key": 0,
+                "value": "True"
+              },
+              {
+                "key": 1,
+                "value": "False"
+              },
+              {
+                "key": 2,
+                "value": "Not given"
+              }
+            ],
+            "correctOptions": [],
+            "maxSelectedOptions": 1
+          },
+          {
+            "uuid": "3665fbcd-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "TFN_ANSWER_V2",
+            "question": "Dar es Salaam's authorities have decided to follow the public transport plan adopted by a large number of African cities.",
+            "userAnswers": [],
+            "notes": [],
+            "options": [
+              {
+                "key": 0,
+                "value": "True"
+              },
+              {
+                "key": 1,
+                "value": "False"
+              },
+              {
+                "key": 2,
+                "value": "Not given"
+              }
+            ],
+            "correctOptions": [],
+            "maxSelectedOptions": 1
+          }
+        ],
+        "questionType": "TFN_ANSWER_V2",
+        "displayedQuestionType": "True/False/Not Given",
+        "guideline": {
+          "content": [
+            {
+              "children": [
+                {
+                  "text": "Do the following statements agree with the information given in the Reading Passage?\n"
+                },
+                {
+                  "text": "TRUE",
+                  "bold": true
+                },
+                {
+                  "text": "                    if the statement agrees with the information\n"
+                },
+                {
+                  "text": "FALSE",
+                  "bold": true
+                },
+                {
+                  "text": "                  if the statement contradicts the information\n"
+                },
+                {
+                  "text": "NOT GIVEN",
+                  "bold": true
+                },
+                {
+                  "text": "         if it is impossible to say what the writer thinks about this"
+                }
+              ],
+              "type": "p"
+            }
+          ]
+        },
+        "compactGuideline": {
+          "content": [
+            {
+              "children": [
+                {
+                  "text": "Choose "
+                },
+                {
+                  "text": "TRUE/FALSE/NOT GIVEN",
+                  "bold": true
+                }
+              ],
+              "type": "p"
+            }
+          ],
+          "enable": true
+        },
+        "totalQuestion": 5
+      },
+      {
+        "id": "3667344e-6e23-11f1-8829-f90adc4bb2e5",
+        "questions": [
+          {
+            "uuid": "3667344f-6e23-11f1-8829-f90adc4bb2e5",
+            "type": "NOTE_FORM_COMPLETION_V2",
+            "correctAnswers": [],
+            "userAnswers": [],
+            "heading": "Dar es Salaam's DART Bus Rapid Transit system",
+            "paragraph": {
+              "id": "36695730-6e23-11f1-8829-f90adc4bb2e5",
+              "editorValue": "[{\"type\":\"p\",\"children\":[{\"text\":\"Features\",\"bold\":true},{\"id\":\"Ac6fLZjc_2xiPiFV\",\"text\":\"\\n• the buses use designated \"},{\"type\":\"blank\",\"id\":\"9ecbe3d2-77d7-4d38-bdee-604bdc3202c1\",\"children\":[{\"text\":\"\"}]},{\"text\":\" to cut down on delays\\n• passengers pay fares before \"},{\"type\":\"blank\",\"id\":\"a908bc84-cb11-460a-9873-50c4279435bc\",\"children\":[{\"text\":\"\"}]},{\"text\":\"\\n• passengers in \"},{\"type\":\"blank\",\"id\":\"8fe1f4b8-ee1a-4b2e-8faf-257362f5b88c\",\"children\":[{\"text\":\"\"}]},{\"text\":\" can use every part of the system\"}],\"id\":\"D24xl7BpEBHcMi24\"},{\"type\":\"p\",\"children\":[{\"text\":\"Problems\",\"bold\":true},{\"id\":\"KKRFOKa6K2Rd3Rl3\",\"text\":\"\\n• the temperature control is sometimes not activated in order to reduce \"},{\"type\":\"blank\",\"id\":\"06b3d9b1-235a-4eff-9085-f0a90f095761\",\"children\":[{\"text\":\"\"}]},{\"text\":\" use\\n• insufficient number of vehicles are available due to the effects of a severe \"},{\"type\":\"blank\",\"id\":\"ee2263f6-fde4-4ba0-8aed-5c243aaf6496\",\"children\":[{\"text\":\"\"}]},{\"text\":\" .\\n• passengers are unable to use \"},{\"type\":\"blank\",\"id\":\"6c88fee6-85aa-41ce-bd4f-6e601a3a4163\",\"children\":[{\"text\":\"\"}]},{\"text\":\" because some equipment is out of action\\n• tickets have to be checked manually at station \"},{\"type\":\"blank\",\"id\":\"84b5ba08-bbf5-45ec-abe2-dc3ce1c46a76\",\"children\":[{\"text\":\"\"}]},{\"text\":\"\\n• \"},{\"type\":\"blank\",\"id\":\"331a5fa7-f3bf-442b-915d-d62d7d22bbd1\",\"children\":[{\"text\":\"\"}]},{\"text\":\" frequently build up during rush hours\"}],\"id\":\"YJIAQMWcmjPbWxoe\"}]",
+              "blanks": [
+                {
+                  "id": "9ecbe3d2-77d7-4d38-bdee-604bdc3202c1",
+                  "key": 0
+                },
+                {
+                  "id": "a908bc84-cb11-460a-9873-50c4279435bc",
+                  "key": 1
+                },
+                {
+                  "id": "8fe1f4b8-ee1a-4b2e-8faf-257362f5b88c",
+                  "key": 2
+                },
+                {
+                  "id": "06b3d9b1-235a-4eff-9085-f0a90f095761",
+                  "key": 3
+                },
+                {
+                  "id": "ee2263f6-fde4-4ba0-8aed-5c243aaf6496",
+                  "key": 4
+                },
+                {
+                  "id": "6c88fee6-85aa-41ce-bd4f-6e601a3a4163",
+                  "key": 5
+                },
+                {
+                  "id": "84b5ba08-bbf5-45ec-abe2-dc3ce1c46a76",
+                  "key": 6
+                },
+                {
+                  "id": "331a5fa7-f3bf-442b-915d-d62d7d22bbd1",
+                  "key": 7
+                }
+              ]
+            }
+          }
+        ],
+        "questionType": "NOTE_FORM_COMPLETION_V2",
+        "displayedQuestionType": "Note Completion",
+        "guideline": {
+          "content": [
+            {
+              "children": [
+                {
+                  "text": "Complete the notes below.\nChoose "
+                },
+                {
+                  "text": "ONE WORD ONLY",
+                  "bold": true
+                },
+                {
+                  "text": " from the passage for each answer."
+                }
+              ],
+              "type": "p"
+            }
+          ]
+        },
+        "compactGuideline": {
+          "content": [
+            {
+              "children": [
+                {
+                  "text": "Choose "
+                },
+                {
+                  "text": "ONE WORD ONLY",
+                  "bold": true
+                },
+                {
+                  "text": " from the passage for each answer."
+                }
+              ],
+              "type": "p"
+            }
+          ],
+          "enable": true
+        },
+        "totalQuestion": 8
+      }
+    ],
+    "testSectionOverview": {
+      "questionTypes": ["NOTE_FORM_COMPLETION_V2", "TFN_ANSWER_V2"],
+      "displayedQuestionTypes": ["Note Completion", "True/False/Not Given"]
+    },
+    "isDraftedVersion": false,
+    "studyTemplate": "SYLLABUS",
+    "aiGenerateStatus": {
+      "totalMetaDataGenerate": 13,
+      "totalMetaDataInProgress": 0,
+      "totalMetaDataError": 0,
+      "totalMetaDataCompleted": 13,
+      "metaDataGenerateStatus": "DONE"
+    },
+    "importSheetUrl": "https://docs.google.com/spreadsheets/d/1BYTZxi_TBThZ1Sj8Of4q_Ecq3wFAqhrN98p-1aLijh0/edit?gid=556571850#gid=556571850",
+    "importStatistic": {
+      "details": [
+        {
+          "property": "totalQuestion",
+          "propertyName": "Total Questions",
+          "count": 13,
+          "errorMessages": []
+        },
+        {
+          "property": "Question types",
+          "propertyName": "Question types",
+          "count": 2,
+          "valid": true,
+          "errorMessages": []
+        },
+        {
+          "property": "Guilde",
+          "propertyName": "Guilde",
+          "count": 2,
+          "valid": true,
+          "errorMessages": []
+        },
+        {
+          "property": "Compact guilde",
+          "propertyName": "Compact guilde",
+          "count": 2,
+          "errorMessages": []
+        },
+        {
+          "property": "Title",
+          "propertyName": "Title",
+          "count": 1,
+          "errorMessages": []
+        },
+        {
+          "property": "Form",
+          "propertyName": "Form",
+          "count": 1,
+          "errorMessages": []
+        },
+        {
+          "property": "Image",
+          "propertyName": "Image",
+          "count": 0,
+          "valid": true,
+          "errorMessages": []
+        },
+        {
+          "property": "Question",
+          "propertyName": "Question",
+          "count": 5,
+          "errorMessages": []
+        },
+        {
+          "property": "Option A",
+          "propertyName": "Option A",
+          "count": 0,
+          "errorMessages": []
+        },
+        {
+          "property": "Option B",
+          "propertyName": "Option B",
+          "count": 0,
+          "errorMessages": []
+        },
+        {
+          "property": "Option C",
+          "propertyName": "Option C",
+          "count": 0,
+          "errorMessages": []
+        },
+        {
+          "property": "Option D",
+          "propertyName": "Option D",
+          "count": 0,
+          "errorMessages": []
+        },
+        {
+          "property": "Option list",
+          "propertyName": "Option list",
+          "count": 0,
+          "errorMessages": []
+        },
+        {
+          "property": "Correct Answer",
+          "propertyName": "Correct Answer",
+          "count": 13,
+          "errorMessages": []
+        },
+        {
+          "property": "Explanation",
+          "propertyName": "Explanation",
+          "count": 12,
+          "errorMessages": []
+        },
+        {
+          "property": "Explanation nonlinear",
+          "propertyName": "Explanation nonlinear",
+          "count": 13,
+          "errorMessages": []
+        }
+      ],
+      "valid": true
+    },
+    "holdingAiQueueStatusIds": [
+      "6a3b57bac56a6f540d78dd53",
+      "6a3b57bac56a6f540d78dd54",
+      "6a3b57bac56a6f540d78dd55",
+      "6a3b57bac56a6f540d78dd56",
+      "6a3b57bac56a6f540d78dd57",
+      "6a3b57bac56a6f540d78dd58",
+      "6a3b57bac56a6f540d78dd59",
+      "6a3b57bac56a6f540d78dd5a",
+      "6a3b57bac56a6f540d78dd5b",
+      "6a3b57bac56a6f540d78dd5c",
+      "6a3b57bac56a6f540d78dd5d",
+      "6a3b57bac56a6f540d78dd5e",
+      "6a3b57bac56a6f540d78dd5f"
+    ],
+    "passage": {
+      "type": "REGULAR",
+      "title": "The problems of getting around the city of Dar es Salaam",
+      "paragraph": {
+        "content": "Dares S for Dares Salaam. For millions of people in African cities, this is their best hope of ever being connected.'"
+      }
+    },
+    "passageType": "PASSAGE2"
+  },
+  "isExtendTimeLimit": false
+}

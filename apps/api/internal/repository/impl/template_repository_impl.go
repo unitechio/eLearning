@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
@@ -20,30 +19,57 @@ func (r *TemplateRepository) Create(ctx context.Context, template *domain.EmailT
 	return r.db.WithContext(ctx).Create(template).Error
 }
 
-func (r *TemplateRepository) GetByID(ctx context.Context, id string) (*domain.EmailTemplate, error) {
-	templateID, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
+func (r *TemplateRepository) FindByID(ctx context.Context, id uint) (*domain.EmailTemplate, error) {
+	var template domain.EmailTemplate
+	if err := r.db.WithContext(ctx).First(&template, id).Error; err != nil {
 		return nil, err
 	}
+	return &template, nil
+}
+
+func (r *TemplateRepository) GetByID(ctx context.Context, id string) (*domain.EmailTemplate, error) {
 	var template domain.EmailTemplate
-	if err := r.db.WithContext(ctx).First(&template, uint(templateID)).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&template, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &template, nil
+}
+
+func (r *TemplateRepository) FindByName(ctx context.Context, name, locale string) (*domain.EmailTemplate, error) {
+	if locale == "" {
+		locale = "vi"
+	}
+	var template domain.EmailTemplate
+	err := r.db.WithContext(ctx).
+		Where("name = ? AND locale = ? AND is_active = ?", name, locale, true).
+		Order("is_default DESC, version DESC").
+		First(&template).
+		Error
+	if err == nil {
+		return &template, nil
+	}
+	if err != gorm.ErrRecordNotFound || locale == "en" {
+		return nil, err
+	}
+	err = r.db.WithContext(ctx).
+		Where("name = ? AND locale = ? AND is_active = ?", name, "en", true).
+		Order("is_default DESC, version DESC").
+		First(&template).
+		Error
+	if err != nil {
 		return nil, err
 	}
 	return &template, nil
 }
 
 func (r *TemplateRepository) GetByName(ctx context.Context, name string) (*domain.EmailTemplate, error) {
-	var template domain.EmailTemplate
-	if err := r.db.WithContext(ctx).Where("name = ?", name).First(&template).Error; err != nil {
-		return nil, err
-	}
-	return &template, nil
+	return r.FindByName(ctx, name, "vi")
 }
 
-func (r *TemplateRepository) List(ctx context.Context, filter domain.EmailTemplateFilter) ([]*domain.EmailTemplate, int64, error) {
+func (r *TemplateRepository) List(ctx context.Context, filter domain.EmailTemplateFilter) ([]domain.EmailTemplate, int64, error) {
 	filter = filter.Normalize()
 	var (
-		items []*domain.EmailTemplate
+		items []domain.EmailTemplate
 		total int64
 	)
 
@@ -67,14 +93,31 @@ func (r *TemplateRepository) List(ctx context.Context, filter domain.EmailTempla
 	return items, total, nil
 }
 
+func (r *TemplateRepository) ListLegacy(ctx context.Context, filter domain.EmailTemplateFilter) ([]*domain.EmailTemplate, int64, error) {
+	items, total, err := r.List(ctx, filter)
+	if err != nil {
+		return nil, 0, err
+	}
+	result := make([]*domain.EmailTemplate, len(items))
+	for i := range items {
+		current := items[i]
+		result[i] = &current
+	}
+	return result, total, nil
+}
+
 func (r *TemplateRepository) Update(ctx context.Context, template *domain.EmailTemplate) error {
 	return r.db.WithContext(ctx).Save(template).Error
 }
 
-func (r *TemplateRepository) Delete(ctx context.Context, id string) error {
-	templateID, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		return err
+func (r *TemplateRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&domain.EmailTemplate{}, id).Error
+}
+
+func (r *TemplateRepository) Exists(ctx context.Context, name string) (bool, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&domain.EmailTemplate{}).Where("name = ?", name).Count(&count).Error; err != nil {
+		return false, err
 	}
-	return r.db.WithContext(ctx).Delete(&domain.EmailTemplate{}, uint(templateID)).Error
+	return count > 0, nil
 }
