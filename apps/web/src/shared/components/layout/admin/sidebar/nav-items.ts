@@ -73,6 +73,10 @@ export const adminNavItems: readonly NavGroup[] = [
       { icon: Image,         label: 'Media Library', path: '/admin/media' },
       { icon: Megaphone,     label: 'Announcements', path: '/admin/announcements' },
       { icon: LineChart,     label: 'LMS',           path: '/admin/lms' },
+      { icon: FileText,      label: 'Documents',     path: '/admin/documents' },
+      { icon: MessageSquare, label: 'Writing Review', path: '/admin/writing-review' },
+      { icon: BookOpen,      label: 'Content Manager', path: '/admin/content' },
+      { icon: ScrollText,    label: 'Mock Tests Sessions', path: '/admin/mock-tests' },
     ],
   },
   {
@@ -82,6 +86,8 @@ export const adminNavItems: readonly NavGroup[] = [
       { icon: Zap,        label: 'Subscriptions', path: '/admin/subscriptions' },
       { icon: Receipt,    label: 'Transactions',  path: '/admin/transactions' },
       { icon: Tag,        label: 'Coupons',       path: '/admin/coupons' },
+      { icon: Receipt,    label: 'Invoices',      path: '/admin/invoices' },
+      { icon: Tag,        label: 'Vouchers',      path: '/admin/vouchers' },
     ],
   },
   {

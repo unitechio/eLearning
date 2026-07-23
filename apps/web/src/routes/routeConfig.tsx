@@ -13,6 +13,12 @@ import {
   AdminPlatformSettingsPage,
   AdminSupportTicketsPage,
   AdminUsersPage,
+  AdminDocumentPage,
+  AdminWritingReviewPage,
+  AdminInvoicesPage,
+  AdminContentPage,
+  AdminMockTestPage,
+  AdminVouchersPage,
 } from '@/domains/admin';
 import {
   CustomerManagementPage,
@@ -23,10 +29,10 @@ import {
   UserPage,
 } from '@/domains/admin/user-access';
 import { BillingPage } from '@/domains/billing';
-import { ToeicHubPage } from '@/domains/course';
+import { ToeicHubPage, CoursesPage, CourseDetailPage, CartView } from '@/domains/course';
 import { AchievementsPage, PlannerPage } from '@/domains/engagement';
 import { DashboardPage } from '@/domains/learning';
-import { LmsDashboardPage, AssignmentReviewPage } from '@/domains/lms';
+import { LmsDashboardPage, AssignmentReviewPage, LmsLoginPage } from '@/domains/lms';
 import { SpeakingPage } from '@/domains/speaking';
 import { VocabularyPage } from '@/domains/vocabulary';
 import { WritingPage } from '@/domains/writing';
@@ -48,6 +54,7 @@ const MarketingLayout = lazy(() => import('./layouts/MarketingLayout').then((m) 
 const AuthLayout      = lazy(() => import('./layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })));
 const AdminLayout     = lazy(() => import('./layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })));
+const LmsLayout       = lazy(() => import('./layouts/LmsLayout').then((m) => ({ default: m.LmsLayout })));
 
 export const routes: RouteObject[] = [
   // ─── Public fullscreen pages (no layout) ─────────────────────────────────
@@ -72,6 +79,9 @@ export const routes: RouteObject[] = [
     element: <MarketingLayout />,
     children: [
       { path: '/', element: <MarketingPage /> },
+      { path: '/courses', element: <CoursesPage /> },
+      { path: '/courses/:id', element: <CourseDetailPage /> },
+      { path: '/cart', element: <CartView /> },
     ],
   },
 
@@ -84,6 +94,7 @@ export const routes: RouteObject[] = [
         children: [
           { path: '/login', element: <LoginPage /> },
           { path: '/register', element: <RegisterPage /> },
+          { path: '/lms/login', element: <LmsLoginPage /> },
         ],
       },
     ],
@@ -106,6 +117,12 @@ export const routes: RouteObject[] = [
           { path: '/admin/ielts', element: <AdminIELTSContentPage /> },
           { path: '/admin/lms', element: <AdminLmsPage /> },
           { path: '/admin/support', element: <AdminSupportTicketsPage /> },
+          { path: '/admin/documents', element: <AdminDocumentPage /> },
+          { path: '/admin/writing-review', element: <AdminWritingReviewPage /> },
+          { path: '/admin/invoices', element: <AdminInvoicesPage /> },
+          { path: '/admin/content', element: <AdminContentPage /> },
+          { path: '/admin/mock-tests', element: <AdminMockTestPage /> },
+          { path: '/admin/vouchers', element: <AdminVouchersPage /> },
           { path: '/admin/user-access', element: <UserPage /> },
           { path: '/admin/user-access/users', element: <CustomerManagementPage /> },
           { path: '/admin/user-access/roles', element: <RoleManagementPage /> },
@@ -125,15 +142,11 @@ export const routes: RouteObject[] = [
         element: <DashboardLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
-          { path: '/lms', element: <LmsDashboardPage /> },
-          { path: '/assignment-review/:id', element: <AssignmentReviewPage /> },
           { path: '/grammar', element: <UniGrammarPage /> },
           { path: '/dictionary', element: <UniDictionaryPage /> },
           { path: '/ielts-knowledge', element: <IeltsKnowledgePage /> },
           { path: '/profile', element: <ProfilePage /> },
           { path: '/billing', element: <BillingPage /> },
-          { path: '/planner', element: <PlannerPage /> },
-          { path: '/achievements', element: <AchievementsPage /> },
           { path: '/speaking', element: <SpeakingPage /> },
           { path: '/story-practice', element: <StoryExerciseView /> },
           { path: '/vocabulary', element: <VocabularyPage /> },
@@ -143,6 +156,25 @@ export const routes: RouteObject[] = [
           { path: '/reading-practice', element: <IeltsReadingPage /> },
           { path: '/speaking-simulation', element: <IeltsSpeakingSimPage /> },
           { path: '/writing-coach', element: <IeltsWritingCoachPage /> },
+        ],
+      },
+    ],
+  },
+
+  // ─── LMS Student Service (Requires login, Standalone LmsLayout) ───────────
+  {
+    element: <RequireAuth />,
+    children: [
+      {
+        element: <LmsLayout />,
+        children: [
+          { path: '/lms', element: <LmsDashboardPage /> },
+          { path: '/lms/chat', element: <LmsDashboardPage /> },
+          { path: '/lms/calendar', element: <LmsDashboardPage /> },
+          { path: '/lms/documents', element: <LmsDashboardPage /> },
+          { path: '/assignment-review/:id', element: <AssignmentReviewPage /> },
+          { path: '/planner', element: <PlannerPage /> },
+          { path: '/achievements', element: <AchievementsPage /> },
         ],
       },
     ],

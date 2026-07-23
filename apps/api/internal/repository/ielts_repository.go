@@ -46,6 +46,7 @@ type IELTSRepository interface {
 	CreateMockSession(ctx context.Context, session *domain.IELTSMockTestSession) error
 	GetMockSession(ctx context.Context, id uint, userID uuid.UUID) (*domain.IELTSMockTestSession, error)
 	UpdateMockSession(ctx context.Context, session *domain.IELTSMockTestSession) error
+	ListMockSessions(ctx context.Context, filter dto.IELTSMockSessionFilter) ([]domain.IELTSMockTestSession, int64, error)
 	UpsertProgress(ctx context.Context, progress *domain.IELTSLearningProgress) error
 	ListProgress(ctx context.Context, userID uuid.UUID, filter dto.IELTSProgressFilter) ([]domain.IELTSLearningProgress, int64, error)
 	WriteWsAudit(ctx context.Context, audit *domain.WsAudit) error

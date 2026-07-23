@@ -44,4 +44,5 @@ type IELTSUsecase interface {
 	UpdateProgress(ctx context.Context, userID uuid.UUID, contentID uint, req dto.IELTSProgressUpdateRequest, audit dto.IeltsAuditContext) (*domain.IELTSLearningProgress, error)
 	StartMockTest(ctx context.Context, userID uuid.UUID, req dto.IELTSMockStartRequest, audit dto.IeltsAuditContext) (*domain.IELTSMockTestSession, error)
 	SubmitMockTest(ctx context.Context, userID uuid.UUID, sessionID uint, audit dto.IeltsAuditContext) (*domain.IELTSMockTestSession, error)
+	ListMockSessions(ctx context.Context, filter dto.IELTSMockSessionFilter) ([]domain.IELTSMockTestSession, int64, error)
 }

@@ -28,6 +28,17 @@ func NewMediaHandler(s *storage.MinioStorage) *MediaHandler {
 }
 
 // Serve serves original media files with 1-year client caching
+// Serve godoc
+// @Summary      Serve original media file
+// @Description  Downloads a file from internal MinIO storage and streams it to the client with aggressive browser caching.
+// @Tags         media
+// @Produce      octet-stream
+// @Param        key     query  string  true   "Storage key of the file"
+// @Param        bucket  query  string  false  "Bucket name override"
+// @Success      200  {file}    binary
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /public/media/serve [get]
 func (h *MediaHandler) Serve(c *gin.Context) {
 	if h.storage == nil {
 		response.Fail(c, 503, "storage not configured")
@@ -59,6 +70,18 @@ func (h *MediaHandler) Serve(c *gin.Context) {
 }
 
 // ServeThumbnail crop/resizes images on-the-fly and caches them in the browser
+// ServeThumbnail godoc
+// @Summary      Serve optimized webp thumbnail on-the-fly
+// @Description  Decodes an image, resizes it to the target dimensions using Lanczos filter, encodes it to WebP format, and streams it.
+// @Tags         media
+// @Produce      image/webp
+// @Param        key     query  string  true   "Storage key of the original image"
+// @Param        w       query  int     false  "Width (default 400)"
+// @Param        h       query  int     false  "Height (default 300)"
+// @Success      200  {file}    binary
+// @Failure      400  {object}  response.Envelope
+// @Failure      404  {object}  response.Envelope
+// @Router       /public/media/thumbnail [get]
 func (h *MediaHandler) ServeThumbnail(c *gin.Context) {
 	if h.storage == nil {
 		response.Fail(c, 503, "storage not configured")

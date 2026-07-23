@@ -542,6 +542,44 @@ func (h *IELTSHandler) SubmitMockTest(c *gin.Context) {
 	response.OKCode(c, response.CodeSuccess, item)
 }
 
+// AdminListMockSessions godoc
+// @Summary      List student mock test sessions (admin)
+// @Description  Returns paginated list of all mock test sessions across all users.
+// @Tags         admin-ielts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page       query  int     false  "Page number"
+// @Param        page_size  query  int     false  "Page size"
+// @Param        user_id    query  string  false  "Search by student UUID"
+// @Param        status     query  string  false  "Filter by status: started, submitted"
+// @Success      200  {object}  response.Envelope{data=[]domain.IELTSMockTestSession}
+// @Router       /admin/ielts/mock-tests [get]
+func (h *IELTSHandler) AdminListMockSessions(c *gin.Context) {
+	var filter dto.IELTSMockSessionFilter
+	if err := c.ShouldBindQuery(&filter); err != nil {
+		response.Fail(c, 400, "invalid query parameters")
+		return
+	}
+
+	items, total, err := h.svc.ListMockSessions(requestContext(c), filter)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	meta := response.Meta{
+		Page:       filter.Page,
+		PageSize:   filter.PageSize,
+		TotalItems: total,
+		TotalPages: int(total) / filter.PageSize,
+	}
+	if int(total)%filter.PageSize != 0 {
+		meta.TotalPages++
+	}
+
+	response.OKWithMeta(c, "mock sessions fetched", items, &meta)
+}
+
 // CreatePassage godoc
 // @Summary      Add a reading passage to content
 // @Tags         admin-ielts

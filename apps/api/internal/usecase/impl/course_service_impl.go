@@ -53,14 +53,17 @@ func (s *CourseUsecase) CreateCourse(ctx context.Context, actorID uuid.UUID, req
 		return nil, err
 	}
 	item := &domain.Course{
-		TenantID:    tenantID,
-		CreatedBy:   actorID,
-		Title:       req.Title,
-		Description: req.Description,
-		Domain:      req.Domain,
-		Level:       req.Level,
-		Status:      fallback(req.Status, "draft"),
-		Visibility:  fallback(req.Visibility, "private"),
+		TenantID:     tenantID,
+		CreatedBy:    actorID,
+		Title:        req.Title,
+		Description:  req.Description,
+		Domain:       req.Domain,
+		Level:        req.Level,
+		Status:       fallback(req.Status, "draft"),
+		Visibility:   fallback(req.Visibility, "private"),
+		Price:        req.Price,
+		Currency:     fallback(req.Currency, "USD"),
+		ThumbnailURL: req.ThumbnailURL,
 	}
 	if err := s.repo.CreateCourse(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
@@ -105,6 +108,7 @@ func (s *CourseUsecase) UpdateCourse(ctx context.Context, actorID uuid.UUID, id 
 	}
 	item.Title, item.Description, item.Domain = req.Title, req.Description, req.Domain
 	item.Level, item.Status, item.Visibility = req.Level, fallback(req.Status, item.Status), fallback(req.Visibility, item.Visibility)
+	item.Price, item.Currency, item.ThumbnailURL = req.Price, fallback(req.Currency, item.Currency), req.ThumbnailURL
 	if err := s.repo.UpdateCourse(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -354,5 +358,16 @@ func (s *CourseUsecase) DeleteLesson(ctx context.Context, actorID uuid.UUID, id 
 }
 
 func mapCourse(item domain.Course) dto.Course {
-	return dto.Course{ID: item.ID.String(), Title: item.Title, Description: item.Description, Domain: item.Domain, Level: item.Level, Status: item.Status, Visibility: item.Visibility}
+	return dto.Course{
+		ID:           item.ID.String(),
+		Title:        item.Title,
+		Description:  item.Description,
+		Domain:       item.Domain,
+		Level:        item.Level,
+		Status:       item.Status,
+		Visibility:   item.Visibility,
+		Price:        item.Price,
+		Currency:     item.Currency,
+		ThumbnailURL: item.ThumbnailURL,
+	}
 }

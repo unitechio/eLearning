@@ -1,5 +1,16 @@
 import { create } from 'zustand';
-import { IELTSSpeakingResult } from '@e-english/ielts-ai';
+export interface IELTSSpeakingResult {
+  overall_band: number;
+  feedback: string;
+  criteria: {
+    fluency: number;
+    lexical: number;
+  };
+  mistakes: {
+    text: string;
+    suggestion: string;
+  }[];
+}
 
 interface SpeakingState {
   isRecording: boolean;

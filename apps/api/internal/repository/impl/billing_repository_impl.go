@@ -179,3 +179,33 @@ func (r *BillingRepository) ListPaymentTransactions(filter repository.BillingAdm
 	err := q.Order("created_at desc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
 	return items, total, err
 }
+
+func (r *BillingRepository) FindCourseByID(id uuid.UUID) (*domain.Course, error) {
+	var item domain.Course
+	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *BillingRepository) FindVoucherByCode(code string) (*domain.Voucher, error) {
+	var item domain.Voucher
+	if err := r.db.Where("code = ? AND is_active = ?", code, true).First(&item).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *BillingRepository) CreateVoucher(v *domain.Voucher) error {
+	return r.db.Create(v).Error
+}
+
+func (r *BillingRepository) ListVouchers() ([]domain.Voucher, error) {
+	var items []domain.Voucher
+	err := r.db.Order("created_at desc").Find(&items).Error
+	return items, err
+}
+
+func (r *BillingRepository) DeleteVoucher(id uuid.UUID) error {
+	return r.db.Delete(&domain.Voucher{}, "id = ?", id).Error
+}

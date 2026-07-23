@@ -194,6 +194,12 @@ type IELTSAttemptFilter struct {
 	Status      string `form:"status"`
 }
 
+type IELTSMockSessionFilter struct {
+	PaginationQuery
+	UserID string `form:"user_id"`
+	Status string `form:"status"`
+}
+
 type IELTSProgressUpdateRequest struct {
 	Status             string `json:"status" binding:"required"`
 	CompletedQuestions int    `json:"completed_questions"`

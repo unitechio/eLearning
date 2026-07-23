@@ -333,6 +333,112 @@ func (h *BillingHandler) ConfirmSandboxPayment(c *gin.Context) {
 	response.OK(c, "sandbox payment confirmed", item)
 }
 
+// CheckoutCart godoc
+// @Summary      Checkout shopping cart for course purchase
+// @Description  Creates an invoice for selected courses, applying the voucher discount if valid.
+// @Tags         billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.CartCheckoutRequest true  "Checkout cart payload"
+// @Success      201  {object}  response.Envelope{data=dto.CheckoutPaymentResponse}
+// @Router       /billing/checkout/cart [post]
+func (h *BillingHandler) CheckoutCart(c *gin.Context) {
+	var req dto.CartCheckoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.CheckoutCart(userID, req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "payment checkout created", item)
+}
+
+// ApplyVoucher godoc
+// @Summary      Apply discount voucher
+// @Description  Validates promo code and returns estimated discount.
+// @Tags         billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.ApplyVoucherRequest true  "Voucher payload"
+// @Success      200  {object}  response.Envelope{data=dto.ApplyVoucherResponse}
+// @Router       /billing/vouchers/apply [post]
+func (h *BillingHandler) ApplyVoucher(c *gin.Context) {
+	var req dto.ApplyVoucherRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.ApplyVoucher(req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "voucher applied", item)
+}
+
+// AdminCreateVoucher godoc
+// @Summary      Create discount voucher (admin)
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body  dto.UpsertVoucherRequest true  "Voucher data"
+// @Success      201  {object}  response.Envelope{data=dto.VoucherDTO}
+// @Router       /admin/billing/vouchers [post]
+func (h *BillingHandler) AdminCreateVoucher(c *gin.Context) {
+	var req dto.UpsertVoucherRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, 400, err.Error())
+		return
+	}
+	item, err := h.svc.AdminCreateVoucher(req)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "voucher created", item)
+}
+
+// AdminListVouchers godoc
+// @Summary      List all vouchers (admin)
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  response.Envelope{data=[]dto.VoucherDTO}
+// @Router       /admin/billing/vouchers [get]
+func (h *BillingHandler) AdminListVouchers(c *gin.Context) {
+	items, err := h.svc.AdminListVouchers()
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "vouchers fetched", items)
+}
+
+// AdminDeleteVoucher godoc
+// @Summary      Delete voucher (admin)
+// @Tags         admin-billing
+// @Security     BearerAuth
+// @Param        id  path  string  true  "Voucher ID"
+// @Success      204
+// @Router       /admin/billing/vouchers/{id} [delete]
+func (h *BillingHandler) AdminDeleteVoucher(c *gin.Context) {
+	if err := h.svc.AdminDeleteVoucher(c.Param("id")); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.NoContent(c)
+}
+
 // AdminPlans godoc
 // @Summary      List admin billing plans
 // @Tags         admin-billing

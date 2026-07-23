@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Flame, 
   Headphones, 
@@ -22,11 +22,22 @@ import {
   Compass,
   Menu,
   X,
-  Dumbbell
+  Dumbbell,
+  MessageSquare,
+  CalendarDays,
+  Eye,
+  Share2,
+  FileText,
+  Volume2
 } from 'lucide-react';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { useMyLmsDashboard } from '../api/hooks';
 import { cn } from '@/shared/lib';
+import { PDFPreview } from '@/shared/components/media/PDFPreview';
+import { ShareModal } from '@/shared/components/media/ShareModal';
+import { MediaPreview } from '@/shared/components/media/MediaPreview';
+import { LmsChat } from '../components/LmsChat';
+import { CalendarView } from '@/shared/components/calendar/CalendarView';
 
 function ProgressRing({ value, label, subtitle }: { value: number; label: string; subtitle?: string }) {
   const safeValue = Math.max(0, Math.min(100, value));
@@ -49,8 +60,24 @@ function ProgressRing({ value, label, subtitle }: { value: number; label: string
 export function LmsDashboardPage() {
   const { theme, toggleTheme } = useTheme();
   const dashboardQuery = useMyLmsDashboard();
-  const [activeTab, setActiveTab] = useState<'overview' | 'course-details' | 'ai-practice'>('overview');
+  const location = useLocation();
+
+  const getTabFromPath = () => {
+    if (location.pathname.includes('/chat')) return 'chat';
+    if (location.pathname.includes('/calendar')) return 'calendar';
+    if (location.pathname.includes('/documents')) return 'media-previews';
+    return 'overview';
+  };
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'course-details' | 'ai-practice' | 'chat' | 'calendar' | 'media-previews'>(getTabFromPath());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pdfPreviewOpen, setPdfPreviewOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [mediaPreview, setMediaPreview] = useState<{ url: string; title: string; fileSize: string; type: 'image' | 'video' } | null>(null);
+
+  React.useEffect(() => {
+    setActiveTab(getTabFromPath());
+  }, [location.pathname]);
 
   const data = dashboardQuery.data;
   const dashboard = data?.dashboard ?? {
@@ -62,17 +89,14 @@ export function LmsDashboardPage() {
   };
 
   const menuItems = [
-    { label: "Home", icon: ClipboardList, active: true },
-    { label: "Hall of fame", icon: Trophy },
-    { label: "Ký yếu", icon: BookOpen },
-    { label: "DOL Linearculture", icon: Sparkles },
-    { label: "In-progress courses", icon: Calendar },
-    { label: "Upcoming courses", icon: Calendar },
-    { label: "Completed courses", icon: Calendar },
-    { label: "Extra courses", icon: Calendar },
-    { label: "Test history", icon: Compass },
-    { label: "Certifications", icon: Award },
+    { label: "Tổng quan", icon: ClipboardList, active: activeTab === 'overview', tab: 'overview' as const },
+    { label: "Chi tiết khóa học", icon: GraduationCap, active: activeTab === 'course-details', tab: 'course-details' as const },
+    { label: "AI Practice", icon: Trophy, active: activeTab === 'ai-practice', tab: 'ai-practice' as const },
+    { label: "Chat & Thảo luận", icon: MessageSquare, active: activeTab === 'chat', tab: 'chat' as const },
+    { label: "Lịch học & Sự kiện", icon: CalendarDays, active: activeTab === 'calendar', tab: 'calendar' as const },
+    { label: "Tài liệu & Media", icon: BookOpen, active: activeTab === 'media-previews', tab: 'media-previews' as const },
   ];
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans flex flex-col">
@@ -153,6 +177,10 @@ export function LmsDashboardPage() {
                 <button
                   key={idx}
                   type="button"
+                  onClick={() => {
+                    setActiveTab(item.tab);
+                    setMobileMenuOpen(false);
+                  }}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-2xl transition-all",
                     item.active 
@@ -188,12 +216,12 @@ export function LmsDashboardPage() {
             </h1>
             
             {/* Tab Toggle buttons */}
-            <nav aria-label="Dashboard filter" className="flex items-center gap-2 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-2xl">
+            <nav aria-label="Dashboard filter" className="flex items-center gap-1 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-2xl flex-wrap">
               <button
                 type="button"
                 onClick={() => setActiveTab('overview')}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-black transition",
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
                   activeTab === 'overview' 
                     ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
@@ -205,25 +233,61 @@ export function LmsDashboardPage() {
                 type="button"
                 onClick={() => setActiveTab('course-details')}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-black transition",
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
                   activeTab === 'course-details' 
                     ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                 )}
               >
-                Chi tiết khóa học
+                Chi tiết
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('ai-practice')}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-black transition",
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
                   activeTab === 'ai-practice' 
                     ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
                     : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                 )}
               >
                 AI Practice
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('chat')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
+                  activeTab === 'chat' 
+                    ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                Chat
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('calendar')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
+                  activeTab === 'calendar' 
+                    ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                Lịch
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('media-previews')}
+                className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-black transition",
+                  activeTab === 'media-previews' 
+                    ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                Media Previews
               </button>
             </nav>
           </header>
@@ -631,9 +695,141 @@ export function LmsDashboardPage() {
             </div>
           )}
 
-        </main>
+          {/* ──── TAB 4: CHAT ──── */}
+          {activeTab === 'chat' && (
+            <div className="animate-in fade-in duration-300">
+              <LmsChat />
+            </div>
+          )}
 
+          {/* ──── TAB 5: CALENDAR ──── */}
+          {activeTab === 'calendar' && (
+            <div className="animate-in fade-in duration-300">
+              <CalendarView />
+            </div>
+          )}
+
+          {/* ──── TAB 6: MEDIA PREVIEWS ──── */}
+          {activeTab === 'media-previews' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <header className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-sm">
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Kho tài liệu & Media của lớp học</h3>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  Xem trước và chia sẻ các tài nguyên học tập (PDF bài học, video giảng dạy, hình ảnh minh họa).
+                </p>
+              </header>
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {/* 1. PDF Item */}
+                <article className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 hover:shadow-md transition space-y-4">
+                  <figure className="h-12 w-12 rounded-2xl bg-red-50 dark:bg-red-950/30 text-red-500 flex items-center justify-center" aria-hidden="true">
+                    <FileText className="h-6 w-6" />
+                  </figure>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white leading-none">Q2 performance reports.pdf</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">PDF Document · 4.2 MB</p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setPdfPreviewOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl py-2.5 text-xs font-black transition hover:bg-slate-850 dark:hover:bg-slate-100"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>Xem tài liệu PDF</span>
+                  </button>
+                </article>
+
+                {/* 2. Share Meeting Link Access */}
+                <article className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 hover:shadow-md transition space-y-4">
+                  <figure className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center" aria-hidden="true">
+                    <Share2 className="h-6 w-6" />
+                  </figure>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white leading-none">Product design Q3 Planning</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">Meeting Access · Mar 16, 2026</p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setShareModalOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-xl py-2.5 text-xs font-black transition"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span>Chia sẻ & Phân quyền</span>
+                  </button>
+                </article>
+
+                {/* 3. Image Item */}
+                <article className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 hover:shadow-md transition space-y-4">
+                  <figure className="h-12 w-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 flex items-center justify-center" aria-hidden="true">
+                    <Compass className="h-6 w-6" />
+                  </figure>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white leading-none">UBUD-Style-1.png</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">Image file · 4.2 MB</p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => setMediaPreview({
+                      url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&h=600",
+                      title: "UBUD-Style-1.png",
+                      fileSize: "4.2 MB",
+                      type: "image"
+                    })}
+                    className="w-full flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl py-2.5 text-xs font-black transition hover:bg-slate-850 dark:hover:bg-slate-100"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>Xem hình ảnh</span>
+                  </button>
+                </article>
+              </div>
+            </div>
+          )}
+
+        </main>
       </div>
+
+      {/* ──── OVERLAY PREVIEWS ──── */}
+
+      {/* 1. PDF Preview modal */}
+      {pdfPreviewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-5xl" onClick={(e) => e.stopPropagation()}>
+            <PDFPreview 
+              title="Q2 performance reports.pdf" 
+              fileSize="4.2MB" 
+              onClose={() => setPdfPreviewOpen(false)}
+              onShare={() => {
+                setPdfPreviewOpen(false);
+                setShareModalOpen(true);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 2. Share Meeting Modal */}
+      {shareModalOpen && (
+        <ShareModal 
+          title="Share meeting" 
+          subtitle="Product design Q3 Planning • Mar 16, 2026" 
+          onClose={() => setShareModalOpen(false)}
+        />
+      )}
+
+      {/* 3. Media Preview modal */}
+      {mediaPreview && (
+        <MediaPreview 
+          url={mediaPreview.url}
+          title={mediaPreview.title}
+          fileSize={mediaPreview.fileSize}
+          type={mediaPreview.type}
+          onClose={() => setMediaPreview(null)}
+          onShare={() => {
+            setMediaPreview(null);
+            setShareModalOpen(true);
+          }}
+        />
+      )}
 
     </div>
   );

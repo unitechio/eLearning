@@ -33,4 +33,9 @@ type BillingService interface {
 	ConfirmSandboxPayment(userID uuid.UUID, id string, req dto.ConfirmPaymentRequest) (*dto.CheckoutPaymentResponse, error)
 	ListInvoices(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminBillingInvoice], error)
 	ListPaymentTransactions(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminPaymentTransaction], error)
+	CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequest) (*dto.CheckoutPaymentResponse, error)
+	ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error)
+	AdminCreateVoucher(req dto.UpsertVoucherRequest) (*dto.VoucherDTO, error)
+	AdminListVouchers() ([]dto.VoucherDTO, error)
+	AdminDeleteVoucher(id string) error
 }

@@ -1,13 +1,16 @@
 package dto
 
 type Course struct {
-	ID          string `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Domain      string `json:"domain"`
-	Level       string `json:"level"`
-	Status      string `json:"status"`
-	Visibility  string `json:"visibility"`
+	ID           string  `json:"id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	Domain       string  `json:"domain"`
+	Level        string  `json:"level"`
+	Status       string  `json:"status"`
+	Visibility   string  `json:"visibility"`
+	Price        float64 `json:"price"`
+	Currency     string  `json:"currency"`
+	ThumbnailURL string  `json:"thumbnail_url"`
 }
 
 type CourseListQuery struct {
@@ -19,12 +22,15 @@ type CourseListQuery struct {
 }
 
 type UpsertCourseRequest struct {
-	Title       string `json:"title" binding:"required"`
-	Description string `json:"description"`
-	Domain      string `json:"domain" binding:"required"`
-	Level       string `json:"level"`
-	Status      string `json:"status"`
-	Visibility  string `json:"visibility"`
+	Title        string  `json:"title" binding:"required"`
+	Description  string  `json:"description"`
+	Domain       string  `json:"domain" binding:"required"`
+	Level        string  `json:"level"`
+	Status       string  `json:"status"`
+	Visibility   string  `json:"visibility"`
+	Price        float64 `json:"price"`
+	Currency     string  `json:"currency"`
+	ThumbnailURL string  `json:"thumbnail_url"`
 }
 
 type CourseModule struct {

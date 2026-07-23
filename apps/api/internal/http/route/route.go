@@ -372,6 +372,9 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				admin.POST("/billing/subscriptions/grant-premium", h.Billing.GrantPremium)
 				admin.GET("/billing/invoices", h.Billing.AdminInvoices)
 				admin.GET("/billing/payments", h.Billing.AdminPaymentTransactions)
+				admin.POST("/billing/vouchers", h.Billing.AdminCreateVoucher)
+				admin.GET("/billing/vouchers", h.Billing.AdminListVouchers)
+				admin.DELETE("/billing/vouchers/:id", h.Billing.AdminDeleteVoucher)
 				admin.GET("/support/tickets", h.Support.AdminTickets)
 				admin.GET("/support/tickets/:id", h.Support.AdminGet)
 				admin.POST("/support/tickets/:id/comments", h.Support.AdminComment)
@@ -400,6 +403,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				adminIELTS := admin.Group("/ielts")
 				{
 					adminIELTS.GET("/content", h.IELTS.AdminList)
+					adminIELTS.GET("/mock-tests", h.IELTS.AdminListMockSessions)
 					adminIELTS.POST("/content", h.IELTS.Create)
 					adminIELTS.POST("/content/import", h.IELTS.Import)
 					adminIELTS.POST("/content/import-pdf", h.IELTS.ImportPDF)
@@ -452,6 +456,8 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				billing.GET("/history", h.Billing.History)
 				billing.POST("/payments/checkout", h.Billing.Checkout)
 				billing.POST("/payments/:id/sandbox-confirm", h.Billing.ConfirmSandboxPayment)
+				billing.POST("/checkout/cart", h.Billing.CheckoutCart)
+				billing.POST("/vouchers/apply", h.Billing.ApplyVoucher)
 			}
 
 			licenses := protected.Group("/licenses")

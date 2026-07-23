@@ -459,3 +459,164 @@ func defaultString(value string, fallback string) string {
 	}
 	return value
 }
+
+func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequest) (*dto.CheckoutPaymentResponse, error) {
+	if len(req.CourseIDs) == 0 {
+		return nil, apperr.BadRequest("no courses selected in cart")
+	}
+
+	var totalAmount float64
+	var courseTitles []string
+
+	for _, idStr := range req.CourseIDs {
+		cID, err := uuid.Parse(idStr)
+		if err != nil {
+			return nil, apperr.BadRequest("invalid course id: " + idStr)
+		}
+		course, err := s.repo.FindCourseByID(cID)
+		if err != nil {
+			return nil, apperr.NotFound("course", idStr)
+		}
+		totalAmount += course.Price
+		courseTitles = append(courseTitles, course.Title)
+	}
+
+	discountAmount := 0.0
+	if req.VoucherCode != "" {
+		voucher, err := s.repo.FindVoucherByCode(strings.ToUpper(req.VoucherCode))
+		if err == nil && voucher != nil {
+			if time.Now().UTC().Before(voucher.ExpiresAt) && voucher.IsActive {
+				if voucher.Type == "percent" {
+					discountAmount = totalAmount * (voucher.Discount / 100.0)
+				} else {
+					discountAmount = voucher.Discount
+				}
+				if discountAmount > totalAmount {
+					discountAmount = totalAmount
+				}
+			}
+		}
+	}
+
+	netAmount := totalAmount - discountAmount
+	provider := strings.ToLower(defaultString(req.Provider, "sandbox"))
+	dueAt := time.Now().UTC().Add(30 * time.Minute)
+
+	invoice := &domain.BillingInvoice{
+		UserID:      userID,
+		PlanID:      uuid.Nil, // Cart checkout has no single membership plan ID
+		InvoiceNo:   newInvoiceNo(),
+		Amount:      netAmount,
+		Currency:    "USD",
+		Status:      "pending",
+		DueAt:       &dueAt,
+		Description: "Course purchase: " + strings.Join(courseTitles, ", "),
+	}
+	if err := s.repo.CreateInvoice(invoice); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	tx := &domain.PaymentTransaction{
+		UserID:            userID,
+		InvoiceID:         invoice.ID,
+		PlanID:            uuid.Nil,
+		Provider:          provider,
+		ProviderReference: "sandbox_" + invoice.InvoiceNo,
+		Amount:            netAmount,
+		Currency:          "USD",
+		Status:            "pending",
+		CheckoutURL:       "/sandbox/payments/" + invoice.ID.String(),
+	}
+	if err := s.repo.CreatePaymentTransaction(tx); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	return mapCheckout(invoice, tx), nil
+}
+
+func (s *BillingUsecase) ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
+	voucher, err := s.repo.FindVoucherByCode(strings.ToUpper(req.Code))
+	if err != nil {
+		return &dto.ApplyVoucherResponse{DiscountAmount: 0, NetAmount: req.CartAmount, Active: false}, nil
+	}
+
+	if time.Now().UTC().After(voucher.ExpiresAt) || !voucher.IsActive {
+		return &dto.ApplyVoucherResponse{DiscountAmount: 0, NetAmount: req.CartAmount, Active: false}, nil
+	}
+
+	var discount float64
+	if voucher.Type == "percent" {
+		discount = req.CartAmount * (voucher.Discount / 100.0)
+	} else {
+		discount = voucher.Discount
+	}
+
+	if discount > req.CartAmount {
+		discount = req.CartAmount
+	}
+
+	return &dto.ApplyVoucherResponse{
+		DiscountAmount: discount,
+		NetAmount:      req.CartAmount - discount,
+		Active:         true,
+	}, nil
+}
+
+func (s *BillingUsecase) AdminCreateVoucher(req dto.UpsertVoucherRequest) (*dto.VoucherDTO, error) {
+	expTime, err := time.Parse("2006-01-02", req.ExpiresAt)
+	if err != nil {
+		return nil, apperr.BadRequest("invalid expiry date format, use YYYY-MM-DD")
+	}
+
+	v := &domain.Voucher{
+		Code:      strings.ToUpper(req.Code),
+		Discount:  req.Discount,
+		Type:      strings.ToLower(req.Type),
+		ExpiresAt: expTime.UTC(),
+		IsActive:  req.IsActive,
+	}
+
+	if err := s.repo.CreateVoucher(v); err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	return &dto.VoucherDTO{
+		ID:        v.ID.String(),
+		Code:      v.Code,
+		Discount:  v.Discount,
+		Type:      v.Type,
+		ExpiresAt: v.ExpiresAt,
+		IsActive:  v.IsActive,
+	}, nil
+}
+
+func (s *BillingUsecase) AdminListVouchers() ([]dto.VoucherDTO, error) {
+	items, err := s.repo.ListVouchers()
+	if err != nil {
+		return nil, apperr.Internal(err)
+	}
+
+	res := make([]dto.VoucherDTO, 0, len(items))
+	for _, v := range items {
+		res = append(res, dto.VoucherDTO{
+			ID:        v.ID.String(),
+			Code:      v.Code,
+			Discount:  v.Discount,
+			Type:      v.Type,
+			ExpiresAt: v.ExpiresAt,
+			IsActive:  v.IsActive,
+		})
+	}
+	return res, nil
+}
+
+func (s *BillingUsecase) AdminDeleteVoucher(id string) error {
+	vID, err := uuid.Parse(id)
+	if err != nil {
+		return apperr.BadRequest("invalid voucher id")
+	}
+	if err := s.repo.DeleteVoucher(vID); err != nil {
+		return apperr.Internal(err)
+	}
+	return nil
+}

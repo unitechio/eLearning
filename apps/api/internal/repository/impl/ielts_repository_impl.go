@@ -354,6 +354,35 @@ func (r *IELTSRepository) UpdateMockSession(ctx context.Context, session *domain
 	return r.db.WithContext(ctx).Save(session).Error
 }
 
+func (r *IELTSRepository) ListMockSessions(ctx context.Context, filter dto.IELTSMockSessionFilter) ([]domain.IELTSMockTestSession, int64, error) {
+	var items []domain.IELTSMockTestSession
+	var total int64
+
+	query := r.db.WithContext(ctx).Model(&domain.IELTSMockTestSession{})
+	if filter.UserID != "" {
+		query = query.Where("user_id = ?", filter.UserID)
+	}
+	if filter.Status != "" {
+		query = query.Where("status = ?", filter.Status)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	filter.PaginationQuery = filter.PaginationQuery.Normalize()
+	offset := (filter.Page - 1) * filter.PageSize
+
+	if err := query.Order("started_at DESC").
+		Offset(offset).
+		Limit(filter.PageSize).
+		Find(&items).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return items, total, nil
+}
+
 func (r *IELTSRepository) UpsertProgress(ctx context.Context, progress *domain.IELTSLearningProgress) error {
 	return r.db.WithContext(ctx).
 		Clauses(clause.OnConflict{

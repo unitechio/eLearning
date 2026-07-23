@@ -26,6 +26,11 @@ type BillingRepository interface {
 	FindPaymentTransactionByID(id uuid.UUID) (*domain.PaymentTransaction, error)
 	UpdatePaymentTransaction(tx *domain.PaymentTransaction) error
 	ListPaymentTransactions(filter BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error)
+	FindCourseByID(id uuid.UUID) (*domain.Course, error)
+	FindVoucherByCode(code string) (*domain.Voucher, error)
+	CreateVoucher(v *domain.Voucher) error
+	ListVouchers() ([]domain.Voucher, error)
+	DeleteVoucher(id uuid.UUID) error
 }
 
 type BillingAdminListFilter struct {

@@ -610,6 +610,10 @@ func (s *IELTSService) SubmitMockTest(ctx context.Context, userID uuid.UUID, ses
 	return session, err
 }
 
+func (s *IELTSService) ListMockSessions(ctx context.Context, filter dto.IELTSMockSessionFilter) ([]domain.IELTSMockTestSession, int64, error) {
+	return s.repo.ListMockSessions(ctx, filter)
+}
+
 func (s *IELTSService) createAttemptBySlug(ctx context.Context, userID uuid.UUID, slug string) (*domain.IELTSPracticeAttempt, error) {
 	content, err := s.repo.GetContentBySlug(ctx, slug)
 	if err != nil {

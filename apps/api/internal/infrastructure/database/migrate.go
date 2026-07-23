@@ -47,6 +47,7 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.Course{},
 		&domain.Unit{},
 		&domain.Lesson{},
+		&domain.Voucher{},
 		&domain.UserProgress{},
 		&domain.Activity{},
 		&domain.ActivitySubmission{},
