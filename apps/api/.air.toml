@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  cmd = "go run ./cmd/build/main.go"
+  cmd = "go run ./cmd/server/main.go"
   bin = "tmp/main"          # Air chạy file này (Linux/Mac); build.go sẽ tự đổi khi là Windows
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
