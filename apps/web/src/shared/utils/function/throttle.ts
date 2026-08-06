@@ -5,7 +5,7 @@ type ThrottleOptions = {
   readonly trailing?: boolean;
 };
 
-type ThrottledFn<T extends (...args: Parameters<T>) => ReturnType<T>> = {
+type ThrottledFn<T extends (...args: any[]) => any> = {
   (...args: Parameters<T>): ReturnType<T> | undefined;
   /** Cancels any pending trailing invocation and resets the throttle state. */
   cancel: () => void;
@@ -19,7 +19,7 @@ type ThrottledFn<T extends (...args: Parameters<T>) => ReturnType<T>> = {
  * const throttledScroll = throttle(onScroll, 100);
  * window.addEventListener('scroll', throttledScroll);
  */
-export function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
+export function throttle<T extends (...args: any[]) => any>(
   fn: T,
   wait: number,
   options: ThrottleOptions = {}
@@ -32,7 +32,7 @@ export function throttle<T extends (...args: Parameters<T>) => ReturnType<T>>(
   const invokeTrailing = (): void => {
     timer = undefined;
     if (trailing && lastArgs) {
-      fn(...lastArgs);
+      fn(...(lastArgs as Parameters<T>));
       lastCallTime = Date.now();
       lastArgs = undefined;
     }

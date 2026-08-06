@@ -73,7 +73,7 @@ const MarketingLayout = lazy(() => import('../layouts/MarketingLayout').then((m)
 const AuthLayout      = lazy(() => import('../layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
 const DashboardLayout = lazy(() => import('../layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })));
 const AdminLayout     = lazy(() => import('../layouts/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
-const LmsLayout       = lazy(() => import('../layouts/LmsLayout').then((m) => ({ default: m.LmsLayout })));
+const LmsLayout       = lazy(() => import('../layouts/lms/LmsLayout').then((m) => ({ default: m.LmsLayout })));
 
 export const routes: RouteObject[] = [
   // ─── Public fullscreen pages (no layout) ─────────────────────────────────

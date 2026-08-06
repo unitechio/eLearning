@@ -48,7 +48,7 @@ export function CommandPalette() {
                 className="flex items-center gap-2.5"
               >
                 <item.icon className="h-3.5 w-3.5 shrink-0 text-slate-500" />
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-sm font-medium text-slate-600">
                     {item.title}
                 </span>
                 {item.soon && (

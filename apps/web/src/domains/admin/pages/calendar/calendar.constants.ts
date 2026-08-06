@@ -1,0 +1,163 @@
+import { type DayConfig, type CalendarEvent, type Teacher, type Classroom } from './calendar.types';
+
+export const START_HOUR = 9; // 9:00 AM
+export const END_HOUR = 13;   // 1:00 PM is the last scale marker
+export const SLOT_HEIGHT = 64; // Height of 30-minute block (in pixels)
+export const PIXELS_PER_MINUTE = (SLOT_HEIGHT * 2) / 60; // 128px per hour
+
+export const DAYS: readonly DayConfig[] = [
+  { key: '04 MON', label: '04 MON', date: '2027-01-04' },
+  { key: '05 TUE', label: '05 TUE', date: '2027-01-05' },
+  { key: '06 WED', label: '06 WED', date: '2027-01-06' },
+  { key: '07 THU', label: '07 THU', date: '2027-01-07' },
+  { key: '08 FRI', label: '08 FRI', date: '2027-01-08' },
+] as const;
+
+export const TIME_SLOTS: readonly string[] = [
+  '9 AM',
+  '10 AM',
+  '11 AM',
+  '12 PM',
+  '1 PM',
+] as const;
+
+export const TEACHERS: readonly Teacher[] = [
+  { id: 't1', name: 'Ms. Sheila Nanda', skills: ['listening', 'speaking'], color: 'blue' },
+  { id: 't2', name: 'Mr. Ben Beckman', skills: ['reading', 'writing'], color: 'purple' },
+  { id: 't3', name: 'Ms. Sabrina Brown', skills: ['speaking', 'general'], color: 'orange' },
+  { id: 't4', name: 'Mr. David Evans', skills: ['writing', 'general'], color: 'green' },
+] as const;
+
+export const CLASSROOMS: readonly Classroom[] = [
+  { id: 'c1', name: 'Room 101 (Lab)', capacity: 15, color: 'blue' },
+  { id: 'c2', name: 'Room 102 (Large)', capacity: 30, color: 'green' },
+  { id: 'c3', name: 'Room 201 (VIP)', capacity: 8, color: 'orange' },
+  { id: 'c4', name: 'Room 202 (Online Room)', capacity: 100, color: 'purple' },
+] as const;
+
+const MOCK_STUDENTS = [
+  { id: 's1', name: 'Nguyen An', status: 'unmarked' as const },
+  { id: 's2', name: 'Tran Binh', status: 'unmarked' as const },
+  { id: 's3', name: 'Le Chi', status: 'unmarked' as const },
+  { id: 's4', name: 'Pham Duy', status: 'unmarked' as const },
+  { id: 's5', name: 'Hoang Giang', status: 'unmarked' as const },
+];
+
+export const INITIAL_EVENTS: readonly CalendarEvent[] = [
+  {
+    id: 'e1',
+    title: 'Brainstorming Session',
+    time: '9:00 - 9:30 AM',
+    date: '2027-01-04',
+    col: 1,
+    rowStart: '9:00 AM',
+    rowEnd: '9:30 AM',
+    color: 'gray',
+    type: 'meeting',
+    avatars: ['MT', 'LM', 'LA'],
+    teacherId: 't1',
+    classroomId: 'c3',
+    courseId: 'c_general',
+    skill: 'general',
+    students: MOCK_STUDENTS.slice(0, 3),
+    maxCapacity: 8,
+    auditLog: { createdBy: 'Admin', createdAt: '2026-08-01 10:00' },
+  },
+  {
+    id: 'e2',
+    title: 'IELTS Listening Practice',
+    time: '9:30 - 10:30 AM',
+    date: '2027-01-04',
+    col: 1,
+    rowStart: '9:30 AM',
+    rowEnd: '10:30 AM',
+    color: 'blue',
+    type: 'class',
+    avatars: ['LM', 'LA', 'JB'],
+    teacherId: 't1',
+    classroomId: 'c1',
+    courseId: 'c_ielts_intensive',
+    skill: 'listening',
+    students: [...MOCK_STUDENTS, { id: 's6', name: 'Doan Hung', status: 'unmarked' as const }],
+    maxCapacity: 15,
+    auditLog: { createdBy: 'Admin', createdAt: '2026-08-01 10:30' },
+  },
+  {
+    id: 'e3',
+    title: 'Writing Task 2 Review',
+    time: '11:30 AM - 1:00 PM',
+    date: '2027-01-04',
+    col: 1,
+    rowStart: '11:30 AM',
+    rowEnd: '1:00 PM',
+    color: 'orange',
+    type: 'class',
+    platform: 'Zoom Meeting',
+    avatars: ['MT', 'AP', 'CR'],
+    teacherId: 't2',
+    classroomId: 'c4',
+    courseId: 'c_ielts_basic',
+    skill: 'writing',
+    students: MOCK_STUDENTS,
+    maxCapacity: 100,
+    auditLog: { createdBy: 'Staff', createdAt: '2026-08-02 09:00' },
+  },
+  {
+    id: 'e4',
+    title: 'Project Review Meeting',
+    time: '9:00 - 9:30 AM',
+    date: '2027-01-05',
+    col: 2,
+    rowStart: '9:00 AM',
+    rowEnd: '9:30 AM',
+    color: 'purple',
+    type: 'meeting',
+    avatars: ['EH', 'BS', 'WY'],
+    teacherId: 't3',
+    classroomId: 'c3',
+    courseId: 'c_general',
+    skill: 'general',
+    students: MOCK_STUDENTS.slice(0, 2),
+    maxCapacity: 8,
+    auditLog: { createdBy: 'Admin', createdAt: '2026-08-03 14:00' },
+  },
+  {
+    id: 'e5',
+    title: 'Speaking Mock Exam',
+    time: '10:00 - 11:30 AM',
+    date: '2027-01-05',
+    col: 2,
+    rowStart: '10:00 AM',
+    rowEnd: '11:30 AM',
+    color: 'blue',
+    type: 'exam',
+    platform: 'Main Building Lab',
+    avatars: ['MT', 'LM', 'LA', 'JB', 'AP'],
+    teacherId: 't3',
+    classroomId: 'c1',
+    courseId: 'c_ielts_intensive',
+    skill: 'speaking',
+    students: MOCK_STUDENTS,
+    maxCapacity: 15,
+    auditLog: { createdBy: 'Admin', createdAt: '2026-08-03 15:30' },
+  },
+  {
+    id: 'e6',
+    title: 'Weekly Academic Board',
+    time: '12:00 - 1:00 PM',
+    date: '2027-01-05',
+    col: 2,
+    rowStart: '12:00 PM',
+    rowEnd: '1:00 PM',
+    color: 'gray',
+    type: 'meeting',
+    avatars: ['BS', 'WY'],
+    teacherId: 't4',
+    classroomId: 'c3',
+    courseId: 'c_general',
+    skill: 'general',
+    students: [],
+    maxCapacity: 8,
+    auditLog: { createdBy: 'Staff', createdAt: '2026-08-04 11:00' },
+  }
+];

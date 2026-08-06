@@ -1,9 +1,9 @@
-type DebouncedFn<T extends (...args: Parameters<T>) => ReturnType<T>> = {
+type DebouncedFn<T extends (...args: any[]) => any> = {
   (...args: Parameters<T>): void;
   /** Cancels the pending invocation without calling the function. */
   cancel: () => void;
   /** Immediately invokes the function if there is a pending call, then cancels the timer. */
-  flush: (...args: Parameters<T>) => ReturnType<T> | undefined;
+  flush: (...args: Parameters<T> | readonly []) => ReturnType<T> | undefined;
 };
 
 /**
@@ -16,7 +16,7 @@ type DebouncedFn<T extends (...args: Parameters<T>) => ReturnType<T>> = {
  * // Cancel on unmount:
  * debouncedSearch.cancel();
  */
-export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
+export function debounce<T extends (...args: any[]) => any>(
   fn: T,
   wait: number
 ): DebouncedFn<T> {
@@ -39,12 +39,12 @@ export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
     }
   };
 
-  debounced.flush = (...args: Parameters<T>): ReturnType<T> | undefined => {
+  debounced.flush = (...args: Parameters<T> | readonly []): ReturnType<T> | undefined => {
     if (timer !== undefined) {
       clearTimeout(timer);
       timer = undefined;
       const resolvedArgs = args.length > 0 ? args : lastArgs;
-      if (resolvedArgs) return fn(...resolvedArgs);
+      if (resolvedArgs) return fn(...(resolvedArgs as Parameters<T>));
     }
     return undefined;
   };

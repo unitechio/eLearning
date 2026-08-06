@@ -1,3 +1,5 @@
+declare const process: any;
+
 /**
  * Returns true if the application is running in development mode.
  *
