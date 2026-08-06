@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -252,7 +254,7 @@ func LoadConfig(configPath string) (*Config, error) {
 
 		Database: DatabaseConfig{
 			Host:            getEnv("DB_HOST", "localhost"),
-			Port:            getEnvAsInt("DB_PORT", 1521),
+			Port:            getEnvAsInt("DB_PORT", 5432),
 			User:            getEnv("DB_USER", ""),
 			Password:        getEnv("DB_PASSWORD", ""),
 			Database:        getEnvAny([]string{"DB_DATABASE", "DB_NAME"}, ""),
@@ -266,7 +268,7 @@ func LoadConfig(configPath string) (*Config, error) {
 		},
 
 		JWT: JWTConfig{
-			Secret:               getEnv("JWT_SECRET", "your-jwt-secret-key"),
+			Secret:               getEnv("JWT_SECRET", ""),
 			AccessExpiry:         getEnvAsDuration("JWT_ACCESS_TOKEN_EXPIRE", 15*time.Minute),
 			ExpirationHours:      getEnvAsInt("JWT_EXPIRATION_HOURS", 1),
 			RefreshExpiration:    getEnvAsDuration("JWT_REFRESH_EXPIRATION", 168*time.Hour),
@@ -318,7 +320,7 @@ func LoadConfig(configPath string) (*Config, error) {
 			Burst:          getEnvAsInt("RATE_LIMIT_BURST", 20),
 		},
 		CORS: CORSConfig{
-			AllowedOrigins:   getSliceEnv("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:5173"}),
+			AllowedOrigins:   getSliceEnv("CORS_ALLOWED_ORIGINS", []string{}),
 			AllowedMethods:   getSliceEnv("CORS_ALLOWED_METHODS", []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
 			AllowedHeaders:   getSliceEnv("CORS_ALLOWED_HEADERS", []string{"Origin", "Content-Type", "Authorization", "X-Request-ID"}),
 			ExposedHeaders:   getSliceEnv("CORS_EXPOSED_HEADERS", []string{"X-Request-ID"}),
@@ -336,5 +338,35 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 	config.Mail = loadMailConfig()
 
+	if err := config.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
+	}
+
 	return config, nil
+}
+
+// insecureJWTDefault is the placeholder value that must never be used in production.
+const insecureJWTDefault = "your-jwt-secret-key"
+
+// Validate checks that all required configuration fields are present and secure.
+// It is called automatically by LoadConfig and causes a fatal startup error
+// when any required field is missing or unsafe.
+func (c *Config) Validate() error {
+	var errs []error
+	if c.JWT.Secret == "" || c.JWT.Secret == insecureJWTDefault {
+		errs = append(errs, errors.New("JWT_SECRET must be set to a secure random value (not empty or default)"))
+	}
+	if c.Database.Host == "" {
+		errs = append(errs, errors.New("DB_HOST is required"))
+	}
+	if c.Database.User == "" {
+		errs = append(errs, errors.New("DB_USER is required"))
+	}
+	if c.Database.Password == "" {
+		errs = append(errs, errors.New("DB_PASSWORD is required"))
+	}
+	if c.Database.Database == "" {
+		errs = append(errs, errors.New("DB_DATABASE (DB_NAME) is required"))
+	}
+	return errors.Join(errs...)
 }

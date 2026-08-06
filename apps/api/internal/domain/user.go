@@ -208,14 +208,18 @@ func (o *OTP) IsExpired() bool {
 	return time.Now().After(o.ExpiresAt)
 }
 
-// RefreshToken represents a refresh token for JWT
+// RefreshToken represents a JWT refresh token.
+// Uses UUIDModel so its ID is a uuid.UUID, consistent with User and other
+// domain entities. The LastUsedAt field tracks actual token usage separately
+// from the updated_at audit timestamp.
 type RefreshToken struct {
-	BaseModel
-	UserID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"user_id"`
-	Token     string     `gorm:"uniqueIndex;not null" json:"token"`
-	ExpiresAt time.Time  `gorm:"not null" json:"expires_at"`
-	Revoked   bool       `gorm:"default:false" json:"revoked"`
-	RevokedAt *time.Time `json:"revoked_at,omitempty"`
+	UUIDModel
+	UserID     uuid.UUID  `gorm:"type:uuid;index;not null" json:"user_id"`
+	Token      string     `gorm:"uniqueIndex;not null" json:"token"`
+	ExpiresAt  time.Time  `gorm:"not null" json:"expires_at"`
+	Revoked    bool       `gorm:"default:false" json:"revoked"`
+	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
+	LastUsedAt *time.Time `json:"last_used_at,omitempty"`
 
 	// Relationships
 	User User `gorm:"foreignKey:UserID;references:ID" json:"user,omitempty"`

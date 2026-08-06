@@ -1,11 +1,12 @@
 package impl
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -18,7 +19,7 @@ func NewEngagementRepository(db *gorm.DB) *EngagementRepository {
 	return &EngagementRepository{db: db}
 }
 
-func (r *EngagementRepository) ListLeaderboardSince(since time.Time, limit int) ([]repository.LeaderboardMetricRow, error) {
+func (r *EngagementRepository) ListLeaderboardSince(ctx context.Context, since time.Time, limit int) ([]repository.LeaderboardMetricRow, error) {
 	type row struct {
 		UserID    uuid.UUID
 		Email     string
@@ -28,7 +29,7 @@ func (r *EngagementRepository) ListLeaderboardSince(since time.Time, limit int) 
 		TimeSpent int
 	}
 	var rows []row
-	err := r.db.Table("users u").
+	err := r.db.WithContext(ctx).Table("users u").
 		Select(`
 			u.id as user_id,
 			u.email,
@@ -61,8 +62,8 @@ func (r *EngagementRepository) ListLeaderboardSince(since time.Time, limit int) 
 	return res, nil
 }
 
-func (r *EngagementRepository) GetLeaderboardEntrySince(userID uuid.UUID, since time.Time) (*repository.LeaderboardMetricRow, error) {
-	rows, err := r.ListLeaderboardSince(since, 1000)
+func (r *EngagementRepository) GetLeaderboardEntrySince(ctx context.Context, userID uuid.UUID, since time.Time) (*repository.LeaderboardMetricRow, error) {
+	rows, err := r.ListLeaderboardSince(ctx, since, 1000)
 	if err != nil {
 		return nil, err
 	}
@@ -75,10 +76,10 @@ func (r *EngagementRepository) GetLeaderboardEntrySince(userID uuid.UUID, since 
 	return nil, gorm.ErrRecordNotFound
 }
 
-func (r *EngagementRepository) ListXPByUser(userID uuid.UUID, filter repository.Pagination) ([]domain.XPPoint, int64, error) {
+func (r *EngagementRepository) ListXPByUser(ctx context.Context, userID uuid.UUID, filter repository.Pagination) ([]domain.XPPoint, int64, error) {
 	var items []domain.XPPoint
 	var total int64
-	q := r.db.Model(&domain.XPPoint{}).Where("user_id = ?", userID)
+	q := r.db.WithContext(ctx).Model(&domain.XPPoint{}).Where("user_id = ?", userID)
 	if err := q.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -88,18 +89,18 @@ func (r *EngagementRepository) ListXPByUser(userID uuid.UUID, filter repository.
 	return items, total, nil
 }
 
-func (r *EngagementRepository) AddXP(point *domain.XPPoint) error {
-	return r.db.Create(point).Error
+func (r *EngagementRepository) AddXP(ctx context.Context, point *domain.XPPoint) error {
+	return r.db.WithContext(ctx).Create(point).Error
 }
 
-func (r *EngagementRepository) FindStreakByUser(userID uuid.UUID) (*domain.Streak, error) {
+func (r *EngagementRepository) FindStreakByUser(ctx context.Context, userID uuid.UUID) (*domain.Streak, error) {
 	var item domain.Streak
-	if err := r.db.Where("user_id = ?", userID).First(&item).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *EngagementRepository) SaveStreak(streak *domain.Streak) error {
-	return r.db.Save(streak).Error
+func (r *EngagementRepository) SaveStreak(ctx context.Context, streak *domain.Streak) error {
+	return r.db.WithContext(ctx).Save(streak).Error
 }

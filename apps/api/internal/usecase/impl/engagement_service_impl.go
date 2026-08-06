@@ -24,8 +24,8 @@ func NewEngagementService(repo repository.EngagementRepository, progressRepo rep
 	return &EngagementUsecase{repo: repo, progressRepo: progressRepo, activityRepo: activityRepo, billingRepo: billingRepo}
 }
 
-func (s *EngagementUsecase) GetLeaderboard(userID uuid.UUID, query dto.LeaderboardQuery) ([]dto.LeaderboardEntry, error) {
-	rows, err := s.repo.ListLeaderboardSince(resolveLeaderboardStart(query.Type), normalizeLimit(query.Limit))
+func (s *EngagementUsecase) GetLeaderboard(ctx context.Context, userID uuid.UUID, query dto.LeaderboardQuery) ([]dto.LeaderboardEntry, error) {
+	rows, err := s.repo.ListLeaderboardSince(ctx, resolveLeaderboardStart(query.Type), normalizeLimit(query.Limit))
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -53,8 +53,8 @@ func (s *EngagementUsecase) GetLeaderboard(userID uuid.UUID, query dto.Leaderboa
 	return entries, nil
 }
 
-func (s *EngagementUsecase) GetMyLeaderboardStanding(userID uuid.UUID, query dto.LeaderboardQuery) (*dto.LeaderboardEntry, error) {
-	entry, err := s.repo.GetLeaderboardEntrySince(userID, resolveLeaderboardStart(query.Type))
+func (s *EngagementUsecase) GetMyLeaderboardStanding(ctx context.Context, userID uuid.UUID, query dto.LeaderboardQuery) (*dto.LeaderboardEntry, error) {
+	entry, err := s.repo.GetLeaderboardEntrySince(ctx, userID, resolveLeaderboardStart(query.Type))
 	if err != nil {
 		if isNotFoundErr(err) {
 			return &dto.LeaderboardEntry{Rank: 0, UserID: userID.String(), DisplayName: "You"}, nil
@@ -68,13 +68,13 @@ func (s *EngagementUsecase) GetMyLeaderboardStanding(userID uuid.UUID, query dto
 	return &dto.LeaderboardEntry{Rank: entry.CurrentRank, UserID: entry.UserID.String(), DisplayName: display, XP: entry.XP, TimeSpent: entry.TimeSpent, IsCurrent: true}, nil
 }
 
-func (s *EngagementUsecase) GetHeatmap(userID uuid.UUID, query dto.HeatmapQuery) ([]dto.HeatmapPoint, error) {
+func (s *EngagementUsecase) GetHeatmap(ctx context.Context, userID uuid.UUID, query dto.HeatmapQuery) ([]dto.HeatmapPoint, error) {
 	days := resolveDays(query.Range, 180)
-	progressItems, err := s.progressRepo.ListRecentProgressByUser(userID, 1000)
+	progressItems, err := s.progressRepo.ListRecentProgressByUser(ctx, userID, 1000)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-	submissions, err := s.activityRepo.ListSubmissionsByUser(context.Background(), userID, repository.ActivitySubmissionUserFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1000}})
+	submissions, err := s.activityRepo.ListSubmissionsByUser(ctx, userID, repository.ActivitySubmissionUserFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1000}})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -100,12 +100,12 @@ func (s *EngagementUsecase) GetHeatmap(userID uuid.UUID, query dto.HeatmapQuery)
 	return res, nil
 }
 
-func (s *EngagementUsecase) GetDailyActivity(userID uuid.UUID, query dto.DailyActivityQuery) ([]dto.DailyActivityPoint, error) {
-	heatmap, err := s.GetHeatmap(userID, dto.HeatmapQuery{Range: query.Range})
+func (s *EngagementUsecase) GetDailyActivity(ctx context.Context, userID uuid.UUID, query dto.DailyActivityQuery) ([]dto.DailyActivityPoint, error) {
+	heatmap, err := s.GetHeatmap(ctx, userID, dto.HeatmapQuery{Range: query.Range})
 	if err != nil {
 		return nil, err
 	}
-	xpItems, _, err := s.repo.ListXPByUser(userID, repository.Pagination{Page: 1, PageSize: 1000})
+	xpItems, _, err := s.repo.ListXPByUser(ctx, userID, repository.Pagination{Page: 1, PageSize: 1000})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -124,9 +124,9 @@ func (s *EngagementUsecase) GetDailyActivity(userID uuid.UUID, query dto.DailyAc
 	return res, nil
 }
 
-func (s *EngagementUsecase) GetXPHistory(userID uuid.UUID, query dto.PaginationQuery) (*dto.PageResult[dto.XPHistoryItem], error) {
+func (s *EngagementUsecase) GetXPHistory(ctx context.Context, userID uuid.UUID, query dto.PaginationQuery) (*dto.PageResult[dto.XPHistoryItem], error) {
 	query = query.Normalize()
-	items, total, err := s.repo.ListXPByUser(userID, repository.Pagination{Page: query.Page, PageSize: query.PageSize})
+	items, total, err := s.repo.ListXPByUser(ctx, userID, repository.Pagination{Page: query.Page, PageSize: query.PageSize})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -137,8 +137,8 @@ func (s *EngagementUsecase) GetXPHistory(userID uuid.UUID, query dto.PaginationQ
 	return &dto.PageResult[dto.XPHistoryItem]{Items: res, Meta: buildMeta(query, total)}, nil
 }
 
-func (s *EngagementUsecase) GetTimeSpent(userID uuid.UUID) (*dto.TimeSpentSnapshot, error) {
-	daily, err := s.GetDailyActivity(userID, dto.DailyActivityQuery{Range: "30d"})
+func (s *EngagementUsecase) GetTimeSpent(ctx context.Context, userID uuid.UUID) (*dto.TimeSpentSnapshot, error) {
+	daily, err := s.GetDailyActivity(ctx, userID, dto.DailyActivityQuery{Range: "30d"})
 	if err != nil {
 		return nil, err
 	}
@@ -156,17 +156,17 @@ func (s *EngagementUsecase) GetTimeSpent(userID uuid.UUID) (*dto.TimeSpentSnapsh
 	return &dto.TimeSpentSnapshot{MinutesToday: today, MinutesWeek: week, MinutesMonth: month}, nil
 }
 
-func (s *EngagementUsecase) GetGamificationProfile(userID uuid.UUID) (*dto.GamificationProfile, error) {
-	totalXP, err := s.totalXP(userID)
+func (s *EngagementUsecase) GetGamificationProfile(ctx context.Context, userID uuid.UUID) (*dto.GamificationProfile, error) {
+	totalXP, err := s.totalXP(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	streak, err := s.ensureStreak(userID)
+	streak, err := s.ensureStreak(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	level := totalXP/250 + 1
-	achievements, err := s.GetAchievements(userID)
+	achievements, err := s.GetAchievements(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -197,14 +197,14 @@ func (s *EngagementUsecase) GetGamificationProfile(userID uuid.UUID) (*dto.Gamif
 	}, nil
 }
 
-func (s *EngagementUsecase) AddXP(userID uuid.UUID, req dto.AddXPRequest) (*dto.GamificationProfile, error) {
+func (s *EngagementUsecase) AddXP(ctx context.Context, userID uuid.UUID, req dto.AddXPRequest) (*dto.GamificationProfile, error) {
 	if req.Amount <= 0 {
 		return nil, apperr.BadRequest("xp amount must be greater than zero")
 	}
-	if err := s.repo.AddXP(&domain.XPPoint{UserID: userID, TenantID: uuid.Nil, Amount: req.Amount, Reason: req.Reason}); err != nil {
+	if err := s.repo.AddXP(ctx, &domain.XPPoint{UserID: userID, TenantID: uuid.Nil, Amount: req.Amount, Reason: req.Reason}); err != nil {
 		return nil, apperr.Internal(err)
 	}
-	streak, err := s.ensureStreak(userID)
+	streak, err := s.ensureStreak(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -219,23 +219,23 @@ func (s *EngagementUsecase) AddXP(userID uuid.UUID, req dto.AddXPRequest) (*dto.
 			streak.LongestStreak = streak.CurrentStreak
 		}
 		streak.LastActivityDate = &now
-		if err := s.repo.SaveStreak(streak); err != nil {
+		if err := s.repo.SaveStreak(ctx, streak); err != nil {
 			return nil, apperr.Internal(err)
 		}
 	}
-	return s.GetGamificationProfile(userID)
+	return s.GetGamificationProfile(ctx, userID)
 }
 
-func (s *EngagementUsecase) GetStreak(userID uuid.UUID) (map[string]any, error) {
-	streak, err := s.ensureStreak(userID)
+func (s *EngagementUsecase) GetStreak(ctx context.Context, userID uuid.UUID) (map[string]any, error) {
+	streak, err := s.ensureStreak(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	return map[string]any{"current_streak": streak.CurrentStreak, "longest_streak": streak.LongestStreak, "last_activity": formatDatePtr(streak.LastActivityDate)}, nil
 }
 
-func (s *EngagementUsecase) GetAchievements(userID uuid.UUID) ([]dto.Achievement, error) {
-	profile, err := s.GetGamificationProfile(userID)
+func (s *EngagementUsecase) GetAchievements(ctx context.Context, userID uuid.UUID) ([]dto.Achievement, error) {
+	profile, err := s.GetGamificationProfile(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -247,8 +247,8 @@ func (s *EngagementUsecase) GetAchievements(userID uuid.UUID) ([]dto.Achievement
 	}, nil
 }
 
-func (s *EngagementUsecase) GetRecommendations(userID uuid.UUID) ([]dto.RecommendationItem, error) {
-	weakPoints, err := s.GetWeakPoints(userID)
+func (s *EngagementUsecase) GetRecommendations(ctx context.Context, userID uuid.UUID) ([]dto.RecommendationItem, error) {
+	weakPoints, err := s.GetWeakPoints(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -262,8 +262,8 @@ func (s *EngagementUsecase) GetRecommendations(userID uuid.UUID) ([]dto.Recommen
 	return items, nil
 }
 
-func (s *EngagementUsecase) GetNextLesson(userID uuid.UUID) (map[string]any, error) {
-	items, err := s.progressRepo.ListCourseProgressByUser(userID)
+func (s *EngagementUsecase) GetNextLesson(ctx context.Context, userID uuid.UUID) (map[string]any, error) {
+	items, err := s.progressRepo.ListCourseProgressByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -282,8 +282,8 @@ func (s *EngagementUsecase) GetNextLesson(userID uuid.UUID) (map[string]any, err
 	}, nil
 }
 
-func (s *EngagementUsecase) GetLearningPattern(userID uuid.UUID) (*dto.LearningPattern, error) {
-	progressItems, err := s.progressRepo.ListRecentProgressByUser(userID, 200)
+func (s *EngagementUsecase) GetLearningPattern(ctx context.Context, userID uuid.UUID) (*dto.LearningPattern, error) {
+	progressItems, err := s.progressRepo.ListRecentProgressByUser(ctx, userID, 200)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -311,8 +311,8 @@ func (s *EngagementUsecase) GetLearningPattern(userID uuid.UUID) (*dto.LearningP
 	}, nil
 }
 
-func (s *EngagementUsecase) GetWeakPoints(userID uuid.UUID) ([]dto.WeakPoint, error) {
-	avg, err := s.progressRepo.GetAverageScoreByUser(userID)
+func (s *EngagementUsecase) GetWeakPoints(ctx context.Context, userID uuid.UUID) ([]dto.WeakPoint, error) {
+	avg, err := s.progressRepo.GetAverageScoreByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -325,8 +325,8 @@ func (s *EngagementUsecase) GetWeakPoints(userID uuid.UUID) ([]dto.WeakPoint, er
 	return points, nil
 }
 
-func (s *EngagementUsecase) GetImprovement(userID uuid.UUID) ([]dto.ImprovementInsight, error) {
-	profile, err := s.GetGamificationProfile(userID)
+func (s *EngagementUsecase) GetImprovement(ctx context.Context, userID uuid.UUID) ([]dto.ImprovementInsight, error) {
+	profile, err := s.GetGamificationProfile(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -337,13 +337,13 @@ func (s *EngagementUsecase) GetImprovement(userID uuid.UUID) ([]dto.ImprovementI
 	}, nil
 }
 
-func (s *EngagementUsecase) GetPremiumFeatures(userID uuid.UUID) ([]dto.PremiumFeature, error) {
+func (s *EngagementUsecase) GetPremiumFeatures(ctx context.Context, userID uuid.UUID) ([]dto.PremiumFeature, error) {
 	items := []dto.PremiumFeature{
 		{Code: "ai_stream", Title: "AI stream response", Description: "Realtime premium AI coaching"},
 		{Code: "speaking_realtime", Title: "Realtime speaking coach", Description: "Deep pronunciation and fluency feedback"},
 		{Code: "vocab_pro", Title: "Vocabulary Pro", Description: "Advanced vocab set and memory tracking"},
 	}
-	hasPremium, err := s.hasPremium(userID)
+	hasPremium, err := s.hasPremium(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -353,8 +353,8 @@ func (s *EngagementUsecase) GetPremiumFeatures(userID uuid.UUID) ([]dto.PremiumF
 	return items, nil
 }
 
-func (s *EngagementUsecase) UnlockPremiumFeature(userID uuid.UUID, req dto.PremiumUnlockRequest) (map[string]any, error) {
-	plans, _, err := s.billingRepo.ListPlans(repository.BillingPlanListFilter{Pagination: repository.Pagination{Page: 1, PageSize: 10}})
+func (s *EngagementUsecase) UnlockPremiumFeature(ctx context.Context, userID uuid.UUID, req dto.PremiumUnlockRequest) (map[string]any, error) {
+	plans, _, err := s.billingRepo.ListPlans(ctx, repository.BillingPlanListFilter{Pagination: repository.Pagination{Page: 1, PageSize: 10}})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -373,8 +373,8 @@ func (s *EngagementUsecase) UnlockPremiumFeature(userID uuid.UUID, req dto.Premi
 	}, nil
 }
 
-func (s *EngagementUsecase) totalXP(userID uuid.UUID) (int, error) {
-	items, _, err := s.repo.ListXPByUser(userID, repository.Pagination{Page: 1, PageSize: 1000})
+func (s *EngagementUsecase) totalXP(ctx context.Context, userID uuid.UUID) (int, error) {
+	items, _, err := s.repo.ListXPByUser(ctx, userID, repository.Pagination{Page: 1, PageSize: 1000})
 	if err != nil {
 		return 0, apperr.Internal(err)
 	}
@@ -385,8 +385,8 @@ func (s *EngagementUsecase) totalXP(userID uuid.UUID) (int, error) {
 	return total, nil
 }
 
-func (s *EngagementUsecase) ensureStreak(userID uuid.UUID) (*domain.Streak, error) {
-	item, err := s.repo.FindStreakByUser(userID)
+func (s *EngagementUsecase) ensureStreak(ctx context.Context, userID uuid.UUID) (*domain.Streak, error) {
+	item, err := s.repo.FindStreakByUser(ctx, userID)
 	if err == nil {
 		return item, nil
 	}
@@ -394,14 +394,14 @@ func (s *EngagementUsecase) ensureStreak(userID uuid.UUID) (*domain.Streak, erro
 		return nil, apperr.Internal(err)
 	}
 	item = &domain.Streak{UserID: userID, TenantID: uuid.Nil, CurrentStreak: 0, LongestStreak: 0}
-	if err := s.repo.SaveStreak(item); err != nil {
+	if err := s.repo.SaveStreak(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return item, nil
 }
 
-func (s *EngagementUsecase) hasPremium(userID uuid.UUID) (bool, error) {
-	items, total, err := s.billingRepo.ListHistoryByUserID(userID, repository.BillingHistoryListFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1}, Status: "paid"})
+func (s *EngagementUsecase) hasPremium(ctx context.Context, userID uuid.UUID) (bool, error) {
+	items, total, err := s.billingRepo.ListHistoryByUserID(ctx, userID, repository.BillingHistoryListFilter{Pagination: repository.Pagination{Page: 1, PageSize: 1}, Status: "paid"})
 	if err != nil {
 		return false, apperr.Internal(err)
 	}

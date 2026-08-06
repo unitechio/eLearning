@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,10 +20,10 @@ type LeaderboardMetricRow struct {
 }
 
 type EngagementRepository interface {
-	ListLeaderboardSince(since time.Time, limit int) ([]LeaderboardMetricRow, error)
-	GetLeaderboardEntrySince(userID uuid.UUID, since time.Time) (*LeaderboardMetricRow, error)
-	ListXPByUser(userID uuid.UUID, filter dto.Pagination) ([]domain.XPPoint, int64, error)
-	AddXP(point *domain.XPPoint) error
-	FindStreakByUser(userID uuid.UUID) (*domain.Streak, error)
-	SaveStreak(streak *domain.Streak) error
+	ListLeaderboardSince(ctx context.Context, since time.Time, limit int) ([]LeaderboardMetricRow, error)
+	GetLeaderboardEntrySince(ctx context.Context, userID uuid.UUID, since time.Time) (*LeaderboardMetricRow, error)
+	ListXPByUser(ctx context.Context, userID uuid.UUID, filter dto.Pagination) ([]domain.XPPoint, int64, error)
+	AddXP(ctx context.Context, point *domain.XPPoint) error
+	FindStreakByUser(ctx context.Context, userID uuid.UUID) (*domain.Streak, error)
+	SaveStreak(ctx context.Context, streak *domain.Streak) error
 }

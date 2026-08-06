@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
@@ -15,10 +17,10 @@ type CourseProgressView struct {
 }
 
 type ProgressRepository interface {
-	ListCourseProgressByUser(userID uuid.UUID) ([]CourseProgressView, error)
-	GetAverageScoreByUser(userID uuid.UUID) (float64, error)
-	GetCompletedCoursesCountByUser(userID uuid.UUID) (int64, error)
-	ListRecentProgressByUser(userID uuid.UUID, limit int) ([]domain.UserProgress, error)
-	GetCourseProgress(userID, courseID uuid.UUID) (*CourseProgressView, error)
-	GetLessonProgressByUser(userID uuid.UUID) ([]domain.UserProgress, error)
+	ListCourseProgressByUser(ctx context.Context, userID uuid.UUID) ([]CourseProgressView, error)
+	GetAverageScoreByUser(ctx context.Context, userID uuid.UUID) (float64, error)
+	GetCompletedCoursesCountByUser(ctx context.Context, userID uuid.UUID) (int64, error)
+	ListRecentProgressByUser(ctx context.Context, userID uuid.UUID, limit int) ([]domain.UserProgress, error)
+	GetCourseProgress(ctx context.Context, userID, courseID uuid.UUID) (*CourseProgressView, error)
+	GetLessonProgressByUser(ctx context.Context, userID uuid.UUID) ([]domain.UserProgress, error)
 }

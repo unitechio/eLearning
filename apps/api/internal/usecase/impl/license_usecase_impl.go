@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,7 +22,7 @@ func NewLicenseUsecase(repo repository.LicenseRepository) *LicenseUsecase {
 }
 
 // CreateLicense creates a new license with the specified tier
-func (u *LicenseUsecase) CreateLicense(tier domain.LicenseTier, orgID, orgName, contactEmail string, duration *time.Duration) (*domain.License, error) {
+func (u *LicenseUsecase) CreateLicense(ctx context.Context, tier domain.LicenseTier, orgID, orgName, contactEmail string, duration *time.Duration) (*domain.License, error) {
 	// Generate license key
 	licenseKey, err := domain.GenerateLicenseKey()
 	if err != nil {
@@ -69,43 +70,43 @@ func (u *LicenseUsecase) CreateLicense(tier domain.LicenseTier, orgID, orgName, 
 		ExpiresAt:        expiresAt,
 	}
 
-	return u.repo.Create(license)
+	return u.repo.Create(ctx, license)
 }
 
 // GetLicenseByID retrieves a license by ID
-func (u *LicenseUsecase) GetLicenseByID(id string) (*domain.License, error) {
-	return u.repo.GetByID(id)
+func (u *LicenseUsecase) GetLicenseByID(ctx context.Context, id string) (*domain.License, error) {
+	return u.repo.GetByID(ctx, id)
 }
 
 // GetLicenseByKey retrieves a license by license key
-func (u *LicenseUsecase) GetLicenseByKey(key string) (*domain.License, error) {
-	return u.repo.GetByKey(key)
+func (u *LicenseUsecase) GetLicenseByKey(ctx context.Context, key string) (*domain.License, error) {
+	return u.repo.GetByKey(ctx, key)
 }
 
 // GetLicenseByOrganization retrieves a license by organization ID
-func (u *LicenseUsecase) GetLicenseByOrganization(orgID string) (*domain.License, error) {
-	return u.repo.GetByOrganization(orgID)
+func (u *LicenseUsecase) GetLicenseByOrganization(ctx context.Context, orgID string) (*domain.License, error) {
+	return u.repo.GetByOrganization(ctx, orgID)
 }
 
 // GetAllLicenses retrieves all licenses
-func (u *LicenseUsecase) GetAllLicenses() ([]*domain.License, error) {
-	return u.repo.GetAll()
+func (u *LicenseUsecase) GetAllLicenses(ctx context.Context) ([]*domain.License, error) {
+	return u.repo.GetAll(ctx)
 }
 
 // UpdateLicense updates an existing license
-func (u *LicenseUsecase) UpdateLicense(license *domain.License) (*domain.License, error) {
-	return u.repo.Update(license)
+func (u *LicenseUsecase) UpdateLicense(ctx context.Context, license *domain.License) (*domain.License, error) {
+	return u.repo.Update(ctx, license)
 }
 
 // DeleteLicense deletes a license
-func (u *LicenseUsecase) DeleteLicense(id string) error {
-	return u.repo.Delete(id)
+func (u *LicenseUsecase) DeleteLicense(ctx context.Context, id string) error {
+	return u.repo.Delete(ctx, id)
 }
 
 // ActivateLicense activates a license for an organization
-func (u *LicenseUsecase) ActivateLicense(req *domain.LicenseActivationRequest) (*domain.LicenseValidationResponse, error) {
+func (u *LicenseUsecase) ActivateLicense(ctx context.Context, req *domain.LicenseActivationRequest) (*domain.LicenseValidationResponse, error) {
 	// Get license by key
-	license, err := u.repo.GetByKey(req.LicenseKey)
+	license, err := u.repo.GetByKey(ctx, req.LicenseKey)
 	if err != nil {
 		return &domain.LicenseValidationResponse{
 			Valid:   false,
@@ -128,7 +129,7 @@ func (u *LicenseUsecase) ActivateLicense(req *domain.LicenseActivationRequest) (
 	license.OrganizationName = req.OrganizationName
 	license.ContactEmail = req.ContactEmail
 
-	license, err = u.repo.Update(license)
+	license, err = u.repo.Update(ctx, license)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +138,8 @@ func (u *LicenseUsecase) ActivateLicense(req *domain.LicenseActivationRequest) (
 }
 
 // ValidateLicense validates a license key
-func (u *LicenseUsecase) ValidateLicense(licenseKey string) (*domain.LicenseValidationResponse, error) {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) ValidateLicense(ctx context.Context, licenseKey string) (*domain.LicenseValidationResponse, error) {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return &domain.LicenseValidationResponse{
 			Valid:   false,
@@ -150,8 +151,8 @@ func (u *LicenseUsecase) ValidateLicense(licenseKey string) (*domain.LicenseVali
 }
 
 // CheckLicenseExpiry checks if a license is expired and returns days left
-func (u *LicenseUsecase) CheckLicenseExpiry(licenseKey string) (bool, int, error) {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) CheckLicenseExpiry(ctx context.Context, licenseKey string) (bool, int, error) {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return true, 0, err
 	}
@@ -167,8 +168,8 @@ func (u *LicenseUsecase) CheckLicenseExpiry(licenseKey string) (bool, int, error
 }
 
 // TrackAPICall increments the API call counter
-func (u *LicenseUsecase) TrackAPICall(licenseKey string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) TrackAPICall(ctx context.Context, licenseKey string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
@@ -180,13 +181,13 @@ func (u *LicenseUsecase) TrackAPICall(licenseKey string) error {
 
 	// Increment counter
 	license.CurrentAPICalls++
-	_, err = u.repo.Update(license)
+	_, err = u.repo.Update(ctx, license)
 	if err != nil {
 		return err
 	}
 
 	// Log usage
-	return u.repo.LogUsage(&domain.LicenseUsageLog{
+	return u.repo.LogUsage(ctx, &domain.LicenseUsageLog{
 		LicenseID:  license.ID,
 		UsageType:  "api_call",
 		Count:      1,
@@ -195,15 +196,15 @@ func (u *LicenseUsecase) TrackAPICall(licenseKey string) error {
 }
 
 // TrackUserLogin tracks a user login event
-func (u *LicenseUsecase) TrackUserLogin(licenseKey string, userID string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) TrackUserLogin(ctx context.Context, licenseKey string, userID string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
 
 	// Log usage
 	metadata, _ := json.Marshal(map[string]string{"user_id": userID})
-	return u.repo.LogUsage(&domain.LicenseUsageLog{
+	return u.repo.LogUsage(ctx, &domain.LicenseUsageLog{
 		LicenseID:  license.ID,
 		UsageType:  "user_login",
 		Count:      1,
@@ -213,20 +214,20 @@ func (u *LicenseUsecase) TrackUserLogin(licenseKey string, userID string) error 
 }
 
 // TrackStorageUsage updates storage usage
-func (u *LicenseUsecase) TrackStorageUsage(licenseKey string, sizeInGB int) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) TrackStorageUsage(ctx context.Context, licenseKey string, sizeInGB int) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
 
 	license.CurrentStorage = sizeInGB
-	_, err = u.repo.Update(license)
+	_, err = u.repo.Update(ctx, license)
 	return err
 }
 
 // GetUsageStatistics retrieves current usage statistics
-func (u *LicenseUsecase) GetUsageStatistics(licenseKey string) (*domain.LicenseLimits, error) {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) GetUsageStatistics(ctx context.Context, licenseKey string) (*domain.LicenseLimits, error) {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return nil, err
 	}
@@ -242,18 +243,18 @@ func (u *LicenseUsecase) GetUsageStatistics(licenseKey string) (*domain.LicenseL
 }
 
 // ResetMonthlyUsage resets monthly usage counters
-func (u *LicenseUsecase) ResetMonthlyUsage(licenseKey string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) ResetMonthlyUsage(ctx context.Context, licenseKey string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
 
-	return u.repo.ResetMonthlyUsage(license.ID.String())
+	return u.repo.ResetMonthlyUsage(ctx, license.ID.String())
 }
 
 // UpgradeLicense upgrades a license to a higher tier
-func (u *LicenseUsecase) UpgradeLicense(licenseKey string, newTier domain.LicenseTier) (*domain.License, error) {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) UpgradeLicense(ctx context.Context, licenseKey string, newTier domain.LicenseTier) (*domain.License, error) {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return nil, err
 	}
@@ -265,17 +266,17 @@ func (u *LicenseUsecase) UpgradeLicense(licenseKey string, newTier domain.Licens
 	license.MaxAPICalls = maxAPICalls
 	license.MaxStorage = maxStorage
 
-	return u.repo.Update(license)
+	return u.repo.Update(ctx, license)
 }
 
 // DowngradeLicense downgrades a license to a lower tier
-func (u *LicenseUsecase) DowngradeLicense(licenseKey string, newTier domain.LicenseTier) (*domain.License, error) {
-	return u.UpgradeLicense(licenseKey, newTier) // Same logic
+func (u *LicenseUsecase) DowngradeLicense(ctx context.Context, licenseKey string, newTier domain.LicenseTier) (*domain.License, error) {
+	return u.UpgradeLicense(ctx, licenseKey, newTier) // Same logic
 }
 
 // SuspendLicense suspends a license
-func (u *LicenseUsecase) SuspendLicense(licenseKey string, reason string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) SuspendLicense(ctx context.Context, licenseKey string, reason string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
@@ -285,13 +286,13 @@ func (u *LicenseUsecase) SuspendLicense(licenseKey string, reason string) error 
 	license.SuspendedAt = &now
 	license.Notes = &reason
 
-	_, err = u.repo.Update(license)
+	_, err = u.repo.Update(ctx, license)
 	return err
 }
 
 // RevokeLicense revokes a license permanently
-func (u *LicenseUsecase) RevokeLicense(licenseKey string, reason string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) RevokeLicense(ctx context.Context, licenseKey string, reason string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
@@ -299,13 +300,13 @@ func (u *LicenseUsecase) RevokeLicense(licenseKey string, reason string) error {
 	license.Status = string(domain.LicenseStatusRevoked)
 	license.Notes = &reason
 
-	_, err = u.repo.Update(license)
+	_, err = u.repo.Update(ctx, license)
 	return err
 }
 
 // ReactivateLicense reactivates a suspended license
-func (u *LicenseUsecase) ReactivateLicense(licenseKey string) error {
-	license, err := u.repo.GetByKey(licenseKey)
+func (u *LicenseUsecase) ReactivateLicense(ctx context.Context, licenseKey string) error {
+	license, err := u.repo.GetByKey(ctx, licenseKey)
 	if err != nil {
 		return err
 	}
@@ -313,7 +314,7 @@ func (u *LicenseUsecase) ReactivateLicense(licenseKey string) error {
 	license.Status = string(domain.LicenseStatusActive)
 	license.SuspendedAt = nil
 
-	_, err = u.repo.Update(license)
+	_, err = u.repo.Update(ctx, license)
 	return err
 }
 

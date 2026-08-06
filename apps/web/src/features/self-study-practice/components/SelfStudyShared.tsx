@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import React from 'react';
 import { BookOpen, ChevronDown, LogOut, Search, Star, UserRound, X } from 'lucide-react';
 import { Link } from 'react-router-dom';

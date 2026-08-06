@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/pkg/compress"
 	"gorm.io/datatypes"
 )
 
@@ -64,24 +63,24 @@ type IELTSQuestionGroup struct {
 	QuestionFrom  int                     `gorm:"not null;index" json:"question_from"`
 	QuestionTo    int                     `gorm:"not null;index" json:"question_to"`
 	QuestionType  string                  `gorm:"size:120;not null;index" json:"question_type"`
-	Instruction   string                  `gorm:"type:text" json:"instruction"`
-	Payload       compress.CompressedJSON `gorm:"type:blob" json:"payload"`
-	SortOrder     int                     `gorm:"default:0;index" json:"sort_order"`
-	Questions     []IELTSQuestion         `gorm:"foreignKey:GroupID" json:"questions,omitempty"`
+	Instruction   string         `gorm:"type:text" json:"instruction"`
+	Payload       datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"payload"`
+	SortOrder     int            `gorm:"default:0;index" json:"sort_order"`
+	Questions     []IELTSQuestion `gorm:"foreignKey:GroupID" json:"questions,omitempty"`
 }
 
 func (IELTSQuestionGroup) TableName() string { return "ielts_question_groups" }
 
 type IELTSQuestion struct {
 	BaseModel
-	ContentItemID uint                    `gorm:"not null;index" json:"content_item_id"`
-	GroupID       uint                    `gorm:"not null;index" json:"group_id"`
-	QuestionNo    int                     `gorm:"not null;index" json:"question_no"`
-	Prompt        string                  `gorm:"type:text" json:"prompt"`
-	Answer        string                  `gorm:"type:text" json:"answer"`
-	Options       datatypes.JSON          `gorm:"type:jsonb;default:'[]'" json:"options"`
-	Explanation   compress.CompressedJSON `gorm:"type:blob" json:"explanation"`
-	Payload       compress.CompressedJSON `gorm:"type:blob" json:"payload"`
+	ContentItemID uint           `gorm:"not null;index" json:"content_item_id"`
+	GroupID       uint           `gorm:"not null;index" json:"group_id"`
+	QuestionNo    int            `gorm:"not null;index" json:"question_no"`
+	Prompt        string         `gorm:"type:text" json:"prompt"`
+	Answer        string         `gorm:"type:text" json:"answer"`
+	Options       datatypes.JSON `gorm:"type:jsonb;default:'[]'" json:"options"`
+	Explanation   datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"explanation"`
+	Payload       datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"payload"`
 	SortOrder     int                     `gorm:"default:0;index" json:"sort_order"`
 }
 
@@ -176,8 +175,8 @@ type WsAudit struct {
 	DestinationAppID      string    `gorm:"size:120;index" json:"destination_app_id"`
 	Status                string    `gorm:"size:40;index" json:"status"`
 	FinishTime            int64     `json:"finish_time"`
-	MsgRequest            []byte    `gorm:"type:bytea" json:"msg_request,omitempty"`
-	MsgResponse           []byte    `gorm:"type:bytea" json:"msg_response,omitempty"`
+	MsgRequest            datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"msg_request,omitempty"`
+	MsgResponse           datatypes.JSON `gorm:"type:jsonb;default:'{}'" json:"msg_response,omitempty"`
 	RequestInID           string    `gorm:"size:120;index" json:"request_in_id"`
 	RequestOutID          string    `gorm:"size:120;index" json:"request_out_id"`
 	RequestTimeMilisecond int64     `gorm:"index" json:"request_time_milisecond"`

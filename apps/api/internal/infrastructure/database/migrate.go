@@ -1,10 +1,13 @@
 package database
 
 import (
+	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/errs"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -22,12 +25,12 @@ func AutoMigrate(db *gorm.DB) error {
 	}
 
 	// Drop tables that may have incompatible schema (e.g. old integer ID vs new UUID).
-	// This is safe for development/test databases only.
 	if err := dropAndRecreateUserTables(db); err != nil {
 		slog.Warn("Could not clean old tables, attempting migration anyway", slog.String("error", err.Error()))
 	}
 
-	if err := db.AutoMigrate(
+	// Core domain tables
+	if err := safeAutoMigrate(db,
 		&domain.User{},
 		&domain.Customer{},
 		&domain.Role{},
@@ -81,12 +84,12 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.SupportTicketComment{},
 		&domain.WsAudit{},
 	); err != nil {
-		slog.Error("Failed to migrate user tables", slog.String("error", err.Error()))
-		return err
+		slog.Error("Failed to migrate user tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
 	// Authorization related tables
-	if err := db.AutoMigrate(
+	if err := safeAutoMigrate(db,
 		&domain.Module{},
 		&domain.Department{},
 		&domain.Service{},
@@ -95,12 +98,12 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.RoleEnhancedPermission{},
 		&domain.UserEnhancedPermission{},
 	); err != nil {
-		slog.Error("Failed to migrate authorization tables", slog.String("error", err.Error()))
-		return err
+		slog.Error("Failed to migrate authorization tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
 	// Content related tables
-	if err := db.AutoMigrate(
+	if err := safeAutoMigrate(db,
 		&domain.Post{},
 		&domain.Media{},
 		&domain.PostMedia{},
@@ -108,12 +111,12 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.Tag{},
 		&domain.PostSchedule{},
 	); err != nil {
-		slog.Error("Failed to migrate content tables", slog.String("error", err.Error()))
-		return err
+		slog.Error("Failed to migrate content tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
 	// System related tables
-	if err := db.AutoMigrate(
+	if err := safeAutoMigrate(db,
 		&domain.AuditLog{},
 		&domain.SystemSetting{},
 		&domain.Notification{},
@@ -126,56 +129,96 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.DocumentComment{},
 		&domain.DocumentVersion{},
 	); err != nil {
-		slog.Error("Failed to migrate system tables", slog.String("error", err.Error()))
-		return err
+		slog.Error("Failed to migrate system tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
 	slog.Info("Database migrations completed successfully")
 	return nil
 }
 
+// safeAutoMigrate wraps db.AutoMigrate with fallback retry logic if type cast error (SQLSTATE 42846) or FK error (SQLSTATE 23503) occurs.
+func safeAutoMigrate(db *gorm.DB, models ...any) error {
+	if err := db.AutoMigrate(models...); err != nil {
+		errStr := err.Error()
+		if strings.Contains(errStr, "cannot cast") || strings.Contains(errStr, "42846") ||
+			strings.Contains(errStr, "violates foreign key constraint") || strings.Contains(errStr, "23503") {
+			slog.Warn("Schema or foreign key conflict during migration, dropping batch tables and retrying...", slog.String("error", errStr))
+			for _, m := range models {
+				stmt := &gorm.Statement{DB: db}
+				if errParse := stmt.Parse(m); errParse == nil && stmt.Schema != nil {
+					db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS "%s" CASCADE`, stmt.Schema.Table))
+				}
+			}
+			return db.AutoMigrate(models...)
+		}
+		return err
+	}
+	return nil
+}
+
 // dropAndRecreateUserTables detects and fixes incompatible table schemas.
-// For dev/test databases: drops all user-related tables when issues are found.
 func dropAndRecreateUserTables(db *gorm.DB) error {
-	if !db.Migrator().HasTable("users") {
-		return nil
+	type ColInfo struct {
+		TableName  string `gorm:"column:table_name"`
+		ColumnName string `gorm:"column:column_name"`
+		DataType   string `gorm:"column:data_type"`
+		UdtName    string `gorm:"column:udt_name"`
 	}
 
-	needsDrop := false
-
-	// Check 1: id column must be uuid type
-	var colType string
-	db.Raw(`SELECT data_type FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'id' LIMIT 1`).Scan(&colType)
-	if colType != "" && colType != "uuid" {
-		slog.Warn("Schema mismatch: id column is not uuid", slog.String("col_type", colType))
-		needsDrop = true
-	}
-
-	// Check 2: password column must not have NULLs
-	if !needsDrop {
-		var nullCount int64
-		db.Raw("SELECT COUNT(*) FROM users WHERE password IS NULL").Scan(&nullCount)
-		if nullCount > 0 {
-			slog.Warn("Schema mismatch: users table has NULL passwords", slog.Int64("count", nullCount))
-			needsDrop = true
+	// Detect any columns in public schema that expect UUID but are stored as integer/bigint/varchar in Postgres
+	var mismatches []ColInfo
+	query := `
+		SELECT table_name, column_name, data_type, udt_name
+		FROM information_schema.columns
+		WHERE table_schema = 'public'
+		  AND udt_name NOT IN ('uuid')
+		  AND (
+			column_name IN ('user_id', 'manager_id', 'granted_by', 'revoked_by', 'created_by', 'uploaded_by', 'author_id')
+			OR (table_name = 'users' AND column_name = 'id')
+			OR (table_name = 'refresh_tokens' AND column_name = 'id')
+		  )
+	`
+	if err := db.Raw(query).Scan(&mismatches).Error; err == nil && len(mismatches) > 0 {
+		for _, m := range mismatches {
+			slog.Warn("Schema mismatch detected: column is not uuid",
+				slog.String("table", m.TableName),
+				slog.String("column", m.ColumnName),
+				slog.String("udt_name", m.UdtName),
+			)
+		}
+		// If any table has a mismatch, drop all user and authorization tables cascade to prevent orphan FK errors (SQLSTATE 23503)
+		tablesToClean := []string{
+			"role_enhanced_permissions", "user_enhanced_permissions", "enhanced_permissions",
+			"services", "departments", "scopes", "modules",
+			"document_comments", "document_permissions", "documents",
+			"user_permissions", "role_permissions", "user_roles",
+			"refresh_tokens", "sessions", "audit_logs", "activity_logs", "otps",
+			"login_attempts", "customers", "users",
+		}
+		for _, tbl := range tablesToClean {
+			db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS "%s" CASCADE`, tbl))
 		}
 	}
 
-	if !needsDrop {
-		return nil
+	// Fix incompatible bytea vs jsonb column types from legacy migrations
+	for _, tableCheck := range []struct {
+		table  string
+		column string
+	}{
+		{"ws_audit", "msg_request"},
+		{"ielts_question_groups", "payload"},
+		{"ielts_questions", "payload"},
+		{"ielts_questions", "explanation"},
+	} {
+		var colDataType string
+		db.Raw(`SELECT data_type FROM information_schema.columns WHERE table_name = ? AND column_name = ? LIMIT 1`, tableCheck.table, tableCheck.column).Scan(&colDataType)
+		if colDataType == "bytea" {
+			slog.Warn("Schema mismatch: column is bytea, dropping table to recreate as jsonb", slog.String("table", tableCheck.table), slog.String("column", tableCheck.column))
+			db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS "%s" CASCADE`, tableCheck.table))
+		}
 	}
 
-	slog.Warn("Dropping incompatible user-related tables (dev/test mode). They will be recreated.")
-	for _, t := range []string{
-		"user_permissions", "role_permissions", "user_roles",
-		"user_enhanced_permissions", "role_enhanced_permissions",
-		"refresh_tokens", "audit_logs", "activity_logs", "otps",
-		"posts", "post_media", "post_schedules", "media",
-		"customers", "users",
-	} {
-		db.Exec("DROP TABLE IF EXISTS " + t + " CASCADE")
-	}
-	slog.Info("Tables dropped. AutoMigrate will recreate with correct schema.")
 	return nil
 }
 

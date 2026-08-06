@@ -2,6 +2,8 @@ package domain
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // AuditAction represents the type of action performed
@@ -21,10 +23,10 @@ const (
 // AuditLog represents an audit log entry for tracking user actions
 type AuditLog struct {
 	ID           uint        `gorm:"primarykey" json:"id"`
-	UserID       *uint       `gorm:"index" json:"user_id,omitempty"`
+	UserID       *uuid.UUID  `gorm:"type:uuid;index" json:"user_id,omitempty"`
 	Action       AuditAction `gorm:"type:varchar(50);not null;index" json:"action"`
 	Resource     string      `gorm:"size:100;not null;index" json:"resource"` // e.g., "users", "posts"
-	ResourceID   *uint       `gorm:"index" json:"resource_id,omitempty"`
+	ResourceID   *string     `gorm:"size:100;index" json:"resource_id,omitempty"`
 	Description  string      `gorm:"type:text" json:"description"`
 	IPAddress    string      `gorm:"size:45" json:"ip_address"`
 	UserAgent    string      `gorm:"size:500" json:"user_agent"`
@@ -47,10 +49,10 @@ type AuditLog struct {
 type AuditFilter struct {
 	Page       int
 	PageSize   int
-	UserID     *uint
+	UserID     *uuid.UUID
 	Action     *AuditAction
 	Resource   string
-	ResourceID *uint
+	ResourceID *string
 	IPAddress  string
 	Method     string
 	Path       string
@@ -107,12 +109,12 @@ func (SystemSetting) TableName() string {
 // ActivityLog represents user activity tracking
 type ActivityLog struct {
 	BaseModel
-	UserID      uint   `gorm:"index;not null" json:"user_id"`
-	Activity    string `gorm:"size:200;not null" json:"activity"`
-	Description string `gorm:"type:text" json:"description"`
-	IPAddress   string `gorm:"size:45" json:"ip_address"`
-	UserAgent   string `gorm:"size:500" json:"user_agent"`
-	Metadata    string `gorm:"type:jsonb" json:"metadata,omitempty"`
+	UserID      uuid.UUID `gorm:"type:uuid;index;not null" json:"user_id"`
+	Activity    string    `gorm:"size:200;not null" json:"activity"`
+	Description string    `gorm:"type:text" json:"description"`
+	IPAddress   string    `gorm:"size:45" json:"ip_address"`
+	UserAgent   string    `gorm:"size:500" json:"user_agent"`
+	Metadata    string    `gorm:"type:jsonb" json:"metadata,omitempty"`
 
 	// Relationships
 	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`

@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"strings"
 
 	"github.com/google/uuid"
@@ -13,10 +14,11 @@ import (
 type BillingRepository struct{ db *gorm.DB }
 
 func NewBillingRepository(db *gorm.DB) *BillingRepository { return &BillingRepository{db: db} }
-func (r *BillingRepository) ListPlans(filter repository.BillingPlanListFilter) ([]domain.BillingPlan, int64, error) {
+
+func (r *BillingRepository) ListPlans(ctx context.Context, filter repository.BillingPlanListFilter) ([]domain.BillingPlan, int64, error) {
 	var items []domain.BillingPlan
 	var total int64
-	q := r.db.Model(&domain.BillingPlan{}).Where("is_active = ?", true)
+	q := r.db.WithContext(ctx).Model(&domain.BillingPlan{}).Where("is_active = ?", true)
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(name) like ? or lower(description) like ?", like, like)
@@ -30,46 +32,55 @@ func (r *BillingRepository) ListPlans(filter repository.BillingPlanListFilter) (
 	err := q.Order("price asc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
 	return items, total, err
 }
-func (r *BillingRepository) CreatePlan(plan *domain.BillingPlan) error {
-	return r.db.Create(plan).Error
+
+func (r *BillingRepository) CreatePlan(ctx context.Context, plan *domain.BillingPlan) error {
+	return r.db.WithContext(ctx).Create(plan).Error
 }
-func (r *BillingRepository) FindPlanByID(id uuid.UUID) (*domain.BillingPlan, error) {
+
+func (r *BillingRepository) FindPlanByID(ctx context.Context, id uuid.UUID) (*domain.BillingPlan, error) {
 	var item domain.BillingPlan
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
-func (r *BillingRepository) UpdatePlan(plan *domain.BillingPlan) error {
-	return r.db.Save(plan).Error
+
+func (r *BillingRepository) UpdatePlan(ctx context.Context, plan *domain.BillingPlan) error {
+	return r.db.WithContext(ctx).Save(plan).Error
 }
-func (r *BillingRepository) DeletePlan(id uuid.UUID) error {
-	return r.db.Delete(&domain.BillingPlan{}, "id = ?", id).Error
+
+func (r *BillingRepository) DeletePlan(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.BillingPlan{}, "id = ?", id).Error
 }
-func (r *BillingRepository) CreateSubscription(subscription *domain.BillingSubscription) error {
-	return r.db.Create(subscription).Error
+
+func (r *BillingRepository) CreateSubscription(ctx context.Context, subscription *domain.BillingSubscription) error {
+	return r.db.WithContext(ctx).Create(subscription).Error
 }
-func (r *BillingRepository) FindSubscriptionByID(id uuid.UUID) (*domain.BillingSubscription, error) {
+
+func (r *BillingRepository) FindSubscriptionByID(ctx context.Context, id uuid.UUID) (*domain.BillingSubscription, error) {
 	var item domain.BillingSubscription
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
-func (r *BillingRepository) FindActiveSubscriptionByUserID(userID uuid.UUID) (*domain.BillingSubscription, error) {
+
+func (r *BillingRepository) FindActiveSubscriptionByUserID(ctx context.Context, userID uuid.UUID) (*domain.BillingSubscription, error) {
 	var item domain.BillingSubscription
-	if err := r.db.Where("user_id = ? AND status = ?", userID, "active").Order("started_at desc").First(&item).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ? AND status = ?", userID, "active").Order("started_at desc").First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
-func (r *BillingRepository) UpdateSubscription(subscription *domain.BillingSubscription) error {
-	return r.db.Save(subscription).Error
+
+func (r *BillingRepository) UpdateSubscription(ctx context.Context, subscription *domain.BillingSubscription) error {
+	return r.db.WithContext(ctx).Save(subscription).Error
 }
-func (r *BillingRepository) ListSubscriptions(filter repository.BillingSubscriptionListFilter) ([]domain.BillingSubscription, int64, error) {
+
+func (r *BillingRepository) ListSubscriptions(ctx context.Context, filter repository.BillingSubscriptionListFilter) ([]domain.BillingSubscription, int64, error) {
 	var items []domain.BillingSubscription
 	var total int64
-	q := r.db.Model(&domain.BillingSubscription{})
+	q := r.db.WithContext(ctx).Model(&domain.BillingSubscription{})
 	if filter.Status != "" {
 		q = q.Where("status = ?", filter.Status)
 	}
@@ -85,13 +96,15 @@ func (r *BillingRepository) ListSubscriptions(filter repository.BillingSubscript
 	err := q.Order("started_at desc").Scopes(database.Paginate(filter.Page, filter.PageSize)).Find(&items).Error
 	return items, total, err
 }
-func (r *BillingRepository) CreateHistory(history *domain.BillingHistory) error {
-	return r.db.Create(history).Error
+
+func (r *BillingRepository) CreateHistory(ctx context.Context, history *domain.BillingHistory) error {
+	return r.db.WithContext(ctx).Create(history).Error
 }
-func (r *BillingRepository) ListHistoryByUserID(userID uuid.UUID, filter repository.BillingHistoryListFilter) ([]domain.BillingHistory, int64, error) {
+
+func (r *BillingRepository) ListHistoryByUserID(ctx context.Context, userID uuid.UUID, filter repository.BillingHistoryListFilter) ([]domain.BillingHistory, int64, error) {
 	var items []domain.BillingHistory
 	var total int64
-	q := r.db.Model(&domain.BillingHistory{}).Where("user_id = ?", userID)
+	q := r.db.WithContext(ctx).Model(&domain.BillingHistory{}).Where("user_id = ?", userID)
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(plan_name) like ?", like)
@@ -106,26 +119,26 @@ func (r *BillingRepository) ListHistoryByUserID(userID uuid.UUID, filter reposit
 	return items, total, err
 }
 
-func (r *BillingRepository) CreateInvoice(invoice *domain.BillingInvoice) error {
-	return r.db.Create(invoice).Error
+func (r *BillingRepository) CreateInvoice(ctx context.Context, invoice *domain.BillingInvoice) error {
+	return r.db.WithContext(ctx).Create(invoice).Error
 }
 
-func (r *BillingRepository) FindInvoiceByID(id uuid.UUID) (*domain.BillingInvoice, error) {
+func (r *BillingRepository) FindInvoiceByID(ctx context.Context, id uuid.UUID) (*domain.BillingInvoice, error) {
 	var item domain.BillingInvoice
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *BillingRepository) UpdateInvoice(invoice *domain.BillingInvoice) error {
-	return r.db.Save(invoice).Error
+func (r *BillingRepository) UpdateInvoice(ctx context.Context, invoice *domain.BillingInvoice) error {
+	return r.db.WithContext(ctx).Save(invoice).Error
 }
 
-func (r *BillingRepository) ListInvoices(filter repository.BillingAdminListFilter) ([]domain.BillingInvoice, int64, error) {
+func (r *BillingRepository) ListInvoices(ctx context.Context, filter repository.BillingAdminListFilter) ([]domain.BillingInvoice, int64, error) {
 	var items []domain.BillingInvoice
 	var total int64
-	q := r.db.Model(&domain.BillingInvoice{})
+	q := r.db.WithContext(ctx).Model(&domain.BillingInvoice{})
 	if filter.Status != "" {
 		q = q.Where("status = ?", filter.Status)
 	}
@@ -143,26 +156,26 @@ func (r *BillingRepository) ListInvoices(filter repository.BillingAdminListFilte
 	return items, total, err
 }
 
-func (r *BillingRepository) CreatePaymentTransaction(tx *domain.PaymentTransaction) error {
-	return r.db.Create(tx).Error
+func (r *BillingRepository) CreatePaymentTransaction(ctx context.Context, tx *domain.PaymentTransaction) error {
+	return r.db.WithContext(ctx).Create(tx).Error
 }
 
-func (r *BillingRepository) FindPaymentTransactionByID(id uuid.UUID) (*domain.PaymentTransaction, error) {
+func (r *BillingRepository) FindPaymentTransactionByID(ctx context.Context, id uuid.UUID) (*domain.PaymentTransaction, error) {
 	var item domain.PaymentTransaction
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *BillingRepository) UpdatePaymentTransaction(tx *domain.PaymentTransaction) error {
-	return r.db.Save(tx).Error
+func (r *BillingRepository) UpdatePaymentTransaction(ctx context.Context, tx *domain.PaymentTransaction) error {
+	return r.db.WithContext(ctx).Save(tx).Error
 }
 
-func (r *BillingRepository) ListPaymentTransactions(filter repository.BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error) {
+func (r *BillingRepository) ListPaymentTransactions(ctx context.Context, filter repository.BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error) {
 	var items []domain.PaymentTransaction
 	var total int64
-	q := r.db.Model(&domain.PaymentTransaction{})
+	q := r.db.WithContext(ctx).Model(&domain.PaymentTransaction{})
 	if filter.Status != "" {
 		q = q.Where("status = ?", filter.Status)
 	}
@@ -180,32 +193,32 @@ func (r *BillingRepository) ListPaymentTransactions(filter repository.BillingAdm
 	return items, total, err
 }
 
-func (r *BillingRepository) FindCourseByID(id uuid.UUID) (*domain.Course, error) {
+func (r *BillingRepository) FindCourseByID(ctx context.Context, id uuid.UUID) (*domain.Course, error) {
 	var item domain.Course
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *BillingRepository) FindVoucherByCode(code string) (*domain.Voucher, error) {
+func (r *BillingRepository) FindVoucherByCode(ctx context.Context, code string) (*domain.Voucher, error) {
 	var item domain.Voucher
-	if err := r.db.Where("code = ? AND is_active = ?", code, true).First(&item).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("code = ? AND is_active = ?", code, true).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *BillingRepository) CreateVoucher(v *domain.Voucher) error {
-	return r.db.Create(v).Error
+func (r *BillingRepository) CreateVoucher(ctx context.Context, v *domain.Voucher) error {
+	return r.db.WithContext(ctx).Create(v).Error
 }
 
-func (r *BillingRepository) ListVouchers() ([]domain.Voucher, error) {
+func (r *BillingRepository) ListVouchers(ctx context.Context) ([]domain.Voucher, error) {
 	var items []domain.Voucher
-	err := r.db.Order("created_at desc").Find(&items).Error
+	err := r.db.WithContext(ctx).Order("created_at desc").Find(&items).Error
 	return items, err
 }
 
-func (r *BillingRepository) DeleteVoucher(id uuid.UUID) error {
-	return r.db.Delete(&domain.Voucher{}, "id = ?", id).Error
+func (r *BillingRepository) DeleteVoucher(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.Voucher{}, "id = ?", id).Error
 }

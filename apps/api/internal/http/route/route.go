@@ -50,6 +50,7 @@ type Handlers struct {
 	Media            *handler.MediaHandler
 	TTS              *handler.TTSHandler
 	Document         *handler.DocumentHandler
+	Integration      *handler.IntegrationHandler
 }
 
 type Guards struct {
@@ -446,6 +447,16 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				{
 					adminDocs.POST("/upload", h.Document.Upload)
 					adminDocs.POST("/upload-public", h.Document.UploadPublicAsset)
+				}
+				adminIntegrations := admin.Group("/integrations")
+				{
+					adminIntegrations.GET("/hub", h.Integration.GetUserIntegrationsHub)
+					adminIntegrations.GET("/marketplace", h.Integration.ListMarketplaceCatalog)
+					adminIntegrations.POST("/connect", h.Integration.ConnectIntegration)
+					adminIntegrations.POST("/reconnect", h.Integration.ReconnectIntegration)
+					adminIntegrations.POST("/disconnect", h.Integration.DisconnectIntegration)
+					adminIntegrations.PUT("/config", h.Integration.UpdateConfig)
+					adminIntegrations.POST("/sync", h.Integration.TriggerSync)
 				}
 			}
 

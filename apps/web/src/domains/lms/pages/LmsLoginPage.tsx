@@ -3,24 +3,24 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLogin, useAuthStore } from "@/domains/auth";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { 
-  Sparkles, 
-  HelpCircle, 
-  Check, 
-  ClipboardList, 
-  Volume2, 
-  BookMarked, 
-  Dumbbell, 
-  PenTool, 
-  BookOpen, 
-  Compass, 
-  GraduationCap, 
+import {
+  Sparkles,
+  HelpCircle,
+  Check,
+  ClipboardList,
+  Volume2,
+  BookMarked,
+  Dumbbell,
+  PenTool,
+  BookOpen,
+  Compass,
+  GraduationCap,
   Award,
   Lock,
   Mail,
   ArrowRight
 } from "lucide-react";
-import mascotReader from "@/assets/mascot_reader.png";
+import mascotReader from "@/assets/images/lms/auth/mascot_reader.png";
 
 export function LmsLoginPage() {
   const navigate = useNavigate();
@@ -192,9 +192,9 @@ export function LmsLoginPage() {
           </div>
 
           <figure className="relative max-h-56 mt-8 flex justify-center z-10" aria-label="DOL mascot reading image">
-            <img 
-              alt="Mascot Reader" 
-              src={mascotReader} 
+            <img
+              alt="Mascot Reader"
+              src={mascotReader}
               className="h-full object-contain max-h-48 drop-shadow-xl"
             />
           </figure>

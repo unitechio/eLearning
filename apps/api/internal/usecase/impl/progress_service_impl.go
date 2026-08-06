@@ -30,8 +30,7 @@ func NewProgressService(progressRepo repository.ProgressRepository) *ProgressUse
 }
 
 func (s *UserInsightsUsecase) GetProgress(ctx context.Context, userID uuid.UUID) ([]dto.UserProgress, error) {
-	_ = ctx
-	items, err := s.progressRepo.ListCourseProgressByUser(userID)
+	items, err := s.progressRepo.ListCourseProgressByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -58,16 +57,15 @@ func (s *UserInsightsUsecase) GetProgress(ctx context.Context, userID uuid.UUID)
 }
 
 func (s *UserInsightsUsecase) GetStats(ctx context.Context, userID uuid.UUID) (*dto.UserStats, error) {
-	_ = ctx
-	avg, err := s.progressRepo.GetAverageScoreByUser(userID)
+	avg, err := s.progressRepo.GetAverageScoreByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-	completed, err := s.progressRepo.GetCompletedCoursesCountByUser(userID)
+	completed, err := s.progressRepo.GetCompletedCoursesCountByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
-	progressItems, err := s.progressRepo.GetLessonProgressByUser(userID)
+	progressItems, err := s.progressRepo.GetLessonProgressByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -81,7 +79,7 @@ func (s *UserInsightsUsecase) GetStats(ctx context.Context, userID uuid.UUID) (*
 
 func (s *UserInsightsUsecase) GetActivities(ctx context.Context, userID uuid.UUID, query dto.UserActivityListQuery) (*dto.PageResult[dto.UserActivityItem], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	progressItems, err := s.progressRepo.ListRecentProgressByUser(userID, 100)
+	progressItems, err := s.progressRepo.ListRecentProgressByUser(ctx, userID, 100)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -134,8 +132,7 @@ func (s *UserInsightsUsecase) GetActivities(ctx context.Context, userID uuid.UUI
 }
 
 func (s *ProgressUsecase) GetOverall(ctx context.Context, userID uuid.UUID) (*dto.ProgressSnapshot, error) {
-	_ = ctx
-	items, err := s.progressRepo.ListCourseProgressByUser(userID)
+	items, err := s.progressRepo.ListCourseProgressByUser(ctx, userID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -153,12 +150,11 @@ func (s *ProgressUsecase) GetOverall(ctx context.Context, userID uuid.UUID) (*dt
 }
 
 func (s *ProgressUsecase) GetCourseProgress(ctx context.Context, userID uuid.UUID, courseID string) (map[string]any, error) {
-	_ = ctx
 	id, err := uuid.Parse(courseID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid course id")
 	}
-	item, err := s.progressRepo.GetCourseProgress(userID, id)
+	item, err := s.progressRepo.GetCourseProgress(ctx, userID, id)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("course progress", courseID)
@@ -180,7 +176,6 @@ func (s *ProgressUsecase) GetCourseProgress(ctx context.Context, userID uuid.UUI
 }
 
 func (s *ProgressUsecase) GetActivityProgress(ctx context.Context, userID uuid.UUID, activityID string) (map[string]any, error) {
-	_ = ctx
 	return map[string]any{"activity_id": activityID, "user_id": userID.String(), "status": "tracked", "progress_percent": 100, "attempts": strconv.Itoa(1)}, nil
 }
 

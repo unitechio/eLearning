@@ -3,22 +3,22 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLogin, useAuthStore } from "@/domains/auth";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { 
-  Sparkles, 
-  HelpCircle, 
-  Check, 
-  ClipboardList, 
-  Volume2, 
-  BookMarked, 
-  Dumbbell, 
-  PenTool, 
-  BookOpen, 
-  Compass, 
-  GraduationCap, 
+import {
+  Sparkles,
+  HelpCircle,
+  Check,
+  ClipboardList,
+  Volume2,
+  BookMarked,
+  Dumbbell,
+  PenTool,
+  BookOpen,
+  Compass,
+  GraduationCap,
   Award,
   Lock
 } from "lucide-react";
-import mascotReader from "@/assets/mascot_reader.png";
+import mascotReader from "@/assets/images/lms/auth/mascot_reader.png";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -46,7 +46,6 @@ export function LoginPage() {
     }
   };
 
-  // Mock Google sign in
   const handleGoogleLogin = () => {
     // For demo/dev purposes, log in using default credential
     setEmail("admin@eenglish.com");
@@ -76,32 +75,31 @@ export function LoginPage() {
       </div>
 
       <section className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 bg-white rounded-[32px] shadow-2xl border border-slate-100 overflow-hidden min-h-[600px]">
-        
+
         {/* Left Side: Auth Forms */}
         <article className="lg:col-span-6 p-8 sm:p-12 md:p-16 flex flex-col justify-center border-r border-slate-100">
           <header className="mb-8 space-y-6">
-            {/* DOL Logo */}
+            {/* UNI Logo */}
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-600 text-white font-black text-2xl shadow-md">
                 D
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-black tracking-tight text-slate-900 leading-none">DOL IELTS</span>
-                <span className="text-[10px] font-black tracking-widest text-slate-400 leading-none mt-1">ĐÌNH LỰC</span>
+                <span className="text-base font-black tracking-tight text-slate-900 leading-none">UNI IELTS</span>
+                <span className="text-[10px] font-black tracking-widest text-slate-400 leading-none mt-1">UNITECH </span>
               </div>
               <hr className="h-6 w-px bg-slate-200 mx-2" aria-hidden="true" />
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">Super LMS</span>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Đăng nhập vào DOL superLMS</h1>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Đăng nhập vào UNI superLMS</h1>
               <p className="text-sm font-semibold text-slate-500 leading-relaxed">
-                Vui lòng đăng nhập bằng Gmail bạn đã đăng ký khóa học tại DOL English để vào khóa học.
+                Vui lòng đăng nhập bằng Gmail bạn đã đăng ký khóa học tại UNI English để vào khóa học.
               </p>
             </div>
           </header>
 
-          {/* Error alert */}
           {error && (
             <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-xs font-black" role="alert">
               {error}
@@ -114,7 +112,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-2xl transition shadow-lg shadow-red-600/20"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-lg transition shadow-lg shadow-red-600/20"
               >
                 <img alt="Google" className="w-5 h-5 bg-white rounded-full p-0.5" src="https://www.svgrepo.com/show/475656/google-color.svg" />
                 Sign in with Google
@@ -135,7 +133,7 @@ export function LoginPage() {
                   Địa chỉ Email
                 </label>
                 <Input
-                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
+                  className="w-full px-4 py-3 rounded-md border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
                   id="email"
                   type="email"
                   placeholder="name@example.com"
@@ -150,7 +148,7 @@ export function LoginPage() {
                   Mật khẩu
                 </label>
                 <Input
-                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
+                  className="w-full px-4 py-3 rounded-md border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition font-semibold text-slate-800 text-sm"
                   id="password"
                   type="password"
                   placeholder="••••••••"
@@ -164,15 +162,15 @@ export function LoginPage() {
                 <Button
                   type="submit"
                   disabled={loginMutation.isPending}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-2xl transition shadow-lg shadow-red-600/20"
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-black text-sm rounded-md transition shadow-lg shadow-red-600/20"
                 >
                   {loginMutation.isPending ? "Đang xác thực..." : "Đăng nhập ngay"}
                 </Button>
-                
+
                 <button
                   type="button"
                   onClick={() => setShowEmailForm(false)}
-                  className="px-6 py-3 border border-slate-200 hover:bg-slate-50 text-slate-600 font-black text-sm rounded-2xl transition"
+                  className="px-6 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 font-black text-sm rounded-md transition"
                 >
                   Quay lại
                 </button>
@@ -181,7 +179,7 @@ export function LoginPage() {
           )}
 
           <footer className="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400">
-            <span>© {new Date().getFullYear()} DOL English</span>
+            <span>© {new Date().getFullYear()} UNI English</span>
             <div className="flex gap-4">
               <Link to="#" className="hover:text-slate-600 transition">Điều khoản</Link>
               <Link to="#" className="hover:text-slate-600 transition">Bảo mật</Link>
@@ -191,7 +189,7 @@ export function LoginPage() {
 
         {/* Right Side: Features showcase & Mascot */}
         <article className="lg:col-span-6 bg-slate-50/50 p-8 sm:p-12 md:p-16 flex flex-col justify-between relative overflow-hidden">
-          
+
           <header className="space-y-6">
             {/* Tag badge */}
             <div>
@@ -205,7 +203,7 @@ export function LoginPage() {
               {practiceFeatures.map((feat) => {
                 const IconComponent = feat.icon;
                 return (
-                  <div 
+                  <div
                     key={feat.name}
                     className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/20 transition-all duration-300 group"
                     role="listitem"
@@ -222,8 +220,8 @@ export function LoginPage() {
 
           {/* Mascot Illustration */}
           <figure className="relative z-20 mt-12 flex justify-end items-end h-48 sm:h-56">
-            <img 
-              alt="DOL superLMS Space Mascot Reading Book" 
+            <img
+              alt="UNI superLMS Space Mascot Reading Book"
               src={mascotReader}
               className="h-full object-contain drop-shadow-2xl animate-bounce-slow"
             />
@@ -234,7 +232,7 @@ export function LoginPage() {
       </section>
 
       {/* Floating help action */}
-      <button 
+      <button
         type="button"
         title="Trợ giúp"
         aria-label="Help Button"
@@ -245,4 +243,3 @@ export function LoginPage() {
     </main>
   );
 }
-

@@ -22,7 +22,6 @@ func NewSpeakingExtrasService(repo repository.SpeakingRepository, llm ai.LLMServ
 }
 
 func (s *SpeakingExtrasUsecase) StartSession(ctx context.Context, userID uuid.UUID) (*dto.SpeakingSession, error) {
-	_ = ctx
 	session := &domain.SpeakingSession{
 		UserID:     userID,
 		TenantID:   uuid.Nil,
@@ -30,15 +29,14 @@ func (s *SpeakingExtrasUsecase) StartSession(ctx context.Context, userID uuid.UU
 		PromptText: "Academy English speaking practice",
 		StartedAt:  time.Now().UTC(),
 	}
-	if err := s.repo.CreateSession(session); err != nil {
+	if err := s.repo.CreateSession(ctx, session); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapSpeakingSession(session), nil
 }
 
 func (s *SpeakingExtrasUsecase) StopSession(ctx context.Context, userID uuid.UUID) (*dto.SpeakingSession, error) {
-	_ = ctx
-	session, err := s.repo.FindLatestActiveSessionByUser(userID)
+	session, err := s.repo.FindLatestActiveSessionByUser(ctx, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("speaking session", "active")
@@ -59,19 +57,18 @@ func (s *SpeakingExtrasUsecase) StopSession(ctx context.Context, userID uuid.UUI
 	session.Feedback = eval.Feedback
 	session.Accuracy = &eval.Score
 	session.StoppedAt = &now
-	if err := s.repo.UpdateSession(session); err != nil {
+	if err := s.repo.UpdateSession(ctx, session); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapSpeakingSession(session), nil
 }
 
 func (s *SpeakingExtrasUsecase) GetSession(ctx context.Context, userID uuid.UUID, id string) (*dto.SpeakingSession, error) {
-	_ = ctx
 	sessionID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid session id")
 	}
-	item, err := s.repo.FindSessionByIDForUser(sessionID, userID)
+	item, err := s.repo.FindSessionByIDForUser(ctx, sessionID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("speaking session", id)
@@ -82,7 +79,6 @@ func (s *SpeakingExtrasUsecase) GetSession(ctx context.Context, userID uuid.UUID
 }
 
 func (s *SpeakingExtrasUsecase) CheckPronunciation(ctx context.Context, req dto.PronunciationRequest) (*dto.PronunciationResult, error) {
-	_ = ctx
 	eval, err := s.llm.EvaluateSpeaking(req.Text)
 	if err != nil {
 		return nil, apperr.Internal(err)

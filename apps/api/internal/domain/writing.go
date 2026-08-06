@@ -14,7 +14,7 @@ type WritingSubmission struct {
 	AIScore         float64                 `json:"ai_score"`
 	AIFeedback      string                  `json:"ai_feedback" gorm:"type:text"`
 	TeacherAudioURL string                  `json:"teacher_audio_url" gorm:"type:text"`
-	AnnotatedText   compress.CompressedText `json:"annotated_text" gorm:"type:blob"`   // JSON array of annotations (compressed)
-	CriteriaScores  compress.CompressedText `json:"criteria_scores" gorm:"type:blob"` // JSON representation of radar chart metrics (compressed)
+	AnnotatedText   compress.CompressedText `json:"annotated_text" gorm:"type:bytea"`   // JSON array of annotations (compressed)
+	CriteriaScores  compress.CompressedText `json:"criteria_scores" gorm:"type:bytea"` // JSON representation of radar chart metrics (compressed)
 	IsGraded        bool                    `json:"is_graded" gorm:"default:false;index"`
 }

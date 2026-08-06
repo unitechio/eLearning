@@ -18,9 +18,8 @@ func NewListeningService(repo repository.ListeningRepository) *ListeningUsecase 
 }
 
 func (s *ListeningUsecase) ListLessons(ctx context.Context, query dto.ListeningLessonListQuery) (*dto.PageResult[dto.ListeningLesson], error) {
-	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListLessons(repository.ListeningLessonListFilter{
+	items, total, err := s.repo.ListLessons(ctx, repository.ListeningLessonListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Domain:     "english",
@@ -41,12 +40,11 @@ func (s *ListeningUsecase) ListLessons(ctx context.Context, query dto.ListeningL
 }
 
 func (s *ListeningUsecase) GetLesson(ctx context.Context, id string) (*dto.ListeningLesson, error) {
-	_ = ctx
 	lessonID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid listening lesson id")
 	}
-	item, err := s.repo.FindLessonByID(lessonID)
+	item, err := s.repo.FindLessonByID(ctx, lessonID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("listening lesson", id)
@@ -57,12 +55,11 @@ func (s *ListeningUsecase) GetLesson(ctx context.Context, id string) (*dto.Liste
 }
 
 func (s *ListeningUsecase) SubmitLesson(ctx context.Context, id string, req dto.ListeningSubmissionRequest) (map[string]any, error) {
-	_ = ctx
 	lessonID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid listening lesson id")
 	}
-	item, err := s.repo.FindLessonByID(lessonID)
+	item, err := s.repo.FindLessonByID(ctx, lessonID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("listening lesson", id)

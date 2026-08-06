@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import { 
   FileText, 
-  Search, 
-  Filter, 
   ArrowRight, 
-  MessageSquare, 
   Clock, 
-  CheckCircle, 
-  AlertCircle, 
+  Award,
   Sparkles, 
   Volume2, 
-  Award,
-  ChevronRight,
-  TrendingUp,
   BookOpen
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
-import { cn } from '@/shared/lib';
+import { 
+  AdminPageLayout, AdminCard, AdminCardHeader, AdminCardTitle, AdminCardContent, AdminDataTable, type AdminColumnDef 
+} from '@/shared/components/admin';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Badge } from '@/shared/components/ui/badge';
+import { toast } from 'sonner';
+import { cn } from '@/shared/lib/utils';
 
 interface WritingSubmission {
   id: string;
@@ -60,14 +63,14 @@ export function AdminWritingReviewPage() {
   const [scoreOverride, setScoreOverride] = useState<number>(7.0);
 
   // Fetch writing submissions
-  const { data: submissionsData, isLoading } = useQuery({
+  const { data: submissionsData, isLoading, error } = useQuery({
     queryKey: ['admin-writing-submissions'],
     queryFn: async () => {
       try {
         const res = await apiClient.get<{ data: WritingSubmission[] }>('/admin/writing/submissions?page=1&page_size=50');
         return res.data.data;
-      } catch (err) {
-        // Fallback mock data if API is not fully running or fails
+      } catch {
+        // Fallback mock data
         return [
           {
             id: "1",
@@ -99,45 +102,39 @@ export function AdminWritingReviewPage() {
     }
   });
 
-  const reviewMutation = useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
-      const res = await apiClient.post(`/admin/writing/submissions/${id}/review`, payload);
+  const gradeMutation = useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: { audio_url: string; note: string; score: number } }) => {
+      const res = await apiClient.post(`/admin/writing/submissions/${id}/grade`, payload);
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Đã lưu kết quả chấm bài!');
       void queryClient.invalidateQueries({ queryKey: ['admin-writing-submissions'] });
+      setReviewNote('');
+      setAudioUrl('');
       setSelectedId(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi lưu kết quả chấm');
     }
   });
-
-  const selectedSubmission = (submissionsData ?? []).find(s => s.id === selectedId);
-
-  // Set default values when submission changes
-  React.useEffect(() => {
-    if (selectedSubmission) {
-      setReviewNote(selectedSubmission.review_note ?? '');
-      setAudioUrl(selectedSubmission.teacher_audio_url ?? '');
-      setScoreOverride(selectedSubmission.ai_score);
-    }
-  }, [selectedSubmission]);
 
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedId) return;
-    
-    reviewMutation.mutate({
+    gradeMutation.mutate({
       id: selectedId,
       payload: {
-        teacher_audio_url: audioUrl,
-        review_note: reviewNote,
-        score_override: scoreOverride,
-        annotated_text: JSON.stringify(DEFAULT_ANNOTATIONS),
-        criteria_scores: JSON.stringify(DEFAULT_CRITERIA)
+        audio_url: audioUrl,
+        note: reviewNote,
+        score: scoreOverride
       }
     });
   };
 
-  const filteredSubmissions = (submissionsData ?? []).filter(sub => {
+  const submissions = submissionsData || [];
+
+  const filteredSubmissions = submissions.filter(sub => {
     const matchesSearch = sub.user_email.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           sub.prompt.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || 
@@ -146,264 +143,223 @@ export function AdminWritingReviewPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const selectedSubmission = submissions.find(s => s.id === selectedId);
+
+  const columns: AdminColumnDef<WritingSubmission>[] = [
+    {
+      header: 'Học viên',
+      cell: (sub) => <span className="font-semibold text-foreground text-[13px]">{sub.user_email}</span>,
+    },
+    {
+      header: 'Đề bài',
+      cell: (sub) => <span className="text-muted-foreground truncate max-w-xs inline-block">{sub.prompt}</span>,
+    },
+    {
+      header: 'Số từ',
+      cell: (sub) => <span className="text-muted-foreground text-xs">{sub.word_count} từ</span>,
+    },
+    {
+      header: 'Điểm AI',
+      cell: (sub) => (
+        <Badge variant="outline" className="text-[11px] font-medium border-border/80 text-muted-foreground inline-flex items-center gap-1">
+          <Award className="h-3.5 w-3.5" />
+          <span>Band {sub.ai_score}</span>
+        </Badge>
+      ),
+    },
+    {
+      header: 'Trạng thái',
+      cell: (sub) => (
+        <Badge className={cn("text-[11px] font-semibold border-transparent", sub.is_graded ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400')}>
+          {sub.is_graded ? 'Đã chấm' : 'Chờ chấm'}
+        </Badge>
+      ),
+    },
+    {
+      header: 'Nộp lúc',
+      cell: (sub) => <span className="text-muted-foreground text-xs">{new Date(sub.created_at).toLocaleDateString()}</span>,
+    },
+  ];
+
+  const rightActions = (
+    <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)}>
+      <SelectTrigger className="w-[150px] h-10 rounded-[10px] text-xs font-semibold bg-slate-50/50">
+        <SelectValue placeholder="Trạng thái" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">Mọi trạng thái</SelectItem>
+        <SelectItem value="pending">Chờ chấm</SelectItem>
+        <SelectItem value="graded">Đã chấm</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 p-6 lg:p-8 text-slate-800 dark:text-slate-100 font-sans">
-      {/* Header banner */}
-      <header className="rounded-3xl bg-gradient-to-r from-violet-600 to-purple-600 p-8 text-white shadow-xl">
-        <section className="flex items-center gap-4">
-          <figure className="rounded-2xl bg-white/20 p-3" aria-hidden="true">
-            <BookOpen className="h-8 w-8" />
-          </figure>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Writing Submissions Review</h1>
-            <p className="mt-1 text-purple-100">
-              Chấm và nhận xét chi tiết bài thi viết của học viên kèm audio giảng bài riêng
-            </p>
-          </div>
-        </section>
-      </header>
-
-      {/* Filter and search row */}
-      <section className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white dark:bg-slate-950 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl" aria-label="Filters">
-        <label className="relative flex items-center w-full sm:max-w-md">
-          <Search className="absolute left-3.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Tìm theo email học viên hoặc đề bài..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-purple-500"
+    <AdminPageLayout
+      title="Writing Review Console"
+      description="Chấm điểm các bài viết Writing Task 1/Task 2, thu âm phản hồi và sửa chi tiết lỗi diễn đạt."
+      icon={BookOpen}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 w-full items-start">
+        {/* Left List Pane */}
+        <div className="lg:col-span-3">
+          <AdminDataTable
+            data={filteredSubmissions}
+            columns={columns}
+            isLoading={isLoading}
+            error={error}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            searchPlaceholder="Tìm theo email học viên..."
+            rightActions={rightActions}
+            emptyTitle="Không tìm thấy bài viết nào"
+            emptyDescription="Bài viết nộp bởi học viên sẽ xuất hiện tại đây để chấm điểm."
           />
-        </label>
+        </div>
 
-        <label htmlFor="status-select" className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-slate-400" />
-          <select
-            id="status-select"
-            value={statusFilter}
-            onChange={(e: any) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold focus:outline-none"
-          >
-            <option value="all">Tất cả bài viết</option>
-            <option value="pending">Chờ chấm bài</option>
-            <option value="graded">Đã chấm xong</option>
-          </select>
-        </label>
-      </section>
-
-      {/* Main content grid */}
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Submissions table/list */}
-        <section className="lg:col-span-2 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-sm overflow-hidden" aria-label="Submission List">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4">Danh sách nộp bài</h2>
-          
-          {isLoading ? (
-            <div className="py-20 text-center text-slate-400 font-bold">Đang tải danh sách bài viết...</div>
-          ) : filteredSubmissions.length === 0 ? (
-            <div className="py-20 text-center text-slate-450 font-bold">Không tìm thấy bài viết nào phù hợp</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold min-w-[600px]">
-                <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-850">
-                  <tr>
-                    <th className="px-4 py-3">Học viên</th>
-                    <th className="px-4 py-3">Đề bài</th>
-                    <th className="px-4 py-3">Số từ</th>
-                    <th className="px-4 py-3">Điểm AI</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3">Nộp lúc</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
-                  {filteredSubmissions.map(sub => (
-                    <tr 
-                      key={sub.id}
-                      onClick={() => setSelectedId(sub.id)}
-                      className={cn(
-                        "hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition",
-                        selectedId === sub.id ? "bg-purple-50/40 dark:bg-purple-950/10" : ""
-                      )}
-                    >
-                      <td className="px-4 py-4 truncate max-w-[150px] font-black text-slate-900 dark:text-white">
-                        {sub.user_email}
-                      </td>
-                      <td className="px-4 py-4 truncate max-w-[200px] text-slate-500">
-                        {sub.prompt}
-                      </td>
-                      <td className="px-4 py-4 text-slate-500">{sub.word_count} từ</td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex items-center gap-1 bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 px-2 py-0.5 rounded-lg">
-                          <Award className="h-3.5 w-3.5" />
-                          <span>Band {sub.ai_score}</span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className={cn(
-                          "px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase",
-                          sub.is_graded 
-                            ? "bg-green-150 text-green-700 dark:bg-green-950/30 dark:text-green-400" 
-                            : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
-                        )}>
-                          {sub.is_graded ? 'Đã chấm' : 'Chờ chấm'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-slate-400 text-[10px]">
-                        {new Date(sub.created_at).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
-        {/* Selected Submission Side Panel/Drawer */}
-        <aside className="lg:col-span-1" aria-label="Review workspace">
+        {/* Selected Submission Side Panel */}
+        <aside className="lg:col-span-1">
           {selectedSubmission ? (
-            <article className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-sm space-y-6">
-              <header className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 pb-3">
+            <AdminCard className="rounded-2xl">
+              <AdminCardHeader className="flex flex-row justify-between items-center border-b border-border/60 pb-3.5">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white">Chấm & Sửa bài</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{selectedSubmission.user_email}</p>
+                  <AdminCardTitle className="text-sm font-semibold text-foreground">Chấm & Sửa bài</AdminCardTitle>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{selectedSubmission.user_email}</p>
                 </div>
-                <button 
-                  type="button"
+                <Button 
+                  type="button" 
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
                   onClick={() => setSelectedId(null)}
-                  className="text-slate-400 hover:text-slate-600 p-1"
-                  aria-label="Close panel"
                 >
                   ✕
-                </button>
-              </header>
+                </Button>
+              </AdminCardHeader>
 
-              {/* Prompt and Essay Response */}
-              <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-1">
-                <div>
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Đề bài (Prompt)</h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed mt-1 font-semibold">
-                    {selectedSubmission.prompt}
-                  </p>
+              <AdminCardContent className="space-y-6 pt-4">
+                {/* Prompt and Essay Response */}
+                <div className="space-y-4 max-h-[30vh] overflow-y-auto pr-1 no-scrollbar">
+                  <div>
+                    <h4 className="text-[10px] font-bold text-[#98A2B3] dark:text-[#71717a] uppercase tracking-[0.12em] mb-1">Đề bài (Prompt)</h4>
+                    <p className="text-xs text-foreground/80 leading-relaxed font-semibold">
+                      {selectedSubmission.prompt}
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-[10px] font-bold text-[#98A2B3] dark:text-[#71717a] uppercase tracking-[0.12em] mb-1">Bài viết của học viên</h4>
+                    <p className="text-xs text-foreground leading-relaxed p-3 bg-slate-50 dark:bg-slate-900 border border-border/80 rounded-2xl whitespace-pre-wrap font-sans">
+                      {selectedSubmission.response}
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bài viết của học viên</h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed mt-1.5 p-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-2xl whitespace-pre-wrap font-sans font-semibold">
-                    {selectedSubmission.response}
-                  </p>
-                </div>
-              </div>
-
-              {/* Annotated Suggestions Chips */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lỗi chi tiết cần sửa (Annotated notes)</h4>
-                <div className="space-y-2">
-                  {DEFAULT_ANNOTATIONS.map((ann, idx) => (
-                    <div 
-                      key={idx}
-                      className={cn(
-                        "p-3 rounded-2xl border text-xs font-semibold space-y-1.5",
-                        ann.type === 'grammar' 
-                          ? 'border-red-100 dark:border-red-950/20 bg-red-50/20 dark:bg-red-950/10 text-red-800 dark:text-red-400' 
-                          : ann.type === 'idiom' 
-                            ? 'border-amber-100 dark:border-amber-950/20 bg-amber-50/20 dark:bg-amber-950/10 text-amber-800 dark:text-amber-400' 
-                            : 'border-blue-100 dark:border-blue-950/20 bg-blue-50/20 dark:bg-blue-950/10 text-blue-800 dark:text-blue-400'
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold underline">{ann.original}</span>
-                        <ArrowRight className="h-3 w-3" />
-                        <span className="font-black bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-100 dark:border-slate-800">{ann.alternative}</span>
+                {/* Annotated Suggestions Chips */}
+                <div className="space-y-3 border-t border-border/50 pt-4">
+                  <h4 className="text-[10px] font-bold text-[#98A2B3] dark:text-[#71717a] uppercase tracking-[0.12em]">Lỗi chi tiết cần sửa</h4>
+                  <div className="space-y-2">
+                    {DEFAULT_ANNOTATIONS.map((ann, idx) => (
+                      <div 
+                        key={idx}
+                        className={cn(
+                          "p-3.5 rounded-2xl border text-xs font-semibold space-y-1.5",
+                          ann.type === 'grammar' 
+                            ? 'border-red-100 dark:border-red-950/20 bg-red-50/20 dark:bg-red-950/10 text-red-800 dark:text-red-400' 
+                            : ann.type === 'idiom' 
+                              ? 'border-amber-100 dark:border-amber-950/20 bg-amber-50/20 dark:bg-amber-950/10 text-amber-800 dark:text-amber-400' 
+                              : 'border-blue-100 dark:border-blue-950/20 bg-blue-50/20 dark:bg-blue-950/10 text-blue-800 dark:text-blue-400'
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold underline">{ann.original}</span>
+                          <ArrowRight className="h-3 w-3" />
+                          <span className="font-bold bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-border/60">{ann.alternative}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">{ann.explanation}</p>
                       </div>
-                      <p className="text-[10px] text-slate-500 leading-relaxed font-medium">{ann.explanation}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Criteria detail scores bar */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiêu chí chấm điểm (IELTS Criteria)</h4>
-                <div className="space-y-2.5">
-                  {Object.entries(DEFAULT_CRITERIA).map(([criteria, score]) => (
-                    <div key={criteria} className="space-y-1 text-xs">
-                      <div className="flex justify-between font-bold">
-                        <span>{criteria}</span>
-                        <span>{score}</span>
+                {/* Criteria detail scores bar */}
+                <div className="space-y-3 border-t border-border/50 pt-4">
+                  <h4 className="text-[10px] font-bold text-[#98A2B3] dark:text-[#71717a] uppercase tracking-[0.12em]">Tiêu chí chấm điểm</h4>
+                  <div className="space-y-2.5">
+                    {Object.entries(DEFAULT_CRITERIA).map(([criteria, score]) => (
+                      <div key={criteria} className="space-y-1 text-xs">
+                        <div className="flex justify-between font-bold">
+                          <span className="text-foreground">{criteria}</span>
+                          <span className="font-mono text-foreground">{score}</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-indigo-500 rounded-full" 
+                            style={{ width: `${(score / 9) * 100}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-purple-500 rounded-full" 
-                          style={{ width: `${(score / 9) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Teacher Form */}
-              <form onSubmit={handleSubmitReview} className="border-t border-slate-100 dark:border-slate-900 pt-4 space-y-4">
-                <h4 className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-wider">
-                  Teacher Feedback & Grade
-                </h4>
+                {/* Teacher Form */}
+                <form onSubmit={handleSubmitReview} className="border-t border-border/65 pt-4 space-y-4">
+                  <h4 className="text-[10px] font-bold text-[#98A2B3] dark:text-[#71717a] uppercase tracking-[0.12em]">
+                    Teacher Feedback & Grade
+                  </h4>
 
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">Nhận xét bài viết (Review notes)</span>
-                  <textarea
-                    value={reviewNote}
-                    onChange={(e) => setReviewNote(e.target.value)}
-                    placeholder="Viết nhận xét của giáo viên..."
-                    className="w-full min-h-20 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:border-purple-500 focus:outline-none"
-                    required
-                  />
-                </label>
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-muted-foreground">Nhận xét của Giáo viên</Label>
+                    <Textarea 
+                      value={reviewNote} 
+                      onChange={(e) => setReviewNote(e.target.value)}
+                      placeholder="Ghi chú phản hồi cho học viên..."
+                      className="min-h-[80px] rounded-[10px] text-xs"
+                      required
+                    />
+                  </div>
 
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 flex items-center gap-1">
-                    <Volume2 className="h-4.5 w-4.5 text-slate-400" />
-                    <span>Thu âm giảng bài (Teacher Audio URL)</span>
-                  </span>
-                  <input
-                    type="url"
-                    value={audioUrl}
-                    onChange={(e) => setAudioUrl(e.target.value)}
-                    placeholder="https://example.com/feedback-recording.mp3"
-                    className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:border-purple-500 focus:outline-none"
-                  />
-                </label>
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-muted-foreground">Đường dẫn file âm thanh phản hồi (Audio URL)</Label>
+                    <Input 
+                      type="url" 
+                      value={audioUrl} 
+                      onChange={(e) => setAudioUrl(e.target.value)}
+                      placeholder="https://example.com/audio.mp3"
+                      className="h-10 rounded-[10px] text-xs"
+                    />
+                  </div>
 
-                <label className="block space-y-1.5">
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">Điểm tổng kết (Score Override)</span>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    max="9"
-                    value={scoreOverride}
-                    onChange={(e) => setScoreOverride(Number(e.target.value))}
-                    className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs focus:border-purple-500 focus:outline-none"
-                    required
-                  />
-                </label>
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-semibold text-muted-foreground">Điểm số tổng kết (Band Score)</Label>
+                    <Input 
+                      type="number" 
+                      step="0.5" 
+                      min="1" 
+                      max="9"
+                      value={scoreOverride} 
+                      onChange={(e) => setScoreOverride(Number(e.target.value))}
+                      className="h-10 rounded-[10px] font-mono text-sm"
+                      required
+                    />
+                  </div>
 
-                <button
-                  type="submit"
-                  disabled={reviewMutation.isPending}
-                  className="w-full rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-3.5 transition flex items-center justify-center gap-2"
-                >
-                  {reviewMutation.isPending ? 'Đang cập nhật...' : 'Hoàn tất chấm bài & Gửi review'}
-                </button>
-              </form>
-            </article>
+                  <Button type="submit" disabled={gradeMutation.isPending} className="w-full h-10 rounded-[10px] text-sm font-semibold">
+                    {gradeMutation.isPending ? 'Đang gửi...' : 'Gửi kết quả'}
+                  </Button>
+                </form>
+              </AdminCardContent>
+            </AdminCard>
           ) : (
-            <div className="rounded-3xl border border-dashed border-slate-250 dark:border-slate-800 p-8 text-center text-slate-400">
-              <AlertCircle className="h-10 w-10 mx-auto mb-2 opacity-40" />
-              <p className="text-xs font-bold">Chọn một bài viết để bắt đầu sửa bài</p>
+            <div className="text-center py-16 text-muted-foreground border border-dashed border-border/80 rounded-2xl bg-slate-50/20 dark:bg-slate-900/10">
+              Chọn bài viết ở danh sách để tiến hành chấm bài.
             </div>
           )}
         </aside>
       </div>
-    </main>
+    </AdminPageLayout>
   );
 }
+
+export default AdminWritingReviewPage;

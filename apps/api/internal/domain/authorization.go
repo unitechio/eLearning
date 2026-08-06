@@ -3,6 +3,7 @@ package domain
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -32,15 +33,15 @@ func (Module) TableName() string {
 // Department represents a department/division within an organization
 type Department struct {
 	BaseModel
-	ModuleID    uint   `gorm:"index;not null" json:"module_id"`
-	Code        string `gorm:"uniqueIndex;size:50;not null" json:"code"` // e.g., "sales", "editorial", "it"
-	Name        string `gorm:"size:100;not null" json:"name"`
-	DisplayName string `gorm:"size:200" json:"display_name"`
-	Description string `gorm:"type:text" json:"description"`
-	ParentID    *uint  `gorm:"index" json:"parent_id,omitempty"`  // For hierarchical departments
-	ManagerID   *uint  `gorm:"index" json:"manager_id,omitempty"` // Department manager (User ID would be UUID in real case)
-	IsActive    bool   `gorm:"default:true" json:"is_active"`
-	IsSystem    bool   `gorm:"default:false" json:"is_system"`
+	ModuleID    uint       `gorm:"index;not null" json:"module_id"`
+	Code        string     `gorm:"uniqueIndex;size:50;not null" json:"code"` // e.g., "sales", "editorial", "it"
+	Name        string     `gorm:"size:100;not null" json:"name"`
+	DisplayName string     `gorm:"size:200" json:"display_name"`
+	Description string     `gorm:"type:text" json:"description"`
+	ParentID    *uint      `gorm:"index" json:"parent_id,omitempty"`  // For hierarchical departments
+	ManagerID   *uuid.UUID `gorm:"type:uuid;index" json:"manager_id,omitempty"` // Department manager
+	IsActive    bool       `gorm:"default:true" json:"is_active"`
+	IsSystem    bool       `gorm:"default:false" json:"is_system"`
 
 	// Relationships
 	Module   Module       `gorm:"foreignKey:ModuleID" json:"module,omitempty"`
@@ -96,9 +97,6 @@ type Scope struct {
 	Level       ScopeLevel `gorm:"type:varchar(20);not null" json:"level"`
 	Priority    int        `gorm:"default:0" json:"priority"` // Higher priority = broader scope
 	IsSystem    bool       `gorm:"default:false" json:"is_system"`
-
-	// Relationships
-	// Permissions []Permission `gorm:"foreignKey:ScopeID" json:"permissions,omitempty"`
 }
 
 // TableName specifies the table name for Scope
@@ -106,43 +104,25 @@ func (Scope) TableName() string {
 	return "scopes"
 }
 
-// PermissionAction represents available actions
-type PermissionAction string
-
-const (
-	ActionCreate  PermissionAction = "create"
-	ActionRead    PermissionAction = "read"
-	ActionUpdate  PermissionAction = "update"
-	ActionDelete  PermissionAction = "delete"
-	ActionExecute PermissionAction = "execute"
-	ActionManage  PermissionAction = "manage" // Full control
-	ActionApprove PermissionAction = "approve"
-	ActionPublish PermissionAction = "publish"
-	ActionExport  PermissionAction = "export"
-	ActionImport  PermissionAction = "import"
-)
-
-// EnhancedPermission represents a granular permission with full hierarchy
-// This will replace the existing Permission model
+// EnhancedPermission represents a fine-grained permission with module/dept/service/scope structure
 type EnhancedPermission struct {
 	BaseModel
-	ModuleID     uint             `gorm:"index;not null" json:"module_id"`
-	DepartmentID uint             `gorm:"index;not null" json:"department_id"`
-	ServiceID    uint             `gorm:"index;not null" json:"service_id"`
-	ScopeID      uint             `gorm:"index;not null" json:"scope_id"`
-	Resource     string           `gorm:"size:100;not null" json:"resource"` // e.g., "users", "posts"
-	Action       PermissionAction `gorm:"type:varchar(50);not null" json:"action"`
-	Code         string           `gorm:"uniqueIndex;size:200;not null" json:"code"` // Auto-generated unique code
-	DisplayName  string           `gorm:"size:200" json:"display_name"`
-	Description  string           `gorm:"type:text" json:"description"`
-	IsSystem     bool             `gorm:"default:false" json:"is_system"`
+	ModuleID     uint        `gorm:"index;not null" json:"module_id"`
+	DepartmentID uint        `gorm:"index;not null" json:"department_id"`
+	ServiceID    uint        `gorm:"index;not null" json:"service_id"`
+	ScopeID      uint        `gorm:"index;not null" json:"scope_id"`
+	Resource     string      `gorm:"size:100;not null" json:"resource"`
+	Action       AuditAction `gorm:"type:varchar(50);not null" json:"action"`
+	Code         string      `gorm:"uniqueIndex;size:250;not null" json:"code"` // Auto-generated: module:department:service:scope:resource:action
+	Name         string      `gorm:"size:200;not null" json:"name"`
+	Description  string      `gorm:"type:text" json:"description"`
+	IsSystem     bool        `gorm:"default:false" json:"is_system"`
 
 	// Relationships
 	Module     Module     `gorm:"foreignKey:ModuleID" json:"module,omitempty"`
 	Department Department `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
 	Service    Service    `gorm:"foreignKey:ServiceID" json:"service,omitempty"`
 	Scope      Scope      `gorm:"foreignKey:ScopeID" json:"scope,omitempty"`
-	Roles      []Role     `gorm:"many2many:role_enhanced_permissions;" json:"roles,omitempty"`
 }
 
 // TableName specifies the table name for EnhancedPermission
@@ -184,14 +164,14 @@ func (RoleEnhancedPermission) TableName() string {
 
 // UserEnhancedPermission represents direct user permissions
 type UserEnhancedPermission struct {
-	UserID       uint       `gorm:"primaryKey" json:"user_id"` // Will be UUID in migration
+	UserID       uuid.UUID  `gorm:"type:uuid;primaryKey" json:"user_id"`
 	PermissionID uint       `gorm:"primaryKey" json:"permission_id"`
-	GrantedBy    *uint      `gorm:"index" json:"granted_by,omitempty"` // Who granted this permission
+	GrantedBy    *uuid.UUID `gorm:"type:uuid;index" json:"granted_by,omitempty"` // Who granted this permission
 	GrantedAt    time.Time  `json:"granted_at"`
 	ExpiresAt    *time.Time `json:"expires_at,omitempty"` // Optional expiration
 	IsRevoked    bool       `gorm:"default:false" json:"is_revoked"`
 	RevokedAt    *time.Time `json:"revoked_at,omitempty"`
-	RevokedBy    *uint      `json:"revoked_by,omitempty"`
+	RevokedBy    *uuid.UUID `gorm:"type:uuid" json:"revoked_by,omitempty"`
 }
 
 // TableName specifies the table name for UserEnhancedPermission

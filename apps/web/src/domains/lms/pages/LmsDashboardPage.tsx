@@ -77,6 +77,7 @@ export function LmsDashboardPage() {
 
   React.useEffect(() => {
     setActiveTab(getTabFromPath());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const data = dashboardQuery.data;

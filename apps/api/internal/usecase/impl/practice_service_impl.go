@@ -25,12 +25,10 @@ func NewPracticeService(repo repository.PracticeRepository, vocabularyRepo repos
 }
 
 func (s *PracticeUsecase) GetModes(ctx context.Context) (*dto.PracticeModesResponse, error) {
-	_ = ctx
 	return &dto.PracticeModesResponse{Modes: []string{"dictation", "shadowing", "speaking", "writing", "vocabulary"}}, nil
 }
 
 func (s *PracticeUsecase) Start(ctx context.Context, userID uuid.UUID, req dto.PracticeStartRequest) (*dto.PracticeSessionItem, error) {
-	_ = ctx
 	mode := strings.ToLower(strings.TrimSpace(req.Mode))
 	if mode == "" {
 		return nil, apperr.BadRequest("mode is required")
@@ -95,19 +93,18 @@ func (s *PracticeUsecase) Start(ctx context.Context, userID uuid.UUID, req dto.P
 		Difficulty:   difficulty,
 		StartedAt:    time.Now().UTC(),
 	}
-	if err := s.repo.CreateSession(session); err != nil {
+	if err := s.repo.CreateSession(ctx, session); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapPracticeSession(session), nil
 }
 
 func (s *PracticeUsecase) Submit(ctx context.Context, userID uuid.UUID, req dto.PracticeSubmitRequest) (*dto.PracticeSessionItem, error) {
-	_ = ctx
 	sessionID, err := uuid.Parse(req.SessionID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid session id")
 	}
-	session, err := s.repo.FindSessionByIDForUser(sessionID, userID)
+	session, err := s.repo.FindSessionByIDForUser(ctx, sessionID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("practice session", req.SessionID)
@@ -124,7 +121,7 @@ func (s *PracticeUsecase) Submit(ctx context.Context, userID uuid.UUID, req dto.
 	session.Feedback = eval.Feedback
 	session.Score = &eval.Score
 	session.SubmittedAt = &now
-	if err := s.repo.SaveSession(session); err != nil {
+	if err := s.repo.SaveSession(ctx, session); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapPracticeSession(session), nil
@@ -139,9 +136,8 @@ func (s *PracticeUsecase) AnalyzeSentence(ctx context.Context, userID uuid.UUID,
 }
 
 func (s *PracticeUsecase) ListPronunciationHistory(ctx context.Context, userID uuid.UUID, query dto.PronunciationHistoryQuery) (*dto.PageResult[dto.PronunciationHistoryItem], error) {
-	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListPronunciationHistory(userID, repository.PronunciationHistoryFilter{
+	items, total, err := s.repo.ListPronunciationHistory(ctx, userID, repository.PronunciationHistoryFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Kind:       query.Kind,
 	})
@@ -163,12 +159,11 @@ func (s *PracticeUsecase) ListPronunciationHistory(ctx context.Context, userID u
 }
 
 func (s *PracticeUsecase) LookupDictionary(ctx context.Context, userID uuid.UUID, word string) (*dto.DictionaryLookupResponse, error) {
-	_ = ctx
 	word = strings.TrimSpace(word)
 	if word == "" {
 		return nil, apperr.BadRequest("word is required")
 	}
-	if existing, err := s.repo.FindLatestDictionaryHistoryByWord(userID, word); err == nil {
+	if existing, err := s.repo.FindLatestDictionaryHistoryByWord(ctx, userID, word); err == nil {
 		return mapDictionaryHistory(existing), nil
 	}
 	definition := buildDictionaryEntry(word)
@@ -183,7 +178,7 @@ func (s *PracticeUsecase) LookupDictionary(ctx context.Context, userID uuid.UUID
 		Collocation: definition.Collocation,
 		Example:     definition.Example,
 	}
-	if err := s.repo.CreateDictionaryHistory(item); err != nil {
+	if err := s.repo.CreateDictionaryHistory(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapDictionaryHistory(item), nil
@@ -194,7 +189,7 @@ func (s *PracticeUsecase) SaveDictionaryWord(ctx context.Context, userID uuid.UU
 	if err != nil {
 		return nil, err
 	}
-	history, err := s.repo.FindLatestDictionaryHistoryByWord(userID, req.Word)
+	history, err := s.repo.FindLatestDictionaryHistoryByWord(ctx, userID, req.Word)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -210,7 +205,7 @@ func (s *PracticeUsecase) SaveDictionaryWord(ctx context.Context, userID uuid.UU
 		Example:     history.Example,
 		Saved:       true,
 	}
-	if err := s.repo.CreateDictionaryHistory(saved); err != nil {
+	if err := s.repo.CreateDictionaryHistory(ctx, saved); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	item.Saved = true
@@ -218,9 +213,8 @@ func (s *PracticeUsecase) SaveDictionaryWord(ctx context.Context, userID uuid.UU
 }
 
 func (s *PracticeUsecase) ListDictionaryHistory(ctx context.Context, userID uuid.UUID, query dto.DictionaryHistoryQuery) (*dto.PageResult[dto.DictionaryLookupResponse], error) {
-	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListDictionaryHistory(userID, repository.DictionaryHistoryFilter{
+	items, total, err := s.repo.ListDictionaryHistory(ctx, userID, repository.DictionaryHistoryFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Saved:      query.Saved,
@@ -244,9 +238,8 @@ func (s *PracticeUsecase) ReadingSaveWord(ctx context.Context, userID uuid.UUID,
 }
 
 func (s *PracticeUsecase) ListVocabularySets(ctx context.Context, userID uuid.UUID, query dto.VocabularySetListQuery) (*dto.PageResult[dto.VocabularySetItem], error) {
-	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListVocabularySets(userID, repository.VocabularySetFilter{
+	items, total, err := s.repo.ListVocabularySets(ctx, userID, repository.VocabularySetFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Domain:     query.Domain,
@@ -256,7 +249,7 @@ func (s *PracticeUsecase) ListVocabularySets(ctx context.Context, userID uuid.UU
 	}
 	res := make([]dto.VocabularySetItem, 0, len(items))
 	for _, item := range items {
-		words, _ := s.repo.ListVocabularySetWords(item.ID)
+		words, _ := s.repo.ListVocabularySetWords(ctx, item.ID)
 		mappedWords := make([]string, 0, len(words))
 		for _, word := range words {
 			mappedWords = append(mappedWords, word.Word)
@@ -267,28 +260,26 @@ func (s *PracticeUsecase) ListVocabularySets(ctx context.Context, userID uuid.UU
 }
 
 func (s *PracticeUsecase) CreateVocabularySet(ctx context.Context, userID uuid.UUID, req dto.VocabularySetRequest) (*dto.VocabularySetItem, error) {
-	_ = ctx
 	item := &domain.VocabularySet{UserID: userID, TenantID: uuid.Nil, Name: req.Name, Description: req.Description, Domain: fallback(req.Domain, "english")}
-	if err := s.repo.CreateVocabularySet(item); err != nil {
+	if err := s.repo.CreateVocabularySet(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return &dto.VocabularySetItem{ID: item.ID.String(), Name: item.Name, Description: item.Description, Domain: item.Domain}, nil
 }
 
 func (s *PracticeUsecase) GetVocabularySet(ctx context.Context, userID uuid.UUID, id string) (*dto.VocabularySetItem, error) {
-	_ = ctx
 	setID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid set id")
 	}
-	item, err := s.repo.FindVocabularySetByIDForUser(setID, userID)
+	item, err := s.repo.FindVocabularySetByIDForUser(ctx, setID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("vocabulary set", id)
 		}
 		return nil, apperr.Internal(err)
 	}
-	words, err := s.repo.ListVocabularySetWords(item.ID)
+	words, err := s.repo.ListVocabularySetWords(ctx, item.ID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -300,12 +291,11 @@ func (s *PracticeUsecase) GetVocabularySet(ctx context.Context, userID uuid.UUID
 }
 
 func (s *PracticeUsecase) AddWordToSet(ctx context.Context, userID uuid.UUID, id string, req dto.VocabularySetAddWordRequest) (*dto.VocabularySetItem, error) {
-	_ = ctx
 	setID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid set id")
 	}
-	if _, err := s.repo.FindVocabularySetByIDForUser(setID, userID); err != nil {
+	if _, err := s.repo.FindVocabularySetByIDForUser(ctx, setID, userID); err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("vocabulary set", id)
 		}
@@ -315,21 +305,19 @@ func (s *PracticeUsecase) AddWordToSet(ctx context.Context, userID uuid.UUID, id
 	if err != nil {
 		return nil, apperr.BadRequest("invalid word id")
 	}
-	if _, err := s.vocabularyRepo.FindWordByID(wordID); err != nil {
+	if _, err := s.vocabularyRepo.FindWordByID(ctx, wordID); err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("word", req.WordID)
 		}
 		return nil, apperr.Internal(err)
 	}
-	if err := s.repo.AddWordToSet(&domain.VocabularySetWord{SetID: setID, WordID: wordID}); err != nil {
+	if err := s.repo.AddWordToSet(ctx, &domain.VocabularySetWord{SetID: setID, WordID: wordID}); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return s.GetVocabularySet(ctx, userID, id)
 }
 
 func (s *PracticeUsecase) StreamResponse(ctx context.Context, userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
-	_ = ctx
-	_ = userID
 	return map[string]any{
 		"chunks": []string{
 			"Let's refine your sentence in real time.",
@@ -349,8 +337,6 @@ func (s *PracticeUsecase) PronunciationFeedback(ctx context.Context, userID uuid
 }
 
 func (s *PracticeUsecase) ContextCorrection(ctx context.Context, userID uuid.UUID, req dto.AIStreamRequest) (map[string]any, error) {
-	_ = ctx
-	_ = userID
 	return map[string]any{
 		"original":  req.Message,
 		"corrected": "Academy English context correction: " + strings.TrimSpace(req.Message),
@@ -359,7 +345,6 @@ func (s *PracticeUsecase) ContextCorrection(ctx context.Context, userID uuid.UUI
 }
 
 func (s *PracticeUsecase) savePronunciation(ctx context.Context, userID uuid.UUID, kind, source string) (*dto.PronunciationHistoryItem, error) {
-	_ = ctx
 	eval, err := s.llm.EvaluateSpeaking(source)
 	if err != nil {
 		return nil, apperr.Internal(err)
@@ -372,7 +357,7 @@ func (s *PracticeUsecase) savePronunciation(ctx context.Context, userID uuid.UUI
 		Accuracy:   eval.Score,
 		Feedback:   eval.Feedback,
 	}
-	if err := s.repo.CreatePronunciationHistory(item); err != nil {
+	if err := s.repo.CreatePronunciationHistory(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return &dto.PronunciationHistoryItem{

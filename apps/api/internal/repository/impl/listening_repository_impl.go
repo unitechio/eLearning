@@ -1,11 +1,12 @@
 package impl
 
 import (
+	"context"
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
+	"github.com/unitechio/eLearning/apps/api/internal/infrastructure/database"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"gorm.io/gorm"
 )
@@ -18,10 +19,10 @@ func NewListeningRepository(db *gorm.DB) *ListeningRepository {
 	return &ListeningRepository{db: db}
 }
 
-func (r *ListeningRepository) ListLessons(filter repository.ListeningLessonListFilter) ([]domain.ListeningLesson, int64, error) {
+func (r *ListeningRepository) ListLessons(ctx context.Context, filter repository.ListeningLessonListFilter) ([]domain.ListeningLesson, int64, error) {
 	var items []domain.ListeningLesson
 	var total int64
-	q := r.db.Model(&domain.ListeningLesson{}).Where("is_active = ?", true)
+	q := r.db.WithContext(ctx).Model(&domain.ListeningLesson{}).Where("is_active = ?", true)
 	if filter.Search != "" {
 		like := "%" + strings.ToLower(filter.Search) + "%"
 		q = q.Where("lower(title) like ? or lower(description) like ? or lower(transcript) like ?", like, like, like)
@@ -41,9 +42,9 @@ func (r *ListeningRepository) ListLessons(filter repository.ListeningLessonListF
 	return items, total, nil
 }
 
-func (r *ListeningRepository) FindLessonByID(id uuid.UUID) (*domain.ListeningLesson, error) {
+func (r *ListeningRepository) FindLessonByID(ctx context.Context, id uuid.UUID) (*domain.ListeningLesson, error) {
 	var item domain.ListeningLesson
-	if err := r.db.Where("id = ? AND is_active = ?", id, true).First(&item).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id = ? AND is_active = ?", id, true).First(&item).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil

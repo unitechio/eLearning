@@ -17,9 +17,17 @@ import (
 	storage "github.com/unitechio/eLearning/apps/api/internal/infrastructure/filestorage"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 	"github.com/unitechio/eLearning/apps/api/internal/utils/constants"
-	"github.com/unitechio/eLearning/apps/api/pkg/compress"
 	"gorm.io/datatypes"
 )
+
+// IELTSServiceDeps groups the optional and required dependencies for IELTSService.
+// Using a deps struct makes it impossible to accidentally call the wrong constructor
+// variant and makes it obvious which fields are optional.
+type IELTSServiceDeps struct {
+	Repo         repository.IELTSRepository // required
+	Cache        *redis.Client              // optional — set to nil to disable caching
+	AssetStorage *storage.MinioStorage      // optional — set to nil to disable asset uploads
+}
 
 type IELTSService struct {
 	repo         repository.IELTSRepository
@@ -27,16 +35,14 @@ type IELTSService struct {
 	assetStorage *storage.MinioStorage
 }
 
-func NewIELTSService(repo repository.IELTSRepository) *IELTSService {
-	return &IELTSService{repo: repo}
-}
-
-func NewIELTSServiceWithCache(repo repository.IELTSRepository, cache *redis.Client) *IELTSService {
-	return &IELTSService{repo: repo, cache: cache}
-}
-
-func NewIELTSServiceWithDependencies(repo repository.IELTSRepository, cache *redis.Client, assetStorage *storage.MinioStorage) *IELTSService {
-	return &IELTSService{repo: repo, cache: cache, assetStorage: assetStorage}
+// NewIELTSService constructs an IELTSService from its dependencies.
+// Cache and AssetStorage are optional; set to nil to disable those features.
+func NewIELTSService(deps IELTSServiceDeps) *IELTSService {
+	return &IELTSService{
+		repo:         deps.Repo,
+		cache:        deps.Cache,
+		assetStorage: deps.AssetStorage,
+	}
 }
 
 func (s *IELTSService) ListContent(ctx context.Context, filter dto.IELTSContentFilter) ([]domain.IELTSContentItem, int64, error) {
@@ -147,7 +153,7 @@ func (s *IELTSService) StartAttempt(ctx context.Context, userID uuid.UUID, slug 
 		s.writeAudit(ctx, audit, 1001, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
 		return nil, err
 	}
-	s.writeAudit(ctx, audit, 1001, constants.WsAuditStatusSuccess, req, attempt, start)
+	s.writeAudit(ctx, audit, domain.AuditCodeStartAttempt, constants.WsAuditStatusSuccess, req, attempt, start)
 	return attempt, nil
 }
 
@@ -160,7 +166,7 @@ func (s *IELTSService) SubmitAttempt(ctx context.Context, userID uuid.UUID, atte
 	}
 	questions, err := s.repo.ListAnswerQuestions(ctx, attempt.ContentItemID)
 	if err != nil {
-		s.writeAudit(ctx, audit, 1002, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
+		s.writeAudit(ctx, audit, domain.AuditCodeSubmitAttempt, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
 		return nil, err
 	}
 	result := scoreAnswers(req.Answers, questions)
@@ -185,7 +191,7 @@ func (s *IELTSService) SubmitAttempt(ctx context.Context, userID uuid.UUID, atte
 	attempt.Answers = jsonOrDefault(req.Answers, "{}")
 	attempt.Stats = mergeAttemptStats(result.Stats, req.CriteriaScores, req.ManualScore)
 	if err := s.repo.UpdateAttempt(ctx, attempt); err != nil {
-		s.writeAudit(ctx, audit, 1002, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
+		s.writeAudit(ctx, audit, domain.AuditCodeSubmitAttempt, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
 		return nil, err
 	}
 	result.ID = attempt.ID
@@ -199,7 +205,7 @@ func (s *IELTSService) SubmitAttempt(ctx context.Context, userID uuid.UUID, atte
 		LearnedAt:          &now,
 	}
 	_ = s.repo.UpsertProgress(ctx, progress)
-	s.writeAudit(ctx, audit, 1002, constants.WsAuditStatusSuccess, req, result, start)
+	s.writeAudit(ctx, audit, domain.AuditCodeSubmitAttempt, constants.WsAuditStatusSuccess, req, result, start)
 	return result, nil
 }
 
@@ -211,10 +217,10 @@ func (s *IELTSService) CreateContent(ctx context.Context, req dto.IELTSContentRe
 	start := time.Now()
 	item := contentFromRequest(req)
 	if err := s.repo.CreateContent(ctx, item); err != nil {
-		s.writeAudit(ctx, audit, 1101, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
+		s.writeAudit(ctx, audit, domain.AuditCodeCreateContent, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
 		return nil, err
 	}
-	s.writeAudit(ctx, audit, 1101, constants.WsAuditStatusSuccess, req, item, start)
+	s.writeAudit(ctx, audit, domain.AuditCodeCreateContent, constants.WsAuditStatusSuccess, req, item, start)
 	s.invalidateContentCache(ctx)
 	return item, nil
 }
@@ -230,10 +236,10 @@ func (s *IELTSService) UpdateContent(ctx context.Context, id uint, req dto.IELTS
 	updated.ID = item.ID
 	updated.CreatedAt = item.CreatedAt
 	if err := s.repo.UpdateContent(ctx, updated); err != nil {
-		s.writeAudit(ctx, audit, 1102, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
+		s.writeAudit(ctx, audit, domain.AuditCodeUpdateContent, constants.WsAuditStatusFailed, req, map[string]string{"error": err.Error()}, start)
 		return nil, err
 	}
-	s.writeAudit(ctx, audit, 1102, constants.WsAuditStatusSuccess, req, updated, start)
+	s.writeAudit(ctx, audit, domain.AuditCodeUpdateContent, constants.WsAuditStatusSuccess, req, updated, start)
 	s.invalidateContentCache(ctx)
 	return updated, nil
 }
@@ -242,10 +248,10 @@ func (s *IELTSService) DeleteContent(ctx context.Context, id uint, audit dto.Iel
 	start := time.Now()
 	err := s.repo.DeleteContent(ctx, id)
 	if err != nil {
-		s.writeAudit(ctx, audit, 1103, constants.WsAuditStatusFailed, map[string]uint{"id": id}, map[string]string{"error": err.Error()}, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeDeleteContent, map[string]uint{"id": id}, map[string]string{"error": err.Error()}, err, start)
 		return err
 	}
-	s.writeAudit(ctx, audit, 1103, constants.WsAuditStatusSuccess, map[string]uint{"id": id}, map[string]bool{"deleted": true}, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeleteContent, map[string]uint{"id": id}, map[string]bool{"deleted": true}, nil, start)
 	s.invalidateContentCache(ctx)
 	return nil
 }
@@ -254,7 +260,7 @@ func (s *IELTSService) ImportContent(ctx context.Context, file *multipart.FileHe
 	start := time.Now()
 	bundle, err := parseIELTSImportFile(file)
 	if err != nil {
-		s.auditMutation(ctx, audit, 1801, map[string]string{"filename": file.Filename}, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeImportContent, map[string]string{"filename": file.Filename}, nil, err, start)
 		return nil, err
 	}
 	content := contentFromRequest(bundle.Content)
@@ -275,19 +281,19 @@ func (s *IELTSService) ImportContent(ctx context.Context, file *multipart.FileHe
 		vocabulary = append(vocabulary, *vocabularyFromRequest(0, item))
 	}
 	if err := s.repo.ImportBundle(ctx, content, passages, groups, questions, vocabulary); err != nil {
-		s.auditMutation(ctx, audit, 1801, bundle.Content, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeImportContent, bundle.Content, nil, err, start)
 		return nil, err
 	}
 	res := &dto.IELTSImportResult{ContentID: content.ID, PassageCount: len(passages), GroupCount: len(groups), QuestionCount: len(questions), VocabularyCount: len(vocabulary)}
 	s.invalidateContentCache(ctx)
-	s.auditMutation(ctx, audit, 1801, bundle.Content, res, nil, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeImportContent, bundle.Content, res, nil, start)
 	return res, nil
 }
 
 func (s *IELTSService) ImportPDF(ctx context.Context, file *multipart.FileHeader, audit dto.IeltsAuditContext) (*dto.IELTSPDFImportResult, error) {
 	start := time.Now()
 	result, err := parseIELTSPDFFile(file)
-	s.auditMutation(ctx, audit, 1802, map[string]string{"filename": file.Filename}, result, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeImportContentPDF, map[string]string{"filename": file.Filename}, result, err, start)
 	return result, err
 }
 
@@ -312,7 +318,7 @@ func (s *IELTSService) UpdateReview(ctx context.Context, userID uuid.UUID, id ui
 		err = s.repo.UpdateContent(ctx, item)
 	}
 	s.invalidateContentCache(ctx)
-	s.auditMutation(ctx, audit, 1901, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeReviewContent, req, item, err, start)
 	return item, err
 }
 
@@ -320,7 +326,7 @@ func (s *IELTSService) CreatePassage(ctx context.Context, contentID uint, req dt
 	start := time.Now()
 	item := &domain.IELTSPassage{ContentItemID: contentID, PassageNo: req.PassageNo, Title: req.Title, Body: req.Body, SortOrder: req.SortOrder}
 	err := s.repo.CreatePassage(ctx, item)
-	s.auditMutation(ctx, audit, 1201, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeCreatePassage, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -335,7 +341,7 @@ func (s *IELTSService) UpdatePassage(ctx context.Context, id uint, req dto.IELTS
 		item.SortOrder = req.SortOrder
 		err = s.repo.UpdatePassage(ctx, item)
 	}
-	s.auditMutation(ctx, audit, 1202, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdatePassage, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -343,7 +349,7 @@ func (s *IELTSService) UpdatePassage(ctx context.Context, id uint, req dto.IELTS
 func (s *IELTSService) DeletePassage(ctx context.Context, id uint, audit dto.IeltsAuditContext) error {
 	start := time.Now()
 	err := s.repo.DeletePassage(ctx, id)
-	s.auditMutation(ctx, audit, 1203, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeletePassage, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
 	s.invalidateContentCache(ctx)
 	return err
 }
@@ -352,7 +358,7 @@ func (s *IELTSService) CreateQuestionGroup(ctx context.Context, contentID uint, 
 	start := time.Now()
 	item := questionGroupFromRequest(contentID, req)
 	err := s.repo.CreateQuestionGroup(ctx, item)
-	s.auditMutation(ctx, audit, 1301, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeCreateQuestionGroup, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -367,7 +373,7 @@ func (s *IELTSService) UpdateQuestionGroup(ctx context.Context, id uint, req dto
 		err = s.repo.UpdateQuestionGroup(ctx, updated)
 		item = updated
 	}
-	s.auditMutation(ctx, audit, 1302, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdateQuestionGroup, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -375,7 +381,7 @@ func (s *IELTSService) UpdateQuestionGroup(ctx context.Context, id uint, req dto
 func (s *IELTSService) DeleteQuestionGroup(ctx context.Context, id uint, audit dto.IeltsAuditContext) error {
 	start := time.Now()
 	err := s.repo.DeleteQuestionGroup(ctx, id)
-	s.auditMutation(ctx, audit, 1303, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeleteQuestionGroup, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
 	s.invalidateContentCache(ctx)
 	return err
 }
@@ -384,7 +390,7 @@ func (s *IELTSService) CreateQuestion(ctx context.Context, contentID uint, req d
 	start := time.Now()
 	item := questionFromRequest(contentID, req)
 	err := s.repo.CreateQuestion(ctx, item)
-	s.auditMutation(ctx, audit, 1401, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeCreateQuestion, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -399,7 +405,7 @@ func (s *IELTSService) UpdateQuestion(ctx context.Context, id uint, req dto.IELT
 		err = s.repo.UpdateQuestion(ctx, updated)
 		item = updated
 	}
-	s.auditMutation(ctx, audit, 1402, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdateQuestion, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -407,7 +413,7 @@ func (s *IELTSService) UpdateQuestion(ctx context.Context, id uint, req dto.IELT
 func (s *IELTSService) DeleteQuestion(ctx context.Context, id uint, audit dto.IeltsAuditContext) error {
 	start := time.Now()
 	err := s.repo.DeleteQuestion(ctx, id)
-	s.auditMutation(ctx, audit, 1403, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeleteQuestion, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
 	s.invalidateContentCache(ctx)
 	return err
 }
@@ -416,7 +422,7 @@ func (s *IELTSService) CreateVocabulary(ctx context.Context, contentID uint, req
 	start := time.Now()
 	item := vocabularyFromRequest(contentID, req)
 	err := s.repo.CreateVocabulary(ctx, item)
-	s.auditMutation(ctx, audit, 1501, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeCreateVocabulary, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -431,7 +437,7 @@ func (s *IELTSService) UpdateVocabulary(ctx context.Context, id uint, req dto.IE
 		err = s.repo.UpdateVocabulary(ctx, updated)
 		item = updated
 	}
-	s.auditMutation(ctx, audit, 1502, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdateVocabulary, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -439,7 +445,7 @@ func (s *IELTSService) UpdateVocabulary(ctx context.Context, id uint, req dto.IE
 func (s *IELTSService) DeleteVocabulary(ctx context.Context, id uint, audit dto.IeltsAuditContext) error {
 	start := time.Now()
 	err := s.repo.DeleteVocabulary(ctx, id)
-	s.auditMutation(ctx, audit, 1503, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeleteVocabulary, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
 	s.invalidateContentCache(ctx)
 	return err
 }
@@ -448,7 +454,7 @@ func (s *IELTSService) CreateRelatedPost(ctx context.Context, contentID uint, re
 	start := time.Now()
 	item := &domain.IELTSRelatedPost{ContentItemID: contentID, PostID: req.PostID, Title: req.Title, SortOrder: req.SortOrder}
 	err := s.repo.CreateRelatedPost(ctx, item)
-	s.auditMutation(ctx, audit, 1551, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeCreateRelatedPost, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -462,7 +468,7 @@ func (s *IELTSService) UpdateRelatedPost(ctx context.Context, id uint, req dto.I
 		item.SortOrder = req.SortOrder
 		err = s.repo.UpdateRelatedPost(ctx, item)
 	}
-	s.auditMutation(ctx, audit, 1552, req, item, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdateRelatedPost, req, item, err, start)
 	s.invalidateContentCache(ctx)
 	return item, err
 }
@@ -470,7 +476,7 @@ func (s *IELTSService) UpdateRelatedPost(ctx context.Context, id uint, req dto.I
 func (s *IELTSService) DeleteRelatedPost(ctx context.Context, id uint, audit dto.IeltsAuditContext) error {
 	start := time.Now()
 	err := s.repo.DeleteRelatedPost(ctx, id)
-	s.auditMutation(ctx, audit, 1553, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeDeleteRelatedPost, map[string]uint{"id": id}, map[string]bool{"deleted": err == nil}, err, start)
 	s.invalidateContentCache(ctx)
 	return err
 }
@@ -488,7 +494,7 @@ func (s *IELTSService) UploadAsset(ctx context.Context, userID uuid.UUID, conten
 	}
 	uploaded, err := s.assetStorage.UploadTypedAsset(ctx, file, kind, "ielts", contentID, userID)
 	if err != nil {
-		s.auditMutation(ctx, audit, 1601, map[string]any{"content_id": contentID, "kind": kind}, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeUploadAsset, map[string]any{"content_id": contentID, "kind": kind}, nil, err, start)
 		return nil, err
 	}
 	mediaType := mediaTypeFromKind(kind)
@@ -505,7 +511,7 @@ func (s *IELTSService) UploadAsset(ctx context.Context, userID uuid.UUID, conten
 		URL:          uploaded.URL,
 	}
 	if err := s.repo.CreateMedia(ctx, media); err != nil {
-		s.auditMutation(ctx, audit, 1601, map[string]any{"content_id": contentID, "kind": kind}, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeUploadAsset, map[string]any{"content_id": contentID, "kind": kind}, nil, err, start)
 		return nil, err
 	}
 	res := &dto.IELTSAssetUploadResponse{
@@ -519,7 +525,7 @@ func (s *IELTSService) UploadAsset(ctx context.Context, userID uuid.UUID, conten
 		FileSize:     uploaded.FileSize,
 		MimeType:     uploaded.MimeType,
 	}
-	s.auditMutation(ctx, audit, 1601, map[string]any{"content_id": contentID, "kind": kind}, res, nil, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUploadAsset, map[string]any{"content_id": contentID, "kind": kind}, res, nil, start)
 	return res, nil
 }
 
@@ -540,7 +546,7 @@ func (s *IELTSService) UpdateProgress(ctx context.Context, userID uuid.UUID, con
 		LearnedAt:          learnedAt,
 	}
 	err := s.repo.UpsertProgress(ctx, progress)
-	s.auditMutation(ctx, audit, 1701, req, progress, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeUpdateProgress, req, progress, err, start)
 	return progress, err
 }
 
@@ -568,10 +574,10 @@ func (s *IELTSService) StartMockTest(ctx context.Context, userID uuid.UUID, req 
 		item.set(attempt.ID)
 	}
 	if err := s.repo.CreateMockSession(ctx, session); err != nil {
-		s.auditMutation(ctx, audit, 2001, req, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeStartMockTest, req, nil, err, start)
 		return nil, err
 	}
-	s.auditMutation(ctx, audit, 2001, req, session, nil, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeStartMockTest, req, session, nil, start)
 	return session, nil
 }
 
@@ -579,7 +585,7 @@ func (s *IELTSService) SubmitMockTest(ctx context.Context, userID uuid.UUID, ses
 	start := time.Now()
 	session, err := s.repo.GetMockSession(ctx, sessionID, userID)
 	if err != nil {
-		s.auditMutation(ctx, audit, 2002, map[string]uint{"session_id": sessionID}, nil, err, start)
+		s.auditMutation(ctx, audit, domain.AuditCodeSubmitMockTest, map[string]uint{"session_id": sessionID}, nil, err, start)
 		return nil, err
 	}
 	scores := map[string]float64{}
@@ -606,7 +612,7 @@ func (s *IELTSService) SubmitMockTest(ctx context.Context, userID uuid.UUID, ses
 	now := time.Now()
 	session.SubmittedAt = &now
 	err = s.repo.UpdateMockSession(ctx, session)
-	s.auditMutation(ctx, audit, 2002, map[string]uint{"session_id": sessionID}, session, err, start)
+	s.auditMutation(ctx, audit, domain.AuditCodeSubmitMockTest, map[string]uint{"session_id": sessionID}, session, err, start)
 	return session, err
 }
 
@@ -683,7 +689,7 @@ func questionGroupFromRequest(contentID uint, req dto.IELTSQuestionGroupRequest)
 		QuestionTo:    req.QuestionTo,
 		QuestionType:  req.QuestionType,
 		Instruction:   req.Instruction,
-		Payload:       compress.CompressedJSON(jsonOrDefault(req.Payload, "{}")),
+		Payload:       jsonOrDefault(req.Payload, "{}"),
 		SortOrder:     req.SortOrder,
 	}
 }
@@ -696,8 +702,8 @@ func questionFromRequest(contentID uint, req dto.IELTSQuestionRequest) *domain.I
 		Prompt:        req.Prompt,
 		Answer:        req.Answer,
 		Options:       jsonOrDefault(req.Options, "[]"),
-		Explanation:   compress.CompressedJSON(jsonOrDefault(req.Explanation, "{}")),
-		Payload:       compress.CompressedJSON(jsonOrDefault(req.Payload, "{}")),
+		Explanation:   jsonOrDefault(req.Explanation, "{}"),
+		Payload:       jsonOrDefault(req.Payload, "{}"),
 		SortOrder:     req.SortOrder,
 	}
 }
@@ -818,7 +824,7 @@ func mergeAttemptStats(base datatypes.JSON, criteriaScores datatypes.JSON, manua
 	return marshalJSON(payload, "{}")
 }
 
-func (s *IELTSService) writeAudit(ctx context.Context, audit dto.IeltsAuditContext, actTypeID int64, status string, req any, resp any, start time.Time) {
+func (s *IELTSService) writeAudit(ctx context.Context, audit dto.IeltsAuditContext, actTypeID domain.IELTSAuditCode, status string, req any, resp any, start time.Time) {
 	actionUser := audit.ActionUserName
 	if actionUser == "" && audit.UserID != uuid.Nil {
 		actionUser = audit.UserID.String()
@@ -836,7 +842,7 @@ func (s *IELTSService) writeAudit(ctx context.Context, audit dto.IeltsAuditConte
 	}
 	item := &domain.WsAudit{
 		WsCallType:            constants.WsAuditCallTypeIELTS,
-		ActTypeID:             actTypeID,
+		ActTypeID:             int64(actTypeID),
 		RequestTime:           start,
 		ActionUserName:        actionUser,
 		WsURI:                 audit.URI,
@@ -845,8 +851,8 @@ func (s *IELTSService) writeAudit(ctx context.Context, audit dto.IeltsAuditConte
 		DestinationAppID:      destinationApp,
 		Status:                status,
 		FinishTime:            time.Since(start).Milliseconds(),
-		MsgRequest:            []byte(marshalJSON(req, "{}")),
-		MsgResponse:           []byte(marshalJSON(resp, "{}")),
+		MsgRequest:            datatypes.JSON(marshalJSON(req, "{}")),
+		MsgResponse:           datatypes.JSON(marshalJSON(resp, "{}")),
 		RequestInID:           audit.RequestID,
 		RequestOutID:          uuid.NewString(),
 		RequestTimeMilisecond: start.UnixMilli(),
@@ -854,7 +860,7 @@ func (s *IELTSService) writeAudit(ctx context.Context, audit dto.IeltsAuditConte
 	_ = s.repo.WriteWsAudit(ctx, item)
 }
 
-func (s *IELTSService) auditMutation(ctx context.Context, audit dto.IeltsAuditContext, actTypeID int64, req any, resp any, err error, start time.Time) {
+func (s *IELTSService) auditMutation(ctx context.Context, audit dto.IeltsAuditContext, actTypeID domain.IELTSAuditCode, req any, resp any, err error, start time.Time) {
 	status := constants.WsAuditStatusSuccess
 	if err != nil {
 		status = constants.WsAuditStatusFailed

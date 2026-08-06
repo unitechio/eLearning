@@ -3,9 +3,9 @@ package impl
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"gorm.io/gorm"
 )
@@ -25,14 +25,9 @@ func (r *AuditLogRepository) Create(ctx context.Context, log *domain.AuditLog) e
 func (r *AuditLogRepository) GetByID(ctx context.Context, id string) (*domain.AuditLog, error) {
 	var log domain.AuditLog
 	err := r.db.WithContext(ctx).First(&log, "id = ?", id).Error
-
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("audit log not found")
-		}
 		return nil, err
 	}
-
 	return &log, nil
 }
 
@@ -70,18 +65,16 @@ func (r *AuditLogRepository) List(ctx context.Context, filter domain.AuditFilter
 }
 
 func (r *AuditLogRepository) GetByUserID(ctx context.Context, userID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
-	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
-		value := uint(id)
-		filter.UserID = &value
+	if uid, err := uuid.Parse(userID); err == nil {
+		filter.UserID = &uid
 	}
 	return r.List(ctx, filter)
 }
 
 func (r *AuditLogRepository) GetByResource(ctx context.Context, resource, resourceID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Resource = resource
-	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
-		value := uint(id)
-		filter.ResourceID = &value
+	if resourceID != "" {
+		filter.ResourceID = &resourceID
 	}
 	return r.List(ctx, filter)
 }

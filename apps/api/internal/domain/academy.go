@@ -79,6 +79,7 @@ type BillingPlan struct {
 	Description  string    `json:"description" gorm:"type:text"`
 	BillingCycle string    `json:"billing_cycle" gorm:"type:varchar(20);default:'monthly'"`
 	IsActive     bool      `json:"is_active" gorm:"default:true"`
+	IsPremium    bool      `json:"is_premium" gorm:"default:false"`
 }
 
 type BillingSubscription struct {

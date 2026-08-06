@@ -1,6 +1,7 @@
 package impl
 
 import (
+	"context"
 	"strings"
 
 	"github.com/google/uuid"
@@ -14,26 +15,26 @@ type SupportRepository struct{ db *gorm.DB }
 
 func NewSupportRepository(db *gorm.DB) *SupportRepository { return &SupportRepository{db: db} }
 
-func (r *SupportRepository) CreateTicket(ticket *domain.SupportTicket) error {
-	return r.db.Create(ticket).Error
+func (r *SupportRepository) CreateTicket(ctx context.Context, ticket *domain.SupportTicket) error {
+	return r.db.WithContext(ctx).Create(ticket).Error
 }
 
-func (r *SupportRepository) UpdateTicket(ticket *domain.SupportTicket) error {
-	return r.db.Save(ticket).Error
+func (r *SupportRepository) UpdateTicket(ctx context.Context, ticket *domain.SupportTicket) error {
+	return r.db.WithContext(ctx).Save(ticket).Error
 }
 
-func (r *SupportRepository) FindTicketByID(id uuid.UUID) (*domain.SupportTicket, error) {
+func (r *SupportRepository) FindTicketByID(ctx context.Context, id uuid.UUID) (*domain.SupportTicket, error) {
 	var item domain.SupportTicket
-	if err := r.db.First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *SupportRepository) ListTickets(filter repository.SupportTicketFilter) ([]domain.SupportTicket, int64, error) {
+func (r *SupportRepository) ListTickets(ctx context.Context, filter repository.SupportTicketFilter) ([]domain.SupportTicket, int64, error) {
 	var items []domain.SupportTicket
 	var total int64
-	q := r.db.Model(&domain.SupportTicket{})
+	q := r.db.WithContext(ctx).Model(&domain.SupportTicket{})
 	if filter.UserID != uuid.Nil {
 		q = q.Where("user_id = ?", filter.UserID)
 	}
@@ -60,12 +61,12 @@ func (r *SupportRepository) ListTickets(filter repository.SupportTicketFilter) (
 	return items, total, err
 }
 
-func (r *SupportRepository) CreateComment(comment *domain.SupportTicketComment) error {
-	return r.db.Create(comment).Error
+func (r *SupportRepository) CreateComment(ctx context.Context, comment *domain.SupportTicketComment) error {
+	return r.db.WithContext(ctx).Create(comment).Error
 }
 
-func (r *SupportRepository) ListComments(ticketID uuid.UUID) ([]domain.SupportTicketComment, error) {
+func (r *SupportRepository) ListComments(ctx context.Context, ticketID uuid.UUID) ([]domain.SupportTicketComment, error) {
 	var items []domain.SupportTicketComment
-	err := r.db.Where("ticket_id = ?", ticketID).Order("created_at asc").Find(&items).Error
+	err := r.db.WithContext(ctx).Where("ticket_id = ?", ticketID).Order("created_at asc").Find(&items).Error
 	return items, err
 }

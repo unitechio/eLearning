@@ -1,4 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { cn } from '@/shared/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
   useCreateEnvironment,
   useCreateSystemSetting,
@@ -10,34 +14,76 @@ import {
   useUpdateSystemSetting,
 } from '@/domains/admin/api/platform';
 import { PlatformEnvironment, SystemSetting } from '@/domains/admin/api/platform';
+import { Settings, Plus, Lock, Unlock, Trash2, Layers, Cpu } from 'lucide-react';
+import { AdminPageHeader, AdminCard, AdminCardHeader, AdminCardTitle, AdminCardDescription, AdminCardContent } from '@/shared/components/admin';
+import { Input } from '@/shared/components/ui/input';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Button } from '@/shared/components/ui/button';
+import { Label } from '@/shared/components/ui/label';
 
-const emptyEnvironment = { name: '', slug: '', description: '', type: 'general', url: '', color: '', sort_order: 0, is_active: true };
-const emptySetting = { key: '', value: '', type: 'string', category: 'general', description: '', is_public: false, is_editable: true };
+// Zod schemas for validation
+const environmentSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  slug: z.string().min(1, "Slug is required"),
+  type: z.string().min(1, "Type is required"),
+  description: z.string().optional(),
+});
+
+type EnvironmentFormValues = z.infer<typeof environmentSchema>;
+
+const settingSchema = z.object({
+  key: z.string().min(1, "Key is required"),
+  type: z.string().min(1, "Type is required"),
+  category: z.string().min(1, "Category is required"),
+  value: z.string().min(1, "Value is required"),
+});
+
+type SettingFormValues = z.infer<typeof settingSchema>;
 
 export function AdminPlatformSettingsPage() {
   const environmentsQuery = usePlatformEnvironments();
   const settingsQuery = useSystemSettings();
+
   const createEnvironment = useCreateEnvironment();
   const updateEnvironment = useUpdateEnvironment();
   const deleteEnvironment = useDeleteEnvironment();
+
   const createSetting = useCreateSystemSetting();
   const updateSetting = useUpdateSystemSetting();
   const deleteSetting = useDeleteSystemSetting();
-  const [environmentForm, setEnvironmentForm] = useState(emptyEnvironment);
-  const [settingForm, setSettingForm] = useState(emptySetting);
+
+  // Environment form
+  const envForm = useForm<EnvironmentFormValues>({
+    resolver: zodResolver(environmentSchema),
+    defaultValues: { name: '', slug: '', type: 'general', description: '' }
+  });
+
+  // Setting form
+  const setForm = useForm<SettingFormValues>({
+    resolver: zodResolver(settingSchema),
+    defaultValues: { key: '', type: 'string', category: 'general', value: '' }
+  });
 
   const sortedSettings = useMemo(() => (settingsQuery.data ?? []).slice(0, 30), [settingsQuery.data]);
 
-  const submitEnvironment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await createEnvironment.mutateAsync(environmentForm);
-    setEnvironmentForm(emptyEnvironment);
+  const onEnvironmentSubmit = async (data: EnvironmentFormValues) => {
+    await createEnvironment.mutateAsync({
+      ...data,
+      color: '',
+      sort_order: 0,
+      is_active: true,
+    });
+    envForm.reset({ name: '', slug: '', type: 'general', description: '' });
   };
 
-  const submitSetting = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await createSetting.mutateAsync(settingForm);
-    setSettingForm(emptySetting);
+  const onSettingSubmit = async (data: SettingFormValues) => {
+    await createSetting.mutateAsync({
+      ...data,
+      description: '',
+      is_public: false,
+      is_editable: true,
+    });
+    setForm.reset({ key: '', type: 'string', category: 'general', value: '' });
   };
 
   const toggleEnvironment = async (item: PlatformEnvironment) => {
@@ -72,85 +118,201 @@ export function AdminPlatformSettingsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8 p-8">
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">Platform settings</h1>
-        <p className="mt-2 text-sm text-slate-500">Quản lý môi trường hệ thống và system settings bằng API admin platform thật.</p>
-      </section>
+    <div className="space-y-6 sm:space-y-8">
+      <AdminPageHeader
+        title="Platform Settings"
+        description="Configure application environments, global variables, and active system properties."
+        icon={Settings}
+      />
 
-      <div className="grid gap-8 xl:grid-cols-2">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">Environments</h2>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{(environmentsQuery.data ?? []).length} items</span>
-          </div>
-          <form className="mt-6 grid gap-3" onSubmit={submitEnvironment}>
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Name" value={environmentForm.name} onChange={(e) => setEnvironmentForm((s) => ({ ...s, name: e.target.value }))} />
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Slug" value={environmentForm.slug} onChange={(e) => setEnvironmentForm((s) => ({ ...s, slug: e.target.value }))} />
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Type" value={environmentForm.type} onChange={(e) => setEnvironmentForm((s) => ({ ...s, type: e.target.value }))} />
-            <textarea className="min-h-24 rounded-2xl border border-slate-200 px-4 py-3" placeholder="Description" value={environmentForm.description} onChange={(e) => setEnvironmentForm((s) => ({ ...s, description: e.target.value }))} />
-            <button className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white" type="submit">
-              {createEnvironment.isPending ? 'Creating...' : 'Create environment'}
-            </button>
-          </form>
-          <div className="mt-6 space-y-4">
-            {(environmentsQuery.data ?? []).map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-100 p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="font-bold text-slate-900">{item.name}</p>
-                    <p className="text-sm text-slate-500">{item.description || 'No description.'}</p>
+      <div className="grid gap-6 lg:gap-8 xl:grid-cols-2">
+        {/* Environments section */}
+        <AdminCard>
+          <AdminCardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <AdminCardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-primary" />
+                  <span>Environments</span>
+                </AdminCardTitle>
+                <AdminCardDescription>Manage application hosting environments and states.</AdminCardDescription>
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
+                {(environmentsQuery.data ?? []).length} items
+              </span>
+            </div>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-6">
+            {/* Create form */}
+            <form onSubmit={envForm.handleSubmit(onEnvironmentSubmit)} className="space-y-4 bg-muted/30 p-4 rounded-xl border border-border">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">New Environment</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="env-name">Name</Label>
+                  <Input id="env-name" placeholder="Production" {...envForm.register('name')} />
+                  {envForm.formState.errors.name && (
+                    <p className="text-xs text-destructive">{envForm.formState.errors.name.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="env-slug">Slug</Label>
+                  <Input id="env-slug" placeholder="prod" {...envForm.register('slug')} />
+                  {envForm.formState.errors.slug && (
+                    <p className="text-xs text-destructive">{envForm.formState.errors.slug.message}</p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="env-type">Type</Label>
+                <Input id="env-type" placeholder="general" {...envForm.register('type')} />
+                {envForm.formState.errors.type && (
+                  <p className="text-xs text-destructive">{envForm.formState.errors.type.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="env-desc">Description</Label>
+                <Textarea id="env-desc" placeholder="Core hosting platform for user traffic" {...envForm.register('description')} className="min-h-20" />
+              </div>
+              <Button type="submit" className="w-full h-10 gap-2 rounded-xl text-xs font-bold" disabled={createEnvironment.isPending}>
+                <Plus className="h-4 w-4" />
+                <span>{createEnvironment.isPending ? 'Creating...' : 'Create Environment'}</span>
+              </Button>
+            </form>
+
+            {/* List */}
+            <section className="space-y-3" aria-label="Environment List">
+              {(environmentsQuery.data ?? []).map((item) => (
+                <div key={item.id} className="rounded-xl border border-border bg-card hover:bg-muted/10 p-4 transition-colors flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm text-foreground truncate">{item.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.description || 'No description provided.'}</p>
+                    <span className="inline-block mt-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">{item.type}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <button className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700" onClick={() => void toggleEnvironment(item)} type="button">
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void toggleEnvironment(item)}
+                      className={cn("h-8 text-xs font-bold rounded-lg", item.is_active ? "text-amber-600 hover:text-amber-700" : "text-emerald-600 hover:text-emerald-700")}
+                    >
                       {item.is_active ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600" onClick={() => void deleteEnvironment.mutateAsync(item.id)} type="button">
-                      Delete
-                    </button>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => void deleteEnvironment.mutateAsync(item.id)}
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                      aria-label={`Delete environment ${item.name}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </section>
+          </AdminCardContent>
+        </AdminCard>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">System settings</h2>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{(settingsQuery.data ?? []).length} keys</span>
-          </div>
-          <form className="mt-6 grid gap-3" onSubmit={submitSetting}>
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Key" value={settingForm.key} onChange={(e) => setSettingForm((s) => ({ ...s, key: e.target.value }))} />
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Type" value={settingForm.type} onChange={(e) => setSettingForm((s) => ({ ...s, type: e.target.value }))} />
-            <input className="rounded-2xl border border-slate-200 px-4 py-3" placeholder="Category" value={settingForm.category} onChange={(e) => setSettingForm((s) => ({ ...s, category: e.target.value }))} />
-            <textarea className="min-h-24 rounded-2xl border border-slate-200 px-4 py-3" placeholder="Value" value={settingForm.value} onChange={(e) => setSettingForm((s) => ({ ...s, value: e.target.value }))} />
-            <button className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white" type="submit">
-              {createSetting.isPending ? 'Creating...' : 'Create setting'}
-            </button>
-          </form>
-          <div className="mt-6 space-y-3">
-            {sortedSettings.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-slate-100 px-4 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-slate-900">{item.key}</p>
-                    <p className="mt-1 text-xs uppercase tracking-wider text-slate-400">{item.category || 'general'} • {item.type || 'string'}</p>
-                    <p className="mt-2 break-all text-sm text-slate-600">{item.value}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700" onClick={() => void toggleSettingEditable(item)} type="button">
-                      {item.is_editable ? 'Lock' : 'Unlock'}
-                    </button>
-                    <button className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600" onClick={() => void deleteSetting.mutateAsync(item.id)} type="button">
-                      Delete
-                    </button>
-                  </div>
+        {/* Settings section */}
+        <AdminCard>
+          <AdminCardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <AdminCardTitle className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-primary" />
+                  <span>System Settings</span>
+                </AdminCardTitle>
+                <AdminCardDescription>Browse and modify application system attributes.</AdminCardDescription>
+              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
+                {(settingsQuery.data ?? []).length} keys
+              </span>
+            </div>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-6">
+            {/* Create form */}
+            <form onSubmit={setForm.handleSubmit(onSettingSubmit)} className="space-y-4 bg-muted/30 p-4 rounded-xl border border-border">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">New Setting Key</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="set-key">Key Name</Label>
+                  <Input id="set-key" placeholder="api.timeout" {...setForm.register('key')} />
+                  {setForm.formState.errors.key && (
+                    <p className="text-xs text-destructive">{setForm.formState.errors.key.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="set-category">Category</Label>
+                  <Input id="set-category" placeholder="network" {...setForm.register('category')} />
+                  {setForm.formState.errors.category && (
+                    <p className="text-xs text-destructive">{setForm.formState.errors.category.message}</p>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="space-y-2">
+                <Label htmlFor="set-type">Value Type</Label>
+                <Input id="set-type" placeholder="number" {...setForm.register('type')} />
+                {setForm.formState.errors.type && (
+                  <p className="text-xs text-destructive">{setForm.formState.errors.type.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="set-value">Setting Value</Label>
+                <Textarea id="set-value" placeholder="3000" {...setForm.register('value')} className="min-h-20" />
+                {setForm.formState.errors.value && (
+                  <p className="text-xs text-destructive">{setForm.formState.errors.value.message}</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full h-10 gap-2 rounded-xl text-xs font-bold" disabled={createSetting.isPending}>
+                <Plus className="h-4 w-4" />
+                <span>{createSetting.isPending ? 'Creating...' : 'Create Setting'}</span>
+              </Button>
+            </form>
+
+            {/* List */}
+            <section className="space-y-3" aria-label="System Settings List">
+              {sortedSettings.map((item) => (
+                <div key={item.id} className="rounded-xl border border-border bg-card hover:bg-muted/10 p-4 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-foreground truncate">{item.key}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
+                        {item.category || 'general'} · {item.type || 'string'}
+                      </p>
+                      <p className="mt-2 font-mono text-xs bg-muted/65 p-2 rounded-lg break-all border border-border/40 text-foreground/80">
+                        {item.value}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => void toggleSettingEditable(item)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
+                        aria-label={item.is_editable ? "Lock setting" : "Unlock setting"}
+                      >
+                        {item.is_editable ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => void deleteSetting.mutateAsync(item.id)}
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                        aria-label={`Delete setting ${item.key}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </section>
+          </AdminCardContent>
+        </AdminCard>
       </div>
     </div>
   );

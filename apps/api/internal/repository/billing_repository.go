@@ -1,36 +1,38 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 )
 
 type BillingRepository interface {
-	ListPlans(filter BillingPlanListFilter) ([]domain.BillingPlan, int64, error)
-	FindPlanByID(id uuid.UUID) (*domain.BillingPlan, error)
-	CreatePlan(plan *domain.BillingPlan) error
-	UpdatePlan(plan *domain.BillingPlan) error
-	DeletePlan(id uuid.UUID) error
-	CreateSubscription(subscription *domain.BillingSubscription) error
-	FindSubscriptionByID(id uuid.UUID) (*domain.BillingSubscription, error)
-	FindActiveSubscriptionByUserID(userID uuid.UUID) (*domain.BillingSubscription, error)
-	UpdateSubscription(subscription *domain.BillingSubscription) error
-	ListSubscriptions(filter BillingSubscriptionListFilter) ([]domain.BillingSubscription, int64, error)
-	CreateHistory(history *domain.BillingHistory) error
-	ListHistoryByUserID(userID uuid.UUID, filter BillingHistoryListFilter) ([]domain.BillingHistory, int64, error)
-	CreateInvoice(invoice *domain.BillingInvoice) error
-	FindInvoiceByID(id uuid.UUID) (*domain.BillingInvoice, error)
-	UpdateInvoice(invoice *domain.BillingInvoice) error
-	ListInvoices(filter BillingAdminListFilter) ([]domain.BillingInvoice, int64, error)
-	CreatePaymentTransaction(tx *domain.PaymentTransaction) error
-	FindPaymentTransactionByID(id uuid.UUID) (*domain.PaymentTransaction, error)
-	UpdatePaymentTransaction(tx *domain.PaymentTransaction) error
-	ListPaymentTransactions(filter BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error)
-	FindCourseByID(id uuid.UUID) (*domain.Course, error)
-	FindVoucherByCode(code string) (*domain.Voucher, error)
-	CreateVoucher(v *domain.Voucher) error
-	ListVouchers() ([]domain.Voucher, error)
-	DeleteVoucher(id uuid.UUID) error
+	ListPlans(ctx context.Context, filter BillingPlanListFilter) ([]domain.BillingPlan, int64, error)
+	FindPlanByID(ctx context.Context, id uuid.UUID) (*domain.BillingPlan, error)
+	CreatePlan(ctx context.Context, plan *domain.BillingPlan) error
+	UpdatePlan(ctx context.Context, plan *domain.BillingPlan) error
+	DeletePlan(ctx context.Context, id uuid.UUID) error
+	CreateSubscription(ctx context.Context, subscription *domain.BillingSubscription) error
+	FindSubscriptionByID(ctx context.Context, id uuid.UUID) (*domain.BillingSubscription, error)
+	FindActiveSubscriptionByUserID(ctx context.Context, userID uuid.UUID) (*domain.BillingSubscription, error)
+	UpdateSubscription(ctx context.Context, subscription *domain.BillingSubscription) error
+	ListSubscriptions(ctx context.Context, filter BillingSubscriptionListFilter) ([]domain.BillingSubscription, int64, error)
+	CreateHistory(ctx context.Context, history *domain.BillingHistory) error
+	ListHistoryByUserID(ctx context.Context, userID uuid.UUID, filter BillingHistoryListFilter) ([]domain.BillingHistory, int64, error)
+	CreateInvoice(ctx context.Context, invoice *domain.BillingInvoice) error
+	FindInvoiceByID(ctx context.Context, id uuid.UUID) (*domain.BillingInvoice, error)
+	UpdateInvoice(ctx context.Context, invoice *domain.BillingInvoice) error
+	ListInvoices(ctx context.Context, filter BillingAdminListFilter) ([]domain.BillingInvoice, int64, error)
+	CreatePaymentTransaction(ctx context.Context, tx *domain.PaymentTransaction) error
+	FindPaymentTransactionByID(ctx context.Context, id uuid.UUID) (*domain.PaymentTransaction, error)
+	UpdatePaymentTransaction(ctx context.Context, tx *domain.PaymentTransaction) error
+	ListPaymentTransactions(ctx context.Context, filter BillingAdminListFilter) ([]domain.PaymentTransaction, int64, error)
+	FindCourseByID(ctx context.Context, id uuid.UUID) (*domain.Course, error)
+	FindVoucherByCode(ctx context.Context, code string) (*domain.Voucher, error)
+	CreateVoucher(ctx context.Context, v *domain.Voucher) error
+	ListVouchers(ctx context.Context) ([]domain.Voucher, error)
+	DeleteVoucher(ctx context.Context, id uuid.UUID) error
 }
 
 type BillingAdminListFilter struct {

@@ -20,8 +20,7 @@ func NewVocabularyService(repo repository.VocabularyRepository) *VocabularyUseca
 }
 
 func (s *VocabularyUsecase) GetDueWords(ctx context.Context, userID uuid.UUID) ([]domain.UserVocabularyProgress, error) {
-	_ = ctx
-	items, err := s.repo.FindDueProgressByUser(userID, 20)
+	items, err := s.repo.FindDueProgressByUser(ctx, userID, 20)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -29,8 +28,7 @@ func (s *VocabularyUsecase) GetDueWords(ctx context.Context, userID uuid.UUID) (
 }
 
 func (s *VocabularyUsecase) SubmitReview(ctx context.Context, userID uuid.UUID, req usecase.ReviewRequest) (*domain.UserVocabularyProgress, error) {
-	_ = ctx
-	word, err := s.repo.FindWordByID(req.WordID)
+	word, err := s.repo.FindWordByID(ctx, req.WordID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("word", req.WordID.String())
@@ -38,7 +36,7 @@ func (s *VocabularyUsecase) SubmitReview(ctx context.Context, userID uuid.UUID, 
 		return nil, apperr.Internal(err)
 	}
 
-	progress, err := s.repo.FindProgressByUserAndWord(userID, req.WordID)
+	progress, err := s.repo.FindProgressByUserAndWord(ctx, userID, req.WordID)
 	if err != nil {
 		if !isNotFoundErr(err) {
 			return nil, apperr.Internal(err)
@@ -68,15 +66,14 @@ func (s *VocabularyUsecase) SubmitReview(ctx context.Context, userID uuid.UUID, 
 	}
 
 	progress.NextReviewDate = nextReview(progress.BoxNumber)
-	if err := s.repo.SaveProgress(progress); err != nil {
+	if err := s.repo.SaveProgress(ctx, progress); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return progress, nil
 }
 
 func (s *VocabularyUsecase) GetAllWords(ctx context.Context) ([]domain.VocabularyWord, error) {
-	_ = ctx
-	words, err := s.repo.ListWords()
+	words, err := s.repo.ListWords(ctx)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -84,8 +81,7 @@ func (s *VocabularyUsecase) GetAllWords(ctx context.Context) ([]domain.Vocabular
 }
 
 func (s *VocabularyUsecase) GetWordByID(ctx context.Context, id uuid.UUID) (*domain.VocabularyWord, error) {
-	_ = ctx
-	word, err := s.repo.FindWordByID(id)
+	word, err := s.repo.FindWordByID(ctx, id)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("word", id.String())
@@ -96,7 +92,6 @@ func (s *VocabularyUsecase) GetWordByID(ctx context.Context, id uuid.UUID) (*dom
 }
 
 func (s *VocabularyUsecase) CreateWord(ctx context.Context, tenantID uuid.UUID, req usecase.CreateWordRequest) (*domain.VocabularyWord, error) {
-	_ = ctx
 	word := &domain.VocabularyWord{
 		TenantID:     tenantID,
 		Word:         req.Word,
@@ -106,7 +101,7 @@ func (s *VocabularyUsecase) CreateWord(ctx context.Context, tenantID uuid.UUID, 
 		Level:        req.Level,
 		Example:      req.Example,
 	}
-	if err := s.repo.CreateWord(word); err != nil {
+	if err := s.repo.CreateWord(ctx, word); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return word, nil

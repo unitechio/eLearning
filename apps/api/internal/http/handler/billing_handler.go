@@ -40,7 +40,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.adminSvc.ListUsers(query)
+	res, err := h.adminSvc.ListUsers(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -64,7 +64,7 @@ func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.adminSvc.UpdateUserStatus(c.Param("id"), req)
+	item, err := h.adminSvc.UpdateUserStatus(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -91,7 +91,7 @@ func (h *AdminHandler) ListCourses(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.adminSvc.ListCourses(query)
+	res, err := h.adminSvc.ListCourses(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -121,6 +121,7 @@ func (h *AdminHandler) CreateCourse(c *gin.Context) { h.courseCreateOrUpdate(c, 
 // @Success      200   {object}  response.Envelope{data=dto.Course}
 // @Router       /admin/courses/{id} [put]
 func (h *AdminHandler) UpdateCourse(c *gin.Context) { h.courseCreateOrUpdate(c, false) }
+
 func (h *AdminHandler) courseCreateOrUpdate(c *gin.Context, create bool) {
 	var req dto.UpsertCourseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -130,9 +131,9 @@ func (h *AdminHandler) courseCreateOrUpdate(c *gin.Context, create bool) {
 	var item any
 	var err error
 	if create {
-		item, err = h.adminSvc.CreateCourse(req)
+		item, err = h.adminSvc.CreateCourse(requestContext(c), req)
 	} else {
-		item, err = h.adminSvc.UpdateCourse(c.Param("id"), req)
+		item, err = h.adminSvc.UpdateCourse(requestContext(c), c.Param("id"), req)
 	}
 	if err != nil {
 		_ = c.Error(err)
@@ -153,7 +154,7 @@ func (h *AdminHandler) courseCreateOrUpdate(c *gin.Context, create bool) {
 // @Success      204
 // @Router       /admin/courses/{id} [delete]
 func (h *AdminHandler) DeleteCourse(c *gin.Context) {
-	if err := h.adminSvc.DeleteCourse(c.Param("id")); err != nil {
+	if err := h.adminSvc.DeleteCourse(requestContext(c), c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -168,7 +169,7 @@ func (h *AdminHandler) DeleteCourse(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.AnalyticsSnapshot}
 // @Router       /admin/analytics [get]
 func (h *AdminHandler) Analytics(c *gin.Context) {
-	item, err := h.adminSvc.GetAnalytics()
+	item, err := h.adminSvc.GetAnalytics(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -184,7 +185,7 @@ func (h *AdminHandler) Analytics(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.AIUsageSnapshot}
 // @Router       /admin/ai-usage [get]
 func (h *AdminHandler) AIUsage(c *gin.Context) {
-	item, err := h.adminSvc.GetAIUsage()
+	item, err := h.adminSvc.GetAIUsage(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -209,7 +210,7 @@ func (h *BillingHandler) Plans(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListPlans(query)
+	res, err := h.svc.ListPlans(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -236,7 +237,7 @@ func (h *BillingHandler) Subscribe(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.Subscribe(userID, req)
+	item, err := h.svc.Subscribe(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -265,7 +266,7 @@ func (h *BillingHandler) History(c *gin.Context) {
 	if !ok {
 		return
 	}
-	res, err := h.svc.ListBillingHistory(userID, query)
+	res, err := h.svc.ListBillingHistory(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -295,7 +296,7 @@ func (h *BillingHandler) Checkout(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.CreateCheckout(userID, req)
+	item, err := h.svc.CreateCheckout(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -325,7 +326,7 @@ func (h *BillingHandler) ConfirmSandboxPayment(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.ConfirmSandboxPayment(userID, c.Param("id"), req)
+	item, err := h.svc.ConfirmSandboxPayment(requestContext(c), userID, c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -353,7 +354,7 @@ func (h *BillingHandler) CheckoutCart(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.CheckoutCart(userID, req)
+	item, err := h.svc.CheckoutCart(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -377,7 +378,7 @@ func (h *BillingHandler) ApplyVoucher(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.ApplyVoucher(req)
+	item, err := h.svc.ApplyVoucher(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -400,7 +401,7 @@ func (h *BillingHandler) AdminCreateVoucher(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.AdminCreateVoucher(req)
+	item, err := h.svc.AdminCreateVoucher(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -416,7 +417,7 @@ func (h *BillingHandler) AdminCreateVoucher(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=[]dto.VoucherDTO}
 // @Router       /admin/billing/vouchers [get]
 func (h *BillingHandler) AdminListVouchers(c *gin.Context) {
-	items, err := h.svc.AdminListVouchers()
+	items, err := h.svc.AdminListVouchers(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -432,7 +433,7 @@ func (h *BillingHandler) AdminListVouchers(c *gin.Context) {
 // @Success      204
 // @Router       /admin/billing/vouchers/{id} [delete]
 func (h *BillingHandler) AdminDeleteVoucher(c *gin.Context) {
-	if err := h.svc.AdminDeleteVoucher(c.Param("id")); err != nil {
+	if err := h.svc.AdminDeleteVoucher(requestContext(c), c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -457,7 +458,7 @@ func (h *BillingHandler) AdminPlans(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListAdminPlans(query)
+	res, err := h.svc.ListAdminPlans(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -480,7 +481,7 @@ func (h *BillingHandler) CreatePlan(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.CreatePlan(req)
+	item, err := h.svc.CreatePlan(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -504,7 +505,7 @@ func (h *BillingHandler) UpdatePlan(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.UpdatePlan(c.Param("id"), req)
+	item, err := h.svc.UpdatePlan(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -520,7 +521,7 @@ func (h *BillingHandler) UpdatePlan(c *gin.Context) {
 // @Success      204
 // @Router       /admin/billing/plans/{id} [delete]
 func (h *BillingHandler) DeletePlan(c *gin.Context) {
-	if err := h.svc.DeletePlan(c.Param("id")); err != nil {
+	if err := h.svc.DeletePlan(requestContext(c), c.Param("id")); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -544,7 +545,7 @@ func (h *BillingHandler) AdminSubscriptions(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListSubscriptions(query)
+	res, err := h.svc.ListSubscriptions(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -561,7 +562,7 @@ func (h *BillingHandler) AdminSubscriptions(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.AdminBillingSubscription}
 // @Router       /admin/billing/subscriptions/{id} [get]
 func (h *BillingHandler) GetSubscription(c *gin.Context) {
-	item, err := h.svc.GetSubscription(c.Param("id"))
+	item, err := h.svc.GetSubscription(requestContext(c), c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -585,7 +586,7 @@ func (h *BillingHandler) UpdateSubscriptionStatus(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.UpdateSubscriptionStatus(c.Param("id"), req)
+	item, err := h.svc.UpdateSubscriptionStatus(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -602,7 +603,7 @@ func (h *BillingHandler) UpdateSubscriptionStatus(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=dto.AdminBillingSubscription}
 // @Router       /admin/billing/subscriptions/{id}/cancel [post]
 func (h *BillingHandler) CancelSubscription(c *gin.Context) {
-	item, err := h.svc.CancelSubscription(c.Param("id"))
+	item, err := h.svc.CancelSubscription(requestContext(c), c.Param("id"))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -625,7 +626,7 @@ func (h *BillingHandler) GrantPremium(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.GrantPremium(req)
+	item, err := h.svc.GrantPremium(requestContext(c), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -653,7 +654,7 @@ func (h *BillingHandler) AdminInvoices(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListInvoices(query)
+	res, err := h.svc.ListInvoices(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -680,7 +681,7 @@ func (h *BillingHandler) AdminPaymentTransactions(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListPaymentTransactions(query)
+	res, err := h.svc.ListPaymentTransactions(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return

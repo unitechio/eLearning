@@ -22,9 +22,9 @@ func NewBillingService(repo repository.BillingRepository, userRepo repository.Us
 	return &BillingUsecase{repo: repo, userRepo: userRepo}
 }
 
-func (s *BillingUsecase) ListPlans(query dto.BillingPlanListQuery) (*dto.PageResult[dto.BillingPlan], error) {
+func (s *BillingUsecase) ListPlans(ctx context.Context, query dto.BillingPlanListQuery) (*dto.PageResult[dto.BillingPlan], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListPlans(repository.BillingPlanListFilter{
+	items, total, err := s.repo.ListPlans(ctx, repository.BillingPlanListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Currency:   strings.ToUpper(query.Currency),
@@ -45,41 +45,41 @@ func (s *BillingUsecase) ListPlans(query dto.BillingPlanListQuery) (*dto.PageRes
 	return &dto.PageResult[dto.BillingPlan]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) Subscribe(userID uuid.UUID, req dto.SubscribeRequest) (map[string]any, error) {
+func (s *BillingUsecase) Subscribe(ctx context.Context, userID uuid.UUID, req dto.SubscribeRequest) (map[string]any, error) {
 	planID, err := uuid.Parse(req.PlanID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid plan id")
 	}
-	plan, err := s.repo.FindPlanByID(planID)
+	plan, err := s.repo.FindPlanByID(ctx, planID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("billing plan", req.PlanID)
 		}
 		return nil, apperr.Internal(err)
 	}
-	if existing, err := s.repo.FindActiveSubscriptionByUserID(userID); err == nil && existing != nil {
+	if existing, err := s.repo.FindActiveSubscriptionByUserID(ctx, userID); err == nil && existing != nil {
 		existing.Status = "cancelled"
 		now := time.Now().UTC()
 		existing.CancelledAt = &now
-		if err := s.repo.UpdateSubscription(existing); err != nil {
+		if err := s.repo.UpdateSubscription(ctx, existing); err != nil {
 			return nil, apperr.Internal(err)
 		}
 	}
 	expiresAt := time.Now().UTC().AddDate(0, 1, 0)
 	subscription := &domain.BillingSubscription{UserID: userID, TenantID: uuid.Nil, PlanID: plan.ID, Status: "active", ExpiresAt: &expiresAt}
-	if err := s.repo.CreateSubscription(subscription); err != nil {
+	if err := s.repo.CreateSubscription(ctx, subscription); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	history := &domain.BillingHistory{UserID: userID, SubscriptionID: subscription.ID, PlanName: plan.Name, Amount: plan.Price, Currency: plan.Currency, Status: "paid"}
-	if err := s.repo.CreateHistory(history); err != nil {
+	if err := s.repo.CreateHistory(ctx, history); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return map[string]any{"subscription_id": subscription.ID.String(), "plan_id": plan.ID.String(), "status": subscription.Status, "expires_at": expiresAt}, nil
 }
 
-func (s *BillingUsecase) ListBillingHistory(userID uuid.UUID, query dto.BillingHistoryQuery) (*dto.PageResult[dto.BillingHistoryItem], error) {
+func (s *BillingUsecase) ListBillingHistory(ctx context.Context, userID uuid.UUID, query dto.BillingHistoryQuery) (*dto.PageResult[dto.BillingHistoryItem], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListHistoryByUserID(userID, repository.BillingHistoryListFilter{
+	items, total, err := s.repo.ListHistoryByUserID(ctx, userID, repository.BillingHistoryListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Status:     query.Status,
@@ -100,9 +100,9 @@ func (s *BillingUsecase) ListBillingHistory(userID uuid.UUID, query dto.BillingH
 	return &dto.PageResult[dto.BillingHistoryItem]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) ListAdminPlans(query dto.AdminBillingPlanListQuery) (*dto.PageResult[dto.AdminBillingPlan], error) {
+func (s *BillingUsecase) ListAdminPlans(ctx context.Context, query dto.AdminBillingPlanListQuery) (*dto.PageResult[dto.AdminBillingPlan], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListPlans(repository.BillingPlanListFilter{
+	items, total, err := s.repo.ListPlans(ctx, repository.BillingPlanListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search,
 		Currency:   strings.ToUpper(query.Currency),
@@ -123,24 +123,24 @@ func (s *BillingUsecase) ListAdminPlans(query dto.AdminBillingPlanListQuery) (*d
 	return &dto.PageResult[dto.AdminBillingPlan]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) CreatePlan(req dto.CreateBillingPlanRequest) (*dto.AdminBillingPlan, error) {
+func (s *BillingUsecase) CreatePlan(ctx context.Context, req dto.CreateBillingPlanRequest) (*dto.AdminBillingPlan, error) {
 	plan := &domain.BillingPlan{
 		TenantID: uuid.Nil, Name: req.Name, Code: strings.ToLower(req.Code), Price: req.Price,
 		Currency: strings.ToUpper(defaultString(req.Currency, "USD")), Description: req.Description,
 		BillingCycle: defaultString(req.BillingCycle, "monthly"), IsActive: req.IsActive == nil || *req.IsActive,
 	}
-	if err := s.repo.CreatePlan(plan); err != nil {
+	if err := s.repo.CreatePlan(ctx, plan); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapAdminPlan(plan), nil
 }
 
-func (s *BillingUsecase) UpdatePlan(id string, req dto.UpdateBillingPlanRequest) (*dto.AdminBillingPlan, error) {
+func (s *BillingUsecase) UpdatePlan(ctx context.Context, id string, req dto.UpdateBillingPlanRequest) (*dto.AdminBillingPlan, error) {
 	planID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid plan id")
 	}
-	plan, err := s.repo.FindPlanByID(planID)
+	plan, err := s.repo.FindPlanByID(ctx, planID)
 	if err != nil {
 		return nil, apperr.NotFound("billing plan", id)
 	}
@@ -153,26 +153,26 @@ func (s *BillingUsecase) UpdatePlan(id string, req dto.UpdateBillingPlanRequest)
 	if req.IsActive != nil {
 		plan.IsActive = *req.IsActive
 	}
-	if err := s.repo.UpdatePlan(plan); err != nil {
+	if err := s.repo.UpdatePlan(ctx, plan); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapAdminPlan(plan), nil
 }
 
-func (s *BillingUsecase) DeletePlan(id string) error {
+func (s *BillingUsecase) DeletePlan(ctx context.Context, id string) error {
 	planID, err := uuid.Parse(id)
 	if err != nil {
 		return apperr.BadRequest("invalid plan id")
 	}
-	if err := s.repo.DeletePlan(planID); err != nil {
+	if err := s.repo.DeletePlan(ctx, planID); err != nil {
 		return apperr.Internal(err)
 	}
 	return nil
 }
 
-func (s *BillingUsecase) ListSubscriptions(query dto.AdminBillingSubscriptionListQuery) (*dto.PageResult[dto.AdminBillingSubscription], error) {
+func (s *BillingUsecase) ListSubscriptions(ctx context.Context, query dto.AdminBillingSubscriptionListQuery) (*dto.PageResult[dto.AdminBillingSubscription], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, total, err := s.repo.ListSubscriptions(repository.BillingSubscriptionListFilter{
+	items, total, err := s.repo.ListSubscriptions(ctx, repository.BillingSubscriptionListFilter{
 		Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize},
 		Search:     query.Search, Status: query.Status,
 	})
@@ -181,7 +181,7 @@ func (s *BillingUsecase) ListSubscriptions(query dto.AdminBillingSubscriptionLis
 	}
 	res := make([]dto.AdminBillingSubscription, 0, len(items))
 	for _, item := range items {
-		mapped, err := s.mapSubscription(&item)
+		mapped, err := s.mapSubscription(ctx, &item)
 		if err != nil {
 			return nil, err
 		}
@@ -190,24 +190,24 @@ func (s *BillingUsecase) ListSubscriptions(query dto.AdminBillingSubscriptionLis
 	return &dto.PageResult[dto.AdminBillingSubscription]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) GetSubscription(id string) (*dto.AdminBillingSubscription, error) {
+func (s *BillingUsecase) GetSubscription(ctx context.Context, id string) (*dto.AdminBillingSubscription, error) {
 	subID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid subscription id")
 	}
-	item, err := s.repo.FindSubscriptionByID(subID)
+	item, err := s.repo.FindSubscriptionByID(ctx, subID)
 	if err != nil {
 		return nil, apperr.NotFound("subscription", id)
 	}
-	return s.mapSubscription(item)
+	return s.mapSubscription(ctx, item)
 }
 
-func (s *BillingUsecase) UpdateSubscriptionStatus(id string, req dto.UpdateSubscriptionStatusRequest) (*dto.AdminBillingSubscription, error) {
+func (s *BillingUsecase) UpdateSubscriptionStatus(ctx context.Context, id string, req dto.UpdateSubscriptionStatusRequest) (*dto.AdminBillingSubscription, error) {
 	subID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid subscription id")
 	}
-	item, err := s.repo.FindSubscriptionByID(subID)
+	item, err := s.repo.FindSubscriptionByID(ctx, subID)
 	if err != nil {
 		return nil, apperr.NotFound("subscription", id)
 	}
@@ -216,30 +216,30 @@ func (s *BillingUsecase) UpdateSubscriptionStatus(id string, req dto.UpdateSubsc
 	if item.Status == "cancelled" {
 		item.CancelledAt = &now
 	}
-	if err := s.repo.UpdateSubscription(item); err != nil {
+	if err := s.repo.UpdateSubscription(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
-	return s.mapSubscription(item)
+	return s.mapSubscription(ctx, item)
 }
 
-func (s *BillingUsecase) CancelSubscription(id string) (*dto.AdminBillingSubscription, error) {
-	return s.UpdateSubscriptionStatus(id, dto.UpdateSubscriptionStatusRequest{Status: "cancelled"})
+func (s *BillingUsecase) CancelSubscription(ctx context.Context, id string) (*dto.AdminBillingSubscription, error) {
+	return s.UpdateSubscriptionStatus(ctx, id, dto.UpdateSubscriptionStatusRequest{Status: "cancelled"})
 }
 
-func (s *BillingUsecase) GrantPremium(req dto.GrantPremiumRequest) (*dto.AdminBillingSubscription, error) {
+func (s *BillingUsecase) GrantPremium(ctx context.Context, req dto.GrantPremiumRequest) (*dto.AdminBillingSubscription, error) {
 	userID, err := uuid.Parse(req.UserID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid user id")
 	}
-	return s.createManagedSubscription(userID, req.PlanID, "active")
+	return s.createManagedSubscription(ctx, userID, req.PlanID, "active")
 }
 
-func (s *BillingUsecase) CreateCheckout(userID uuid.UUID, req dto.CheckoutPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
+func (s *BillingUsecase) CreateCheckout(ctx context.Context, userID uuid.UUID, req dto.CheckoutPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
 	planID, err := uuid.Parse(req.PlanID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid plan id")
 	}
-	plan, err := s.repo.FindPlanByID(planID)
+	plan, err := s.repo.FindPlanByID(ctx, planID)
 	if err != nil {
 		return nil, apperr.NotFound("billing plan", req.PlanID)
 	}
@@ -252,7 +252,7 @@ func (s *BillingUsecase) CreateCheckout(userID uuid.UUID, req dto.CheckoutPaymen
 		UserID: userID, PlanID: plan.ID, InvoiceNo: newInvoiceNo(), Amount: plan.Price, Currency: plan.Currency,
 		Status: "pending", DueAt: &dueAt, Description: "Subscription: " + plan.Name,
 	}
-	if err := s.repo.CreateInvoice(invoice); err != nil {
+	if err := s.repo.CreateInvoice(ctx, invoice); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	tx := &domain.PaymentTransaction{
@@ -260,18 +260,18 @@ func (s *BillingUsecase) CreateCheckout(userID uuid.UUID, req dto.CheckoutPaymen
 		ProviderReference: "sandbox_" + invoice.InvoiceNo, Amount: plan.Price, Currency: plan.Currency,
 		Status: "pending", CheckoutURL: "/sandbox/payments/" + invoice.ID.String(),
 	}
-	if err := s.repo.CreatePaymentTransaction(tx); err != nil {
+	if err := s.repo.CreatePaymentTransaction(ctx, tx); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return mapCheckout(invoice, tx), nil
 }
 
-func (s *BillingUsecase) ConfirmSandboxPayment(userID uuid.UUID, id string, req dto.ConfirmPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
+func (s *BillingUsecase) ConfirmSandboxPayment(ctx context.Context, userID uuid.UUID, id string, req dto.ConfirmPaymentRequest) (*dto.CheckoutPaymentResponse, error) {
 	txID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid payment transaction id")
 	}
-	tx, err := s.repo.FindPaymentTransactionByID(txID)
+	tx, err := s.repo.FindPaymentTransactionByID(ctx, txID)
 	if err != nil {
 		return nil, apperr.NotFound("payment transaction", id)
 	}
@@ -281,7 +281,7 @@ func (s *BillingUsecase) ConfirmSandboxPayment(userID uuid.UUID, id string, req 
 	if tx.Provider != "sandbox" {
 		return nil, apperr.BadRequest("only sandbox payments can be confirmed by this endpoint")
 	}
-	invoice, err := s.repo.FindInvoiceByID(tx.InvoiceID)
+	invoice, err := s.repo.FindInvoiceByID(ctx, tx.InvoiceID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -296,23 +296,23 @@ func (s *BillingUsecase) ConfirmSandboxPayment(userID uuid.UUID, id string, req 
 		if req.ProviderReference != "" {
 			tx.ProviderReference = req.ProviderReference
 		}
-		if err := s.repo.UpdatePaymentTransaction(tx); err != nil {
+		if err := s.repo.UpdatePaymentTransaction(ctx, tx); err != nil {
 			return nil, apperr.Internal(err)
 		}
-		if err := s.repo.UpdateInvoice(invoice); err != nil {
+		if err := s.repo.UpdateInvoice(ctx, invoice); err != nil {
 			return nil, apperr.Internal(err)
 		}
-		if _, err := s.createManagedSubscription(userID, tx.PlanID.String(), "active"); err != nil {
+		if _, err := s.createManagedSubscription(ctx, userID, tx.PlanID.String(), "active"); err != nil {
 			return nil, err
 		}
 	case "failed", "cancelled":
 		tx.Status = status
 		tx.FailureReason = req.FailureReason
 		invoice.Status = status
-		if err := s.repo.UpdatePaymentTransaction(tx); err != nil {
+		if err := s.repo.UpdatePaymentTransaction(ctx, tx); err != nil {
 			return nil, apperr.Internal(err)
 		}
-		if err := s.repo.UpdateInvoice(invoice); err != nil {
+		if err := s.repo.UpdateInvoice(ctx, invoice); err != nil {
 			return nil, apperr.Internal(err)
 		}
 	default:
@@ -321,13 +321,13 @@ func (s *BillingUsecase) ConfirmSandboxPayment(userID uuid.UUID, id string, req 
 	return mapCheckout(invoice, tx), nil
 }
 
-func (s *BillingUsecase) ListInvoices(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminBillingInvoice], error) {
+func (s *BillingUsecase) ListInvoices(ctx context.Context, query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminBillingInvoice], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	userID, err := optionalUUID(query.UserID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid user id")
 	}
-	items, total, err := s.repo.ListInvoices(repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
+	items, total, err := s.repo.ListInvoices(ctx, repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -338,13 +338,13 @@ func (s *BillingUsecase) ListInvoices(query dto.AdminBillingListQuery) (*dto.Pag
 	return &dto.PageResult[dto.AdminBillingInvoice]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) ListPaymentTransactions(query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminPaymentTransaction], error) {
+func (s *BillingUsecase) ListPaymentTransactions(ctx context.Context, query dto.AdminBillingListQuery) (*dto.PageResult[dto.AdminPaymentTransaction], error) {
 	query.PaginationQuery = query.PaginationQuery.Normalize()
 	userID, err := optionalUUID(query.UserID)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid user id")
 	}
-	items, total, err := s.repo.ListPaymentTransactions(repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
+	items, total, err := s.repo.ListPaymentTransactions(ctx, repository.BillingAdminListFilter{Pagination: repository.Pagination{Page: query.Page, PageSize: query.PageSize}, Search: query.Search, Status: query.Status, UserID: userID})
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -355,25 +355,25 @@ func (s *BillingUsecase) ListPaymentTransactions(query dto.AdminBillingListQuery
 	return &dto.PageResult[dto.AdminPaymentTransaction]{Items: res, Meta: buildMeta(query.PaginationQuery, total)}, nil
 }
 
-func (s *BillingUsecase) createManagedSubscription(userID uuid.UUID, planIDRaw string, status string) (*dto.AdminBillingSubscription, error) {
+func (s *BillingUsecase) createManagedSubscription(ctx context.Context, userID uuid.UUID, planIDRaw string, status string) (*dto.AdminBillingSubscription, error) {
 	planID, err := uuid.Parse(planIDRaw)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid plan id")
 	}
-	plan, err := s.repo.FindPlanByID(planID)
+	plan, err := s.repo.FindPlanByID(ctx, planID)
 	if err != nil {
 		return nil, apperr.NotFound("billing plan", planIDRaw)
 	}
 	expiresAt := time.Now().UTC().AddDate(0, 1, 0)
 	subscription := &domain.BillingSubscription{UserID: userID, TenantID: uuid.Nil, PlanID: plan.ID, Status: status, ExpiresAt: &expiresAt}
-	if err := s.repo.CreateSubscription(subscription); err != nil {
+	if err := s.repo.CreateSubscription(ctx, subscription); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	history := &domain.BillingHistory{UserID: userID, SubscriptionID: subscription.ID, PlanName: plan.Name, Amount: plan.Price, Currency: plan.Currency, Status: "paid"}
-	if err := s.repo.CreateHistory(history); err != nil {
+	if err := s.repo.CreateHistory(ctx, history); err != nil {
 		return nil, apperr.Internal(err)
 	}
-	return s.mapSubscription(subscription)
+	return s.mapSubscription(ctx, subscription)
 }
 
 func mapCheckout(invoice *domain.BillingInvoice, tx *domain.PaymentTransaction) *dto.CheckoutPaymentResponse {
@@ -419,13 +419,13 @@ func formatTimePtr(value *time.Time) *string {
 	return &formatted
 }
 
-func (s *BillingUsecase) mapSubscription(item *domain.BillingSubscription) (*dto.AdminBillingSubscription, error) {
-	plan, err := s.repo.FindPlanByID(item.PlanID)
+func (s *BillingUsecase) mapSubscription(ctx context.Context, item *domain.BillingSubscription) (*dto.AdminBillingSubscription, error) {
+	plan, err := s.repo.FindPlanByID(ctx, item.PlanID)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
 	var userEmail string
-	if user, err := s.userRepo.FindByID(context.Background(), item.UserID); err == nil && user != nil {
+	if user, err := s.userRepo.FindByID(ctx, item.UserID); err == nil && user != nil {
 		userEmail = user.Email
 	}
 	startedAt := item.StartedAt.Format(time.RFC3339)
@@ -440,9 +440,16 @@ func (s *BillingUsecase) mapSubscription(item *domain.BillingSubscription) (*dto
 		cancelledAt = &value
 	}
 	return &dto.AdminBillingSubscription{
-		ID: item.ID.String(), UserID: item.UserID.String(), UserEmail: userEmail, PlanID: item.PlanID.String(), PlanName: plan.Name,
-		Status: item.Status, StartedAt: startedAt, ExpiresAt: expiresAt, CancelledAt: cancelledAt,
-		IsPremium: strings.Contains(strings.ToLower(plan.Code), "pro") || strings.Contains(strings.ToLower(plan.Code), "premium"),
+		ID:          item.ID.String(),
+		UserID:      item.UserID.String(),
+		UserEmail:   userEmail,
+		PlanID:      item.PlanID.String(),
+		PlanName:    plan.Name,
+		Status:      item.Status,
+		StartedAt:   startedAt,
+		ExpiresAt:   expiresAt,
+		CancelledAt: cancelledAt,
+		IsPremium:   plan.IsPremium || strings.Contains(strings.ToLower(plan.Code), "pro") || strings.Contains(strings.ToLower(plan.Code), "premium"),
 	}, nil
 }
 
@@ -460,7 +467,7 @@ func defaultString(value string, fallback string) string {
 	return value
 }
 
-func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequest) (*dto.CheckoutPaymentResponse, error) {
+func (s *BillingUsecase) CheckoutCart(ctx context.Context, userID uuid.UUID, req dto.CartCheckoutRequest) (*dto.CheckoutPaymentResponse, error) {
 	if len(req.CourseIDs) == 0 {
 		return nil, apperr.BadRequest("no courses selected in cart")
 	}
@@ -473,7 +480,7 @@ func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequ
 		if err != nil {
 			return nil, apperr.BadRequest("invalid course id: " + idStr)
 		}
-		course, err := s.repo.FindCourseByID(cID)
+		course, err := s.repo.FindCourseByID(ctx, cID)
 		if err != nil {
 			return nil, apperr.NotFound("course", idStr)
 		}
@@ -483,18 +490,9 @@ func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequ
 
 	discountAmount := 0.0
 	if req.VoucherCode != "" {
-		voucher, err := s.repo.FindVoucherByCode(strings.ToUpper(req.VoucherCode))
+		voucher, err := s.repo.FindVoucherByCode(ctx, strings.ToUpper(req.VoucherCode))
 		if err == nil && voucher != nil {
-			if time.Now().UTC().Before(voucher.ExpiresAt) && voucher.IsActive {
-				if voucher.Type == "percent" {
-					discountAmount = totalAmount * (voucher.Discount / 100.0)
-				} else {
-					discountAmount = voucher.Discount
-				}
-				if discountAmount > totalAmount {
-					discountAmount = totalAmount
-				}
-			}
+			discountAmount = calculateVoucherDiscount(voucher, totalAmount)
 		}
 	}
 
@@ -512,7 +510,7 @@ func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequ
 		DueAt:       &dueAt,
 		Description: "Course purchase: " + strings.Join(courseTitles, ", "),
 	}
-	if err := s.repo.CreateInvoice(invoice); err != nil {
+	if err := s.repo.CreateInvoice(ctx, invoice); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
@@ -527,42 +525,46 @@ func (s *BillingUsecase) CheckoutCart(userID uuid.UUID, req dto.CartCheckoutRequ
 		Status:            "pending",
 		CheckoutURL:       "/sandbox/payments/" + invoice.ID.String(),
 	}
-	if err := s.repo.CreatePaymentTransaction(tx); err != nil {
+	if err := s.repo.CreatePaymentTransaction(ctx, tx); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
 	return mapCheckout(invoice, tx), nil
 }
 
-func (s *BillingUsecase) ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
-	voucher, err := s.repo.FindVoucherByCode(strings.ToUpper(req.Code))
+func (s *BillingUsecase) ApplyVoucher(ctx context.Context, req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
+	voucher, err := s.repo.FindVoucherByCode(ctx, strings.ToUpper(req.Code))
 	if err != nil {
 		return &dto.ApplyVoucherResponse{DiscountAmount: 0, NetAmount: req.CartAmount, Active: false}, nil
 	}
 
-	if time.Now().UTC().After(voucher.ExpiresAt) || !voucher.IsActive {
-		return &dto.ApplyVoucherResponse{DiscountAmount: 0, NetAmount: req.CartAmount, Active: false}, nil
-	}
-
-	var discount float64
-	if voucher.Type == "percent" {
-		discount = req.CartAmount * (voucher.Discount / 100.0)
-	} else {
-		discount = voucher.Discount
-	}
-
-	if discount > req.CartAmount {
-		discount = req.CartAmount
-	}
+	discount := calculateVoucherDiscount(voucher, req.CartAmount)
+	active := voucher.IsActive && time.Now().UTC().Before(voucher.ExpiresAt)
 
 	return &dto.ApplyVoucherResponse{
 		DiscountAmount: discount,
 		NetAmount:      req.CartAmount - discount,
-		Active:         true,
+		Active:         active,
 	}, nil
 }
 
-func (s *BillingUsecase) AdminCreateVoucher(req dto.UpsertVoucherRequest) (*dto.VoucherDTO, error) {
+func calculateVoucherDiscount(voucher *domain.Voucher, amount float64) float64 {
+	if voucher == nil || !voucher.IsActive || time.Now().UTC().After(voucher.ExpiresAt) {
+		return 0.0
+	}
+	var discount float64
+	if strings.EqualFold(voucher.Type, "percent") {
+		discount = amount * (voucher.Discount / 100.0)
+	} else {
+		discount = voucher.Discount
+	}
+	if discount > amount {
+		discount = amount
+	}
+	return discount
+}
+
+func (s *BillingUsecase) AdminCreateVoucher(ctx context.Context, req dto.UpsertVoucherRequest) (*dto.VoucherDTO, error) {
 	expTime, err := time.Parse("2006-01-02", req.ExpiresAt)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid expiry date format, use YYYY-MM-DD")
@@ -576,7 +578,7 @@ func (s *BillingUsecase) AdminCreateVoucher(req dto.UpsertVoucherRequest) (*dto.
 		IsActive:  req.IsActive,
 	}
 
-	if err := s.repo.CreateVoucher(v); err != nil {
+	if err := s.repo.CreateVoucher(ctx, v); err != nil {
 		return nil, apperr.Internal(err)
 	}
 
@@ -590,8 +592,8 @@ func (s *BillingUsecase) AdminCreateVoucher(req dto.UpsertVoucherRequest) (*dto.
 	}, nil
 }
 
-func (s *BillingUsecase) AdminListVouchers() ([]dto.VoucherDTO, error) {
-	items, err := s.repo.ListVouchers()
+func (s *BillingUsecase) AdminListVouchers(ctx context.Context) ([]dto.VoucherDTO, error) {
+	items, err := s.repo.ListVouchers(ctx)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -610,12 +612,12 @@ func (s *BillingUsecase) AdminListVouchers() ([]dto.VoucherDTO, error) {
 	return res, nil
 }
 
-func (s *BillingUsecase) AdminDeleteVoucher(id string) error {
+func (s *BillingUsecase) AdminDeleteVoucher(ctx context.Context, id string) error {
 	vID, err := uuid.Parse(id)
 	if err != nil {
 		return apperr.BadRequest("invalid voucher id")
 	}
-	if err := s.repo.DeleteVoucher(vID); err != nil {
+	if err := s.repo.DeleteVoucher(ctx, vID); err != nil {
 		return apperr.Internal(err)
 	}
 	return nil

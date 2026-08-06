@@ -20,12 +20,11 @@ func NewVocabularyExtrasService(repo repository.VocabularyRepository) *Vocabular
 }
 
 func (s *VocabularyExtrasUsecase) UpdateWord(ctx context.Context, id string, req dto.UpdateWordRequest) (map[string]any, error) {
-	_ = ctx
 	wordID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid word id")
 	}
-	word, err := s.repo.FindWordByID(wordID)
+	word, err := s.repo.FindWordByID(ctx, wordID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("word", id)
@@ -38,7 +37,7 @@ func (s *VocabularyExtrasUsecase) UpdateWord(ctx context.Context, id string, req
 	word.Phonetic = req.Phonetic
 	word.Level = req.Level
 	word.Example = req.Example
-	if err := s.repo.UpdateWord(word); err != nil {
+	if err := s.repo.UpdateWord(ctx, word); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return map[string]any{
@@ -53,21 +52,19 @@ func (s *VocabularyExtrasUsecase) UpdateWord(ctx context.Context, id string, req
 }
 
 func (s *VocabularyExtrasUsecase) DeleteWord(ctx context.Context, id string) error {
-	_ = ctx
 	wordID, err := uuid.Parse(id)
 	if err != nil {
 		return apperr.BadRequest("invalid word id")
 	}
-	if err := s.repo.DeleteWord(wordID); err != nil {
+	if err := s.repo.DeleteWord(ctx, wordID); err != nil {
 		return apperr.Internal(err)
 	}
 	return nil
 }
 
 func (s *VocabularyExtrasUsecase) ListVocabularyHistory(ctx context.Context, userID uuid.UUID, query dto.VocabularyHistoryQuery) (*dto.PageResult[dto.VocabularyHistoryItem], error) {
-	_ = ctx
 	query.PaginationQuery = query.PaginationQuery.Normalize()
-	items, err := s.repo.ListProgressHistoryByUser(userID, 100)
+	items, err := s.repo.ListProgressHistoryByUser(ctx, userID, 100)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}

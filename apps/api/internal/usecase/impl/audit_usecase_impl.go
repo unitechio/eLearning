@@ -3,9 +3,9 @@ package impl
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/repository"
 )
@@ -25,15 +25,13 @@ func (u *AuditUsecase) Log(ctx context.Context, log *domain.AuditLog) error {
 }
 
 func (u *AuditUsecase) LogUserAction(ctx context.Context, userID, username string, action domain.AuditAction, resource, resourceID, description string) error {
-	var parsedUserID *uint
-	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
-		value := uint(id)
-		parsedUserID = &value
+	var parsedUserID *uuid.UUID
+	if uid, err := uuid.Parse(userID); err == nil {
+		parsedUserID = &uid
 	}
-	var parsedResourceID *uint
-	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
-		value := uint(id)
-		parsedResourceID = &value
+	var parsedResourceID *string
+	if resourceID != "" {
+		parsedResourceID = &resourceID
 	}
 	log := &domain.AuditLog{
 		UserID:      parsedUserID,
@@ -48,10 +46,9 @@ func (u *AuditUsecase) LogUserAction(ctx context.Context, userID, username strin
 }
 
 func (u *AuditUsecase) LogSystemAction(ctx context.Context, action domain.AuditAction, resource, resourceID, description string) error {
-	var parsedResourceID *uint
-	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
-		value := uint(id)
-		parsedResourceID = &value
+	var parsedResourceID *string
+	if resourceID != "" {
+		parsedResourceID = &resourceID
 	}
 	log := &domain.AuditLog{
 		Action:      action,
@@ -73,18 +70,16 @@ func (u *AuditUsecase) ListAuditLogs(ctx context.Context, filter domain.AuditFil
 }
 
 func (u *AuditUsecase) GetUserAuditLogs(ctx context.Context, userID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
-	if id, err := strconv.ParseUint(userID, 10, 64); err == nil {
-		value := uint(id)
-		filter.UserID = &value
+	if uid, err := uuid.Parse(userID); err == nil {
+		filter.UserID = &uid
 	}
 	return u.auditRepo.List(ctx, filter)
 }
 
 func (u *AuditUsecase) GetResourceAuditLogs(ctx context.Context, resource, resourceID string, filter domain.AuditFilter) ([]*domain.AuditLog, int64, error) {
 	filter.Resource = resource
-	if id, err := strconv.ParseUint(resourceID, 10, 64); err == nil {
-		value := uint(id)
-		filter.ResourceID = &value
+	if resourceID != "" {
+		filter.ResourceID = &resourceID
 	}
 	return u.auditRepo.List(ctx, filter)
 }

@@ -20,12 +20,11 @@ func NewWritingExtrasService(repo repository.WritingRepository, llm ai.LLMServic
 }
 
 func (s *WritingExtrasUsecase) GetWritingByID(ctx context.Context, userID uuid.UUID, id string) (map[string]any, error) {
-	_ = ctx
 	submissionID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, apperr.BadRequest("invalid writing id")
 	}
-	item, err := s.repo.FindSubmissionByIDForUser(submissionID, userID)
+	item, err := s.repo.FindSubmissionByIDForUser(ctx, submissionID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("writing submission", id)

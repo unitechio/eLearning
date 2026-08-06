@@ -1,282 +1,316 @@
 import React, { useState } from 'react';
-import { 
-  Receipt, 
-  CreditCard, 
-  Search, 
-  Filter, 
-  Download, 
-  ArrowUpRight, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  AlertCircle 
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/shared/api/client';
-import { cn } from '@/shared/lib';
+import { Receipt, CreditCard, Send, Plus, Upload, Landmark } from 'lucide-react';
+import { AdminPageLayout, AdminDataTable, AdminStatusBadge, type AdminColumnDef } from '@/shared/components/admin';
+import { Button } from '@/shared/components/ui/button';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
+import { Checkbox } from '@/shared/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 
 interface BillingInvoice {
   id: string;
-  invoice_no: string;
-  user_email: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'paid' | 'failed' | 'refunded';
-  created_at: string;
+  dueDate: string;
+  status: 'completed' | 'overdue' | 'not_due_yet';
+  recipient: {
+    name: string;
+    hasCard: boolean;
+  };
+  amount: string;
+  invoiceNo: string;
+  lastUpdate: string;
 }
 
-interface PaymentTransaction {
+interface PaymentRequest {
   id: string;
-  invoice_id: string;
-  user_email: string;
-  amount: number;
-  currency: string;
-  provider: 'vnpay' | 'stripe' | 'momo' | 'sandbox';
-  provider_reference?: string;
-  status: 'pending' | 'success' | 'failed' | 'refunded';
-  created_at: string;
+  createdOn: string;
+  contact: {
+    name: string;
+    avatar: string;
+  };
+  amount: string;
+  status: 'active' | 'canceled';
+  account: string;
 }
+
+const mockInvoices: BillingInvoice[] = [
+  { id: '1', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$129.00', invoiceNo: '9876543456', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '2', dueDate: 'Oct 28-2026', status: 'overdue', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$289.00', invoiceNo: '2345678956', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '3', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '4', dueDate: 'Oct 28-2026', status: 'overdue', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$289.00', invoiceNo: '2345678956', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '5', dueDate: 'Oct 28-2026', status: 'not_due_yet', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '6', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '7', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '8', dueDate: 'Oct 28-2026', status: 'not_due_yet', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '9', dueDate: 'Oct 28-2026', status: 'overdue', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$289.00', invoiceNo: '2345678956', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '10', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '11', dueDate: 'Oct 28-2026', status: 'completed', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$659.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+  { id: '12', dueDate: 'Oct 28-2026', status: 'not_due_yet', recipient: { name: 'Amazon Purchase', hasCard: true }, amount: '$289.00', invoiceNo: '2345678654', lastUpdate: '2026-08-12 11:00 AM' },
+];
+
+const mockRequests: PaymentRequest[] = [
+  { id: '1', createdOn: 'Oct 28-2026', contact: { name: 'Michael Scott', avatar: 'MS' }, amount: '$129.00', status: 'active', account: 'Checking ...23456' },
+  { id: '2', createdOn: 'Oct 28-2026', contact: { name: 'Daniel James', avatar: 'DJ' }, amount: '$289.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '3', createdOn: 'Oct 28-2026', contact: { name: 'David John', avatar: 'DJ' }, amount: '$659.00', status: 'active', account: 'Checking ...23456' },
+  { id: '4', createdOn: 'Oct 28-2026', contact: { name: 'Ryan Thomas', avatar: 'RT' }, amount: '$289.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '5', createdOn: 'Oct 28-2026', contact: { name: 'Mark Anthony', avatar: 'MA' }, amount: '$659.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '6', createdOn: 'Oct 28-2026', contact: { name: 'Luke Andrew', avatar: 'LA' }, amount: '$659.00', status: 'active', account: 'Checking ...23456' },
+  { id: '7', createdOn: 'Oct 28-2026', contact: { name: 'Leo Thomas', avatar: 'LT' }, amount: '$659.00', status: 'active', account: 'Checking ...23456' },
+  { id: '8', createdOn: 'Oct 28-2026', contact: { name: 'Jack William', avatar: 'JW' }, amount: '$659.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '9', createdOn: 'Oct 28-2026', contact: { name: 'Noah James', avatar: 'NJ' }, amount: '$289.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '10', createdOn: 'Oct 28-2026', contact: { name: 'Leo Thomas', avatar: 'LT' }, amount: '$659.00', status: 'active', account: 'Checking ...23456' },
+  { id: '11', createdOn: 'Oct 28-2026', contact: { name: 'Oliver James', avatar: 'OJ' }, amount: '$659.00', status: 'active', account: 'Checking ...23456' },
+  { id: '12', createdOn: 'Oct 28-2026', contact: { name: 'Matthew Clark', avatar: 'MC' }, amount: '$289.00', status: 'canceled', account: 'Checking ...23456' },
+  { id: '13', createdOn: 'Oct 28-2026', contact: { name: 'John Paul', avatar: 'JP' }, amount: '$289.00', status: 'active', account: 'Checking ...23456' },
+];
 
 export function AdminInvoicesPage() {
   const [activeTab, setActiveTab] = useState<'invoices' | 'transactions'>('invoices');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Fetch Invoices
-  const invoicesQuery = useQuery({
-    queryKey: ['admin-invoices'],
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<{ data: BillingInvoice[] }>('/admin/billing/invoices?page=1&page_size=100');
-        return res.data.data;
-      } catch {
-        // Mock fallback if API fails
-        return [
-          { id: "inv_1", invoice_no: "INV-2026-001", user_email: "hocvienA@gmail.com", amount: 19.99, currency: "USD", status: "paid", created_at: "2026-07-20T10:00:00Z" },
-          { id: "inv_2", invoice_no: "INV-2026-002", user_email: "studentB@gmail.com", amount: 29.99, currency: "USD", status: "pending", created_at: "2026-07-22T14:30:00Z" },
-          { id: "inv_3", invoice_no: "INV-2026-003", user_email: "userC@gmail.com", amount: 19.99, currency: "USD", status: "failed", created_at: "2026-07-23T01:15:00Z" }
-        ] as BillingInvoice[];
-      }
-    }
+  const displayTitle = activeTab === 'invoices' ? 'Payments' : 'Requests';
+  const displayDesc = 'Manage your accounts, outbound invoices, and live payment settlements.';
+
+  const filteredInvoices = mockInvoices.filter(inv => {
+    const matchesSearch = inv.recipient.name.toLowerCase().includes(searchTerm.toLowerCase()) || inv.invoiceNo.includes(searchTerm);
+    const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  // Fetch Transactions
-  const transactionsQuery = useQuery({
-    queryKey: ['admin-transactions'],
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<{ data: PaymentTransaction[] }>('/admin/billing/payments?page=1&page_size=100');
-        return res.data.data;
-      } catch {
-        // Mock fallback if API fails
-        return [
-          { id: "tx_1", invoice_id: "inv_1", user_email: "hocvienA@gmail.com", amount: 19.99, currency: "USD", provider: "stripe", provider_reference: "ch_3M4n9KL", status: "success", created_at: "2026-07-20T10:02:00Z" },
-          { id: "tx_2", invoice_id: "inv_3", user_email: "userC@gmail.com", amount: 19.99, currency: "USD", provider: "vnpay", provider_reference: "vnp_8829102", status: "failed", created_at: "2026-07-23T01:16:00Z" }
-        ] as PaymentTransaction[];
-      }
-    }
+  const filteredRequests = mockRequests.filter(req => {
+    const matchesSearch = req.contact.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  const exportToCSV = () => {
-    const data = activeTab === 'invoices' ? invoicesQuery.data : transactionsQuery.data;
-    if (!data || data.length === 0) return;
-
-    let headers = activeTab === 'invoices' 
-      ? ['ID', 'Invoice No', 'User Email', 'Amount', 'Currency', 'Status', 'Created At']
-      : ['ID', 'Invoice ID', 'User Email', 'Amount', 'Currency', 'Provider', 'Reference', 'Status', 'Created At'];
-
-    let csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n"
-      + data.map(e => Object.values(e).join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `billing_${activeTab}_report.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-      case 'success':
-        return (
-          <span className="inline-flex items-center gap-1 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 px-2.5 py-0.5 rounded-full text-xs font-black">
-            <CheckCircle className="h-3 w-3" />
-            <span>Success</span>
-          </span>
-        );
-      case 'pending':
-        return (
-          <span className="inline-flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 px-2.5 py-0.5 rounded-full text-xs font-black">
-            <Clock className="h-3 w-3" />
-            <span>Pending</span>
-          </span>
-        );
-      case 'failed':
-        return (
-          <span className="inline-flex items-center gap-1 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 px-2.5 py-0.5 rounded-full text-xs font-black">
-            <XCircle className="h-3 w-3" />
-            <span>Failed</span>
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400 px-2.5 py-0.5 rounded-full text-xs font-black">
-            <AlertCircle className="h-3 w-3" />
-            <span>Refunded</span>
-          </span>
-        );
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds(prev => [...prev, id]);
+    } else {
+      setSelectedIds(prev => prev.filter(item => item !== id));
     }
   };
+
+  const invoiceColumns: AdminColumnDef<BillingInvoice>[] = [
+    {
+      header: '',
+      cell: (item) => (
+        <Checkbox
+          checked={selectedIds.includes(item.id)}
+          onCheckedChange={(checked) => handleSelectOne(item.id, !!checked)}
+          aria-label={`Select invoice ${item.invoiceNo}`}
+        />
+      ),
+      className: 'w-10 pl-4',
+    },
+    {
+      header: 'Due date',
+      cell: (inv) => <span className="text-muted-foreground">{inv.dueDate}</span>,
+    },
+    {
+      header: 'Status',
+      cell: (inv) => {
+        let state = 'active';
+        if (inv.status === 'overdue') state = 'failed';
+        if (inv.status === 'not_due_yet') state = 'inactive';
+        return <AdminStatusBadge state={state} label={inv.status.replace(/_/g, ' ')} />;
+      },
+    },
+    {
+      header: 'Recipient',
+      cell: (inv) => (
+        <div className="flex items-center gap-2">
+          <Landmark className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="font-semibold text-foreground text-xs">{inv.recipient.name}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Amount',
+      cell: (inv) => <span className="font-bold text-foreground">{inv.amount}</span>,
+    },
+    {
+      header: 'Invoice no',
+      cell: (inv) => <span className="text-muted-foreground font-mono text-[11px]">{inv.invoiceNo}</span>,
+    },
+    {
+      header: 'Last Update',
+      cell: (inv) => <span className="text-muted-foreground text-[10px] font-medium font-mono">{inv.lastUpdate}</span>,
+    },
+  ];
+
+  const requestColumns: AdminColumnDef<PaymentRequest>[] = [
+    {
+      header: '',
+      cell: (item) => (
+        <Checkbox
+          checked={selectedIds.includes(item.id)}
+          onCheckedChange={(checked) => handleSelectOne(item.id, !!checked)}
+          aria-label={`Select request ${item.id}`}
+        />
+      ),
+      className: 'w-10 pl-4',
+    },
+    {
+      header: 'Created on',
+      cell: (req) => <span className="text-muted-foreground">{req.createdOn}</span>,
+    },
+    {
+      header: 'Contact',
+      cell: (req) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-7 w-7 border border-border">
+            <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+              {req.contact.avatar}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-semibold text-foreground text-xs">{req.contact.name}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Amount',
+      cell: (req) => <span className="font-bold text-foreground">{req.amount}</span>,
+    },
+    {
+      header: 'Status',
+      cell: (req) => (
+        <AdminStatusBadge state={req.status === 'active' ? 'active' : 'failed'} label={req.status} />
+      ),
+    },
+    {
+      header: 'Account',
+      cell: (req) => <span className="text-muted-foreground font-mono text-[11px]">{req.account}</span>,
+    },
+  ];
+
+  const tabs = [
+    { value: 'invoices' as const, label: 'Payments', icon: Receipt },
+    { value: 'transactions' as const, label: 'Requests', icon: CreditCard },
+  ];
+
+  // Dynamic header action buttons (Image 5 & 6)
+  const headerActions = activeTab === 'invoices' ? (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="h-10 rounded-[10px] px-3.5 text-xs font-semibold gap-1.5 border-[#EAECF0] dark:border-[#1E1F22] bg-slate-50/50 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+      >
+        <Send className="h-3.5 w-3.5" />
+        <span>Send Money</span>
+      </Button>
+      <Button
+        className="h-10 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold px-4 text-xs gap-1.5 rounded-[10px] shadow-sm"
+      >
+        <Upload className="h-3.5 w-3.5" />
+        <span>Upload Bill</span>
+      </Button>
+    </div>
+  ) : (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        className="h-10 rounded-[10px] px-3.5 text-xs font-semibold gap-1.5 border-[#EAECF0] dark:border-[#1E1F22] bg-slate-50/50 text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        <span>Create Invoice</span>
+      </Button>
+      <Button
+        className="h-10 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold px-4 text-xs gap-1.5 rounded-[10px] shadow-sm"
+      >
+        <Send className="h-3.5 w-3.5" />
+        <span>Request Payment</span>
+      </Button>
+    </div>
+  );
+
+  const rightActions = (
+    <div className="flex items-center gap-2">
+      <Select 
+        value={statusFilter} 
+        onValueChange={(val) => {
+          setStatusFilter(val);
+          setSelectedIds([]);
+        }}
+      >
+        <SelectTrigger className="w-[150px] h-10 rounded-[10px] text-xs font-semibold bg-slate-50/50">
+          <SelectValue placeholder="All statuses" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All statuses</SelectItem>
+          {activeTab === 'invoices' ? (
+            <>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="overdue">Overdue</SelectItem>
+              <SelectItem value="not_due_yet">Not due yet</SelectItem>
+            </>
+          ) : (
+            <>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="canceled">Canceled</SelectItem>
+            </>
+          )}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 p-6 lg:p-8 text-slate-800 dark:text-slate-100 font-sans">
-      {/* Header */}
-      <header className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white shadow-xl">
-        <section className="flex items-center gap-4">
-          <figure className="rounded-2xl bg-white/20 p-3" aria-hidden="true">
-            <Receipt className="h-8 w-8" />
-          </figure>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Invoices & Payments</h1>
-            <p className="mt-1 text-blue-100">
-              Quản lý danh sách hóa đơn học phí và lịch sử giao dịch thanh toán
-            </p>
-          </div>
-        </section>
-      </header>
-
-      {/* Tabs list toggle and Export button */}
-      <section className="flex flex-col sm:flex-row gap-4 items-center justify-between" aria-label="Controls">
-        <nav className="flex items-center gap-2 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-2xl" aria-label="Invoice filter tabs">
-          <button
-            type="button"
-            onClick={() => setActiveTab('invoices')}
-            className={cn(
-              "px-5 py-2.5 rounded-xl text-xs font-black transition flex items-center gap-2",
-              activeTab === 'invoices' 
-                ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            )}
-          >
-            <Receipt className="h-4 w-4" />
-            <span>Hóa đơn (Invoices)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('transactions')}
-            className={cn(
-              "px-5 py-2.5 rounded-xl text-xs font-black transition flex items-center gap-2",
-              activeTab === 'transactions' 
-                ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            )}
-          >
-            <CreditCard className="h-4 w-4" />
-            <span>Giao dịch (Transactions)</span>
-          </button>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <label className="relative flex items-center">
-            <Search className="absolute left-3.5 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo email khách hàng..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
-            />
-          </label>
-
-          <button
-            type="button"
-            onClick={exportToCSV}
-            className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl px-4 py-2.5 text-xs font-bold transition hover:bg-slate-850 dark:hover:bg-slate-100"
-          >
-            <Download className="h-4 w-4" />
-            <span>Xuất CSV</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Main card list */}
-      <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-sm overflow-hidden" aria-label="Data list">
-        {activeTab === 'invoices' ? (
-          <div>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4">Danh sách hóa đơn</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold min-w-[600px]">
-                <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-850">
-                  <tr>
-                    <th className="px-4 py-3">Mã hóa đơn</th>
-                    <th className="px-4 py-3">Khách hàng</th>
-                    <th className="px-4 py-3">Số tiền</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                    <th className="px-4 py-3">Ngày tạo</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
-                  {(invoicesQuery.data ?? [])
-                    .filter(inv => inv.user_email.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .map(inv => (
-                      <tr key={inv.id} className="hover:bg-slate-50 dark:hover:bg-slate-900 transition">
-                        <td className="px-4 py-4 font-bold text-slate-900 dark:text-white">{inv.invoice_no}</td>
-                        <td className="px-4 py-4 text-slate-650">{inv.user_email}</td>
-                        <td className="px-4 py-4 text-slate-800 dark:text-slate-200 font-bold">
-                          {inv.amount.toLocaleString()} {inv.currency}
-                        </td>
-                        <td className="px-4 py-4">{getStatusBadge(inv.status)}</td>
-                        <td className="px-4 py-4 text-slate-500">{new Date(inv.created_at).toLocaleDateString()}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4">Lịch sử giao dịch</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-semibold min-w-[700px]">
-                <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-850">
-                  <tr>
-                    <th className="px-4 py-3">ID giao dịch</th>
-                    <th className="px-4 py-3">Khách hàng</th>
-                    <th className="px-4 py-3">Cổng thanh toán</th>
-                    <th className="px-4 py-3">Mã tham chiếu</th>
-                    <th className="px-4 py-3">Số tiền</th>
-                    <th className="px-4 py-3">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
-                  {(transactionsQuery.data ?? [])
-                    .filter(tx => tx.user_email.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .map(tx => (
-                      <tr key={tx.id} className="hover:bg-slate-50 dark:hover:bg-slate-900 transition">
-                        <td className="px-4 py-4 font-mono font-bold text-slate-900 dark:text-white text-[10px]">{tx.id}</td>
-                        <td className="px-4 py-4 text-slate-650">{tx.user_email}</td>
-                        <td className="px-4 py-4">
-                          <span className="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-350 px-2 py-0.5 rounded-lg border border-slate-150 dark:border-slate-850 font-bold uppercase text-[10px]">
-                            {tx.provider}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-slate-550 font-mono text-[10px]">{tx.provider_reference || 'N/A'}</td>
-                        <td className="px-4 py-4 text-slate-800 dark:text-slate-200 font-bold">
-                          {tx.amount.toLocaleString()} {tx.currency}
-                        </td>
-                        <td className="px-4 py-4">{getStatusBadge(tx.status)}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </section>
-    </main>
+    <AdminPageLayout
+      title={displayTitle}
+      description={displayDesc}
+      icon={activeTab === 'invoices' ? Receipt : CreditCard}
+      action={headerActions}
+    >
+      {activeTab === 'invoices' ? (
+        <AdminDataTable
+          data={filteredInvoices}
+          columns={invoiceColumns}
+          isLoading={false}
+          searchTerm={searchTerm}
+          onSearchChange={(val) => {
+            setSearchTerm(val);
+            setSelectedIds([]);
+          }}
+          searchPlaceholder="Filter by recipient..."
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab as 'invoices' | 'transactions');
+            setSelectedIds([]);
+            setStatusFilter('all');
+            setSearchTerm('');
+          }}
+          rightActions={rightActions}
+          emptyTitle="No payments found"
+          emptyDescription="No transaction histories match your current filters."
+        />
+      ) : (
+        <AdminDataTable
+          data={filteredRequests}
+          columns={requestColumns}
+          isLoading={false}
+          searchTerm={searchTerm}
+          onSearchChange={(val) => {
+            setSearchTerm(val);
+            setSelectedIds([]);
+          }}
+          searchPlaceholder="Filter by contact..."
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab as 'invoices' | 'transactions');
+            setSelectedIds([]);
+            setStatusFilter('all');
+            setSearchTerm('');
+          }}
+          rightActions={rightActions}
+          emptyTitle="No requests found"
+          emptyDescription="No transaction histories match your current filters."
+        />
+      )}
+    </AdminPageLayout>
   );
 }
+
+export default AdminInvoicesPage;

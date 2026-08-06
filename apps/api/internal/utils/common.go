@@ -2,19 +2,17 @@ package utils
 
 import (
 	"bytes"
-	"encoding/base32"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"math"
-	"math/rand"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	cryptoutil "github.com/unitechio/eLearning/apps/api/internal/utils/crypto"
 )
 
 func Base64Decode(s string) (string, error) {
@@ -101,30 +99,11 @@ func DownloadFile(c *gin.Context, filePath, fileName string) {
 }
 
 func RandomPassword() string {
-	lower := "qwertyuiopasdfghjklzxcvbnm"
-	upper := strings.ToUpper(lower)
-	num := "0123456789"
-	special := "!@#$"
-
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	gen := []byte{
-		lower[r.Intn(len(lower))],
-		upper[r.Intn(len(upper))],
-		num[r.Intn(len(num))],
-		special[r.Intn(len(special))],
+	pass, err := cryptoutil.RandomPassword(8)
+	if err != nil {
+		return "DefaultP@ss123"
 	}
-
-	all := lower + upper + num + special
-	for len(gen) < 8 {
-		gen = append(gen, all[r.Intn(len(all))])
-	}
-
-	r.Shuffle(len(gen), func(i, j int) {
-		gen[i], gen[j] = gen[j], gen[i]
-	})
-
-	return string(gen)
+	return pass
 }
 
 func Distance(lat1, lon1, lat2, lon2 float64) float64 {
@@ -142,9 +121,5 @@ func Distance(lat1, lon1, lat2, lon2 float64) float64 {
 }
 
 func GenerateSecret() (string, error) {
-	secret := make([]byte, 20)
-	if _, err := rand.Read(secret); err != nil {
-		return "", err
-	}
-	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(secret), nil
+	return cryptoutil.GenerateSecret()
 }

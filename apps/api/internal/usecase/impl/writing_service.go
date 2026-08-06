@@ -23,7 +23,6 @@ func NewWritingService(repo repository.WritingRepository, llm ai.LLMService) *Wr
 }
 
 func (s *WritingUsecase) Submit(ctx context.Context, userID uuid.UUID, req usecase.SubmitRequest) (*domain.WritingSubmission, error) {
-	_ = ctx
 	wc := wordCount(req.Response)
 	if wc < 50 {
 		return nil, apperr.BadRequest("response must be at least 50 words")
@@ -53,14 +52,13 @@ func (s *WritingUsecase) Submit(ctx context.Context, userID uuid.UUID, req useca
 		CriteriaScores:  compress.CompressedText(criteriaJSON),
 		IsGraded:        true,
 	}
-	if err := s.repo.CreateSubmission(submission); err != nil {
+	if err := s.repo.CreateSubmission(ctx, submission); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return submission, nil
 }
 
 func (s *WritingUsecase) GetHistory(ctx context.Context, userID uuid.UUID, page, pageSize int) (*usecase.HistoryResponse, error) {
-	_ = ctx
 	if page < 1 {
 		page = 1
 	}
@@ -69,7 +67,7 @@ func (s *WritingUsecase) GetHistory(ctx context.Context, userID uuid.UUID, page,
 	}
 
 	offset := (page - 1) * pageSize
-	items, total, err := s.repo.ListSubmissionsByUser(userID, pageSize, offset)
+	items, total, err := s.repo.ListSubmissionsByUser(ctx, userID, pageSize, offset)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -91,8 +89,7 @@ func (s *WritingUsecase) GetHistory(ctx context.Context, userID uuid.UUID, page,
 }
 
 func (s *WritingUsecase) GetSubmissionByID(ctx context.Context, userID, submissionID uuid.UUID) (*domain.WritingSubmission, error) {
-	_ = ctx
-	item, err := s.repo.FindSubmissionByIDForUser(submissionID, userID)
+	item, err := s.repo.FindSubmissionByIDForUser(ctx, submissionID, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("submission", submissionID.String())
@@ -104,7 +101,6 @@ func (s *WritingUsecase) GetSubmissionByID(ctx context.Context, userID, submissi
 
 // AdminListSubmissions lists all writing submissions regardless of user.
 func (s *WritingUsecase) AdminListSubmissions(ctx context.Context, page, pageSize int) (*usecase.HistoryResponse, error) {
-	_ = ctx
 	if page < 1 {
 		page = 1
 	}
@@ -113,7 +109,7 @@ func (s *WritingUsecase) AdminListSubmissions(ctx context.Context, page, pageSiz
 	}
 
 	offset := (page - 1) * pageSize
-	items, total, err := s.repo.ListAllSubmissions(pageSize, offset)
+	items, total, err := s.repo.ListAllSubmissions(ctx, pageSize, offset)
 	if err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -136,8 +132,7 @@ func (s *WritingUsecase) AdminListSubmissions(ctx context.Context, page, pageSiz
 
 // AdminGetSubmissionByID fetches a single submission by ID for admin/teacher review.
 func (s *WritingUsecase) AdminGetSubmissionByID(ctx context.Context, submissionID uuid.UUID) (*domain.WritingSubmission, error) {
-	_ = ctx
-	item, err := s.repo.FindSubmissionByID(submissionID)
+	item, err := s.repo.FindSubmissionByID(ctx, submissionID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("submission", submissionID.String())
@@ -149,8 +144,7 @@ func (s *WritingUsecase) AdminGetSubmissionByID(ctx context.Context, submissionI
 
 // AdminReviewSubmission saves teacher review: audio URL, notes, and optional score/annotations override.
 func (s *WritingUsecase) AdminReviewSubmission(ctx context.Context, reviewerID, submissionID uuid.UUID, req usecase.ReviewWritingRequest) (*domain.WritingSubmission, error) {
-	_ = ctx
-	item, err := s.repo.FindSubmissionByID(submissionID)
+	item, err := s.repo.FindSubmissionByID(ctx, submissionID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return nil, apperr.NotFound("submission", submissionID.String())
@@ -174,7 +168,7 @@ func (s *WritingUsecase) AdminReviewSubmission(ctx context.Context, reviewerID, 
 	// Mark as reviewed
 	item.IsGraded = true
 
-	if err := s.repo.UpdateSubmission(item); err != nil {
+	if err := s.repo.UpdateSubmission(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
 	return item, nil

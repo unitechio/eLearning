@@ -36,7 +36,7 @@ func (h *EngagementHandler) Leaderboard(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetLeaderboard(userID, query)
+	items, err := h.svc.GetLeaderboard(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -64,7 +64,7 @@ func (h *EngagementHandler) MyLeaderboard(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetMyLeaderboardStanding(userID, query)
+	item, err := h.svc.GetMyLeaderboardStanding(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -91,7 +91,7 @@ func (h *EngagementHandler) Heatmap(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetHeatmap(userID, query)
+	items, err := h.svc.GetHeatmap(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -118,7 +118,7 @@ func (h *EngagementHandler) DailyActivity(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetDailyActivity(userID, query)
+	items, err := h.svc.GetDailyActivity(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -146,7 +146,7 @@ func (h *EngagementHandler) XPHistory(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	res, err := h.svc.GetXPHistory(userID, query)
+	res, err := h.svc.GetXPHistory(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -167,7 +167,7 @@ func (h *EngagementHandler) TimeSpent(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetTimeSpent(userID)
+	item, err := h.svc.GetTimeSpent(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -188,7 +188,7 @@ func (h *EngagementHandler) GamificationProfile(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetGamificationProfile(userID)
+	item, err := h.svc.GetGamificationProfile(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -217,7 +217,7 @@ func (h *EngagementHandler) AddXP(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.AddXP(userID, req)
+	item, err := h.svc.AddXP(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -238,7 +238,7 @@ func (h *EngagementHandler) Streak(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetStreak(userID)
+	item, err := h.svc.GetStreak(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -259,7 +259,7 @@ func (h *EngagementHandler) Achievements(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetAchievements(userID)
+	items, err := h.svc.GetAchievements(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -280,7 +280,7 @@ func (h *EngagementHandler) Recommendations(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetRecommendations(userID)
+	items, err := h.svc.GetRecommendations(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -302,7 +302,7 @@ func (h *EngagementHandler) NextLesson(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetNextLesson(userID)
+	item, err := h.svc.GetNextLesson(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -323,7 +323,7 @@ func (h *EngagementHandler) LearningPattern(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.GetLearningPattern(userID)
+	item, err := h.svc.GetLearningPattern(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -344,7 +344,7 @@ func (h *EngagementHandler) WeakPoints(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetWeakPoints(userID)
+	items, err := h.svc.GetWeakPoints(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -365,7 +365,7 @@ func (h *EngagementHandler) Improvement(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetImprovement(userID)
+	items, err := h.svc.GetImprovement(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -386,7 +386,7 @@ func (h *EngagementHandler) PremiumFeatures(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	items, err := h.svc.GetPremiumFeatures(userID)
+	items, err := h.svc.GetPremiumFeatures(requestContext(c), userID)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -414,7 +414,7 @@ func (h *EngagementHandler) PremiumUnlock(c *gin.Context) {
 		response.Fail(c, 401, "unauthorized")
 		return
 	}
-	item, err := h.svc.UnlockPremiumFeature(userID, req)
+	item, err := h.svc.UnlockPremiumFeature(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

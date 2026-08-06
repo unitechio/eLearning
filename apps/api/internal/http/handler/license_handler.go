@@ -42,7 +42,7 @@ func (h *LicenseHandler) ActivateLicense(c *gin.Context) {
 	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.ActivateLicense(&req)
+	item, err := h.svc.ActivateLicense(requestContext(c), &req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -63,7 +63,7 @@ func (h *LicenseHandler) ValidateLicense(c *gin.Context) {
 		response.Fail(c, 400, "license_key is required")
 		return
 	}
-	item, err := h.svc.ValidateLicense(licenseKey)
+	item, err := h.svc.ValidateLicense(requestContext(c), licenseKey)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -83,7 +83,7 @@ func (h *LicenseHandler) GetCurrentLicense(c *gin.Context) {
 		response.Fail(c, 401, "license key not found in context")
 		return
 	}
-	item, err := h.svc.GetLicenseByKey(licenseKey)
+	item, err := h.svc.GetLicenseByKey(requestContext(c), licenseKey)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -103,7 +103,7 @@ func (h *LicenseHandler) GetUsageStatistics(c *gin.Context) {
 		response.Fail(c, 401, "license key not found in context")
 		return
 	}
-	item, err := h.svc.GetUsageStatistics(licenseKey)
+	item, err := h.svc.GetUsageStatistics(requestContext(c), licenseKey)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -130,7 +130,7 @@ func (h *LicenseHandler) CreateLicense(c *gin.Context) {
 		value := time.Duration(*req.DurationDays) * 24 * time.Hour
 		duration = &value
 	}
-	item, err := h.svc.CreateLicense(tier, req.OrganizationID, req.OrganizationName, req.ContactEmail, duration)
+	item, err := h.svc.CreateLicense(requestContext(c), tier, req.OrganizationID, req.OrganizationName, req.ContactEmail, duration)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -145,7 +145,7 @@ func (h *LicenseHandler) CreateLicense(c *gin.Context) {
 // @Success      200  {object}  response.Envelope{data=[]domain.License}
 // @Router       /admin/licenses [get]
 func (h *LicenseHandler) ListLicenses(c *gin.Context) {
-	items, err := h.svc.GetAllLicenses()
+	items, err := h.svc.GetAllLicenses(requestContext(c))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -171,7 +171,7 @@ func (h *LicenseHandler) UpgradeLicense(c *gin.Context) {
 	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	item, err := h.svc.UpgradeLicense(licenseKey, domain.LicenseTier(req.NewTier))
+	item, err := h.svc.UpgradeLicense(requestContext(c), licenseKey, domain.LicenseTier(req.NewTier))
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -195,7 +195,7 @@ func (h *LicenseHandler) SuspendLicense(c *gin.Context) {
 	if !bindJSONOrAbort(c, &req) {
 		return
 	}
-	if err := h.svc.SuspendLicense(c.Param("license_key"), req.Reason); err != nil {
+	if err := h.svc.SuspendLicense(requestContext(c), c.Param("license_key"), req.Reason); err != nil {
 		_ = c.Error(err)
 		return
 	}
@@ -210,7 +210,7 @@ func (h *LicenseHandler) SuspendLicense(c *gin.Context) {
 // @Success      200          {object}  response.Envelope
 // @Router       /admin/licenses/{license_key}/reactivate [post]
 func (h *LicenseHandler) ReactivateLicense(c *gin.Context) {
-	if err := h.svc.ReactivateLicense(c.Param("license_key")); err != nil {
+	if err := h.svc.ReactivateLicense(requestContext(c), c.Param("license_key")); err != nil {
 		_ = c.Error(err)
 		return
 	}

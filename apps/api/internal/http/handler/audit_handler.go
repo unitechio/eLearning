@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	"github.com/unitechio/eLearning/apps/api/pkg/response"
@@ -269,23 +270,16 @@ func parseAuditFilter(c *gin.Context) (domain.AuditFilter, bool) {
 	}
 
 	if raw := c.Query("user_id"); raw != "" {
-		value, err := strconv.ParseUint(raw, 10, 64)
+		parsed, err := uuid.Parse(raw)
 		if err != nil {
-			response.Fail(c, 400, "invalid user_id")
+			response.Fail(c, 400, "invalid user_id (must be a valid UUID)")
 			return domain.AuditFilter{}, false
 		}
-		parsed := uint(value)
 		filter.UserID = &parsed
 	}
 
 	if raw := c.Query("resource_id"); raw != "" {
-		value, err := strconv.ParseUint(raw, 10, 64)
-		if err != nil {
-			response.Fail(c, 400, "invalid resource_id")
-			return domain.AuditFilter{}, false
-		}
-		parsed := uint(value)
-		filter.ResourceID = &parsed
+		filter.ResourceID = &raw
 	}
 
 	if raw := c.Query("action"); raw != "" {

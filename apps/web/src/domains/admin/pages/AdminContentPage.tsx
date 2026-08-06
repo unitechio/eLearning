@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
 import { 
-  BookOpen, 
-  Headphones, 
-  PenSquare, 
-  Mic, 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle,
-  UploadCloud,
-  Loader2
+  Plus, Edit, Trash2, BookOpen
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
-import { cn } from '@/shared/lib';
+import { 
+  AdminPageLayout, AdminCard, AdminCardContent, AdminDataTable, type AdminColumnDef 
+} from '@/shared/components/admin';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Badge } from '@/shared/components/ui/badge';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { toast } from 'sonner';
+import { cn } from '@/shared/lib/utils';
 
 interface IELTSContentItem {
   id: number;
@@ -46,27 +44,14 @@ export function AdminContentPage() {
   // Form states for Create/Edit Modal
   const [showFormModal, setShowFormModal] = useState(false);
   const [editingItem, setEditingItem] = useState<IELTSContentItem | null>(null);
-  const [formData, setFormData] = useState<{
-    title: string;
-    slug: string;
-    subtitle: string;
-    description: string;
-    module: string;
-    skill: 'reading' | 'listening' | 'writing' | 'speaking';
-    content_type: string;
-    level: string;
-    status: string;
-    thumbnail_url: string;
-    audio_url: string;
-    pdf_url: string;
-    duration_seconds: number;
-  }>({
+  
+  const [formData, setFormData] = useState({
     title: '',
     slug: '',
     subtitle: '',
     description: '',
     module: 'ielts',
-    skill: 'reading',
+    skill: 'reading' as 'reading' | 'listening' | 'writing' | 'speaking',
     content_type: 'practice',
     level: 'academic',
     status: 'draft',
@@ -77,7 +62,7 @@ export function AdminContentPage() {
   });
 
   // Query Content Items
-  const { data: contentData, isLoading } = useQuery({
+  const { data: contentData, isLoading, error } = useQuery({
     queryKey: ['admin-ielts-content'],
     queryFn: async () => {
       try {
@@ -86,10 +71,10 @@ export function AdminContentPage() {
       } catch {
         // Fallback Mock Data if API fails
         return [
-          { id: 1, title: "IELTS Reading Test 1 - Cam 18", slug: "ielts-reading-test-1-cam-18", module: "ielts", skill: "reading", content_type: "mock_test", level: "academic", status: "published", thumbnail_url: "/api/v1/public/media/serve?key=thumbnails/default.jpg" },
-          { id: 2, title: "IELTS Listening Practice 2", slug: "ielts-listening-practice-2", module: "ielts", skill: "listening", content_type: "practice", level: "general", status: "draft", thumbnail_url: "" },
-          { id: 3, title: "IELTS Writing Task 2 Topic 3", slug: "ielts-writing-task-2-topic-3", module: "ielts", skill: "writing", content_type: "practice", level: "academic", status: "published", thumbnail_url: "" },
-          { id: 4, title: "IELTS Speaking Part 1 Warm-up", slug: "ielts-speaking-part-1-warm-up", module: "ielts", skill: "speaking", content_type: "practice", level: "academic", status: "published", thumbnail_url: "" }
+          { id: 1, title: "IELTS Reading Mock Test 1", slug: "ielts-reading-test-1", module: "ielts", skill: "reading", content_type: "mock_test", level: "academic", status: "published" },
+          { id: 2, title: "IELTS Listening Practice 2", slug: "ielts-listening-practice-2", module: "ielts", skill: "listening", content_type: "practice", level: "general", status: "draft" },
+          { id: 3, title: "IELTS Writing Task 2", slug: "ielts-writing-task-2", module: "ielts", skill: "writing", content_type: "practice", level: "academic", status: "published" },
+          { id: 4, title: "IELTS Speaking Part 1", slug: "ielts-speaking-part-1-warm-up", module: "ielts", skill: "speaking", content_type: "practice", level: "academic", status: "published" }
         ] as IELTSContentItem[];
       }
     }
@@ -101,51 +86,41 @@ export function AdminContentPage() {
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Tạo bài thi thành công!');
       void queryClient.invalidateQueries({ queryKey: ['admin-ielts-content'] });
-      setShowFormModal(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi tạo bài thi');
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, payload }: { id: number; payload: typeof formData }) => {
+    mutationFn: async ({ id, payload }: { id: number, payload: typeof formData }) => {
       const res = await apiClient.put(`/admin/ielts/content/${id}`, payload);
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Cập nhật bài thi thành công!');
       void queryClient.invalidateQueries({ queryKey: ['admin-ielts-content'] });
-      setShowFormModal(false);
-      setEditingItem(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi cập nhật');
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiClient.delete(`/admin/ielts/content/${id}`);
+      const res = await apiClient.delete(`/admin/ielts/content/${id}`);
+      return res.data;
     },
     onSuccess: () => {
+      toast.success('Đã xóa bài thi');
       void queryClient.invalidateQueries({ queryKey: ['admin-ielts-content'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Lỗi xóa bài thi');
     }
   });
-
-  const handleOpenCreate = () => {
-    setEditingItem(null);
-    setFormData({
-      title: '',
-      slug: '',
-      subtitle: '',
-      description: '',
-      module: 'ielts',
-      skill: activeTab,
-      content_type: 'practice',
-      level: 'academic',
-      status: 'draft',
-      thumbnail_url: '',
-      audio_url: '',
-      pdf_url: '',
-      duration_seconds: 2400
-    });
-    setShowFormModal(true);
-  };
 
   const handleOpenEdit = (item: IELTSContentItem) => {
     setEditingItem(item);
@@ -154,11 +129,11 @@ export function AdminContentPage() {
       slug: item.slug,
       subtitle: item.subtitle || '',
       description: item.description || '',
-      module: item.module,
+      module: item.module || 'ielts',
       skill: item.skill,
-      content_type: item.content_type,
-      level: item.level,
-      status: item.status,
+      content_type: item.content_type || 'practice',
+      level: item.level || 'academic',
+      status: item.status || 'draft',
       thumbnail_url: item.thumbnail_url || '',
       audio_url: item.audio_url || '',
       pdf_url: item.pdf_url || '',
@@ -174,339 +149,267 @@ export function AdminContentPage() {
     } else {
       createMutation.mutate(formData);
     }
+    setShowFormModal(false);
   };
 
-  const filteredItems = (contentData ?? []).filter(item => {
+  const contentItems = contentData || [];
+
+  const filteredItems = contentItems.filter(item => {
     const matchesSkill = item.skill === activeTab;
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           item.slug.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesLevel = levelFilter === 'all' || item.level === levelFilter;
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+
     return matchesSkill && matchesSearch && matchesLevel && matchesStatus;
   });
 
-  const getSkillIcon = (skill: string) => {
-    switch (skill) {
-      case 'listening': return Headphones;
-      case 'writing': return PenSquare;
-      case 'speaking': return Mic;
-      default: return BookOpen;
-    }
-  };
+  const tabs = [
+    { value: 'reading', label: 'Reading' },
+    { value: 'listening', label: 'Listening' },
+    { value: 'writing', label: 'Writing' },
+    { value: 'speaking', label: 'Speaking' }
+  ];
+
+  const columns: AdminColumnDef<IELTSContentItem>[] = [
+    {
+      header: 'Tiêu đề bài thi',
+      cell: (item) => <span className="font-semibold text-foreground">{item.title}</span>,
+    },
+    {
+      header: 'Slug / Path',
+      cell: (item) => <span className="font-mono text-xs text-muted-foreground">{item.slug}</span>,
+    },
+    {
+      header: 'Dạng bài',
+      cell: (item) => <span className="text-muted-foreground capitalize">{item.content_type.replace('_', ' ')}</span>,
+    },
+    {
+      header: 'Trình độ',
+      cell: (item) => <span className="font-semibold text-foreground/80 uppercase">{item.level}</span>,
+    },
+    {
+      header: 'Trạng thái',
+      cell: (item) => (
+        <Badge className={cn("text-[11px] font-semibold border-transparent", item.status === 'published' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-slate-500/10 text-slate-500')}>
+          {item.status}
+        </Badge>
+      ),
+    },
+    {
+      header: 'Thao tác',
+      cell: (item) => (
+        <div className="flex justify-end gap-1.5 pr-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-muted-foreground hover:text-foreground" 
+            onClick={() => handleOpenEdit(item)}
+            title="Sửa"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-red-500 hover:text-red-650 hover:bg-red-500/10" 
+            onClick={() => void deleteMutation.mutateAsync(item.id)}
+            title="Xóa"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      ),
+      className: 'text-right w-[100px]',
+    },
+  ];
+
+  const rightActions = (
+    <div className="flex items-center gap-2">
+      <Select value={levelFilter} onValueChange={setLevelFilter}>
+        <SelectTrigger className="w-[130px] h-10 rounded-[10px] text-xs font-semibold bg-slate-50/50">
+          <SelectValue placeholder="Trình độ" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Mọi trình độ</SelectItem>
+          <SelectItem value="academic">Academic</SelectItem>
+          <SelectItem value="general">General</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-[130px] h-10 rounded-[10px] text-xs font-semibold bg-slate-50/50">
+          <SelectValue placeholder="Trạng thái" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Mọi trạng thái</SelectItem>
+          <SelectItem value="published">Đã đăng</SelectItem>
+          <SelectItem value="draft">Bản nháp</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Button onClick={() => { 
+        setEditingItem(null); 
+        setFormData({
+          title: '',
+          slug: '',
+          subtitle: '',
+          description: '',
+          module: 'ielts',
+          skill: activeTab,
+          content_type: 'practice',
+          level: 'academic',
+          status: 'draft',
+          thumbnail_url: '',
+          audio_url: '',
+          pdf_url: '',
+          duration_seconds: 2400
+        });
+        setShowFormModal(true); 
+      }} className="h-10 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold px-3 text-xs gap-1.5 rounded-[10px] shadow-sm shrink-0">
+        <Plus className="w-4 h-4" /> Tạo bài tập
+      </Button>
+    </div>
+  );
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 p-6 lg:p-8 text-slate-800 dark:text-slate-100 font-sans">
-      {/* Header banner */}
-      <header className="rounded-3xl bg-gradient-to-r from-red-500 to-rose-600 p-8 text-white shadow-xl flex items-center justify-between flex-wrap gap-4">
-        <section className="flex items-center gap-4">
-          <figure className="rounded-2xl bg-white/20 p-3" aria-hidden="true">
-            <BookOpen className="h-8 w-8" />
-          </figure>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight">Content Management</h1>
-            <p className="mt-1 text-red-100">
-              Quản lý và tạo/sửa nội dung luyện thi IELTS Đọc, Nghe, Viết, Nói
-            </p>
-          </div>
-        </section>
-
-        <button
-          type="button"
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-white text-rose-600 hover:bg-slate-50 font-black text-xs px-5 py-3 rounded-2xl transition shadow-md shrink-0"
-        >
-          <Plus className="h-4.5 w-4.5" />
-          <span>Tạo bài thi mới</span>
-        </button>
-      </header>
-
-      {/* Tabs bar selector */}
-      <section className="flex flex-col sm:flex-row gap-4 items-center justify-between" aria-label="Controls">
-        <nav className="flex items-center gap-2 bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-2xl" aria-label="Skill groups">
-          {(['reading', 'listening', 'writing', 'speaking'] as const).map(skill => {
-            const Icon = getSkillIcon(skill);
-            return (
-              <button
-                key={skill}
-                type="button"
-                onClick={() => setActiveTab(skill)}
-                className={cn(
-                  "px-5 py-2.5 rounded-xl text-xs font-black transition flex items-center gap-2 capitalize",
-                  activeTab === skill 
-                    ? "bg-white dark:bg-slate-950 text-slate-900 dark:text-white shadow-sm" 
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                )}
-              >
-                <Icon className="h-4.5 w-4.5" />
-                <span>{skill}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Filters and Search */}
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="relative flex items-center">
-            <Search className="absolute left-3.5 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo tiêu đề bài thi..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-500"
-            />
-          </label>
-
-          <label htmlFor="level-select">
-            <select
-              id="level-select"
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold focus:outline-none"
-            >
-              <option value="all">Mọi trình độ</option>
-              <option value="academic">Academic</option>
-              <option value="general">General</option>
-            </select>
-          </label>
-
-          <label htmlFor="status-select">
-            <select
-              id="status-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-semibold focus:outline-none"
-            >
-              <option value="all">Mọi trạng thái</option>
-              <option value="published">Đã đăng</option>
-              <option value="draft">Bản nháp</option>
-            </select>
-          </label>
-        </div>
-      </section>
-
-      {/* Main card list table */}
-      <section className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-sm overflow-hidden" aria-label="Contents list">
-        {isLoading ? (
-          <div className="py-20 text-center text-slate-400 font-bold">Đang tải danh sách bài tập...</div>
-        ) : filteredItems.length === 0 ? (
-          <div className="py-20 text-center text-slate-450 font-bold">Không tìm thấy bài thi nào phù hợp</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-semibold min-w-[650px]">
-              <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400 font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-850">
-                <tr>
-                  <th className="px-4 py-3">Tiêu đề bài thi</th>
-                  <th className="px-4 py-3">Slug / Path</th>
-                  <th className="px-4 py-3">Dạng bài</th>
-                  <th className="px-4 py-3">Trình độ</th>
-                  <th className="px-4 py-3">Trạng thái</th>
-                  <th className="px-4 py-3 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
-                {filteredItems.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-900 transition">
-                    <td className="px-4 py-4 font-bold text-slate-900 dark:text-white truncate max-w-[220px]">
-                      {item.title}
-                    </td>
-                    <td className="px-4 py-4 text-slate-450 font-mono text-[10px] truncate max-w-[150px]">{item.slug}</td>
-                    <td className="px-4 py-4 capitalize">{item.content_type.replace('_', ' ')}</td>
-                    <td className="px-4 py-4 uppercase font-bold text-slate-500">{item.level}</td>
-                    <td className="px-4 py-4">
-                      <span className={cn(
-                        "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide",
-                        item.status === 'published' 
-                          ? "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" 
-                          : "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-450"
-                      )}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <nav className="inline-flex gap-2" aria-label="Item actions">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(item)}
-                          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition"
-                          aria-label="Edit item"
-                        >
-                          <Edit className="h-4.5 w-4.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void deleteMutation.mutateAsync(item.id)}
-                          className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-950/35 rounded-lg text-slate-500 hover:text-rose-600 transition"
-                          aria-label="Delete item"
-                        >
-                          <Trash2 className="h-4.5 w-4.5" />
-                        </button>
-                      </nav>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      {/* Create / Edit Form Modal */}
-      {showFormModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <article 
-            className="w-full max-w-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 relative max-h-[85vh] overflow-y-auto flex flex-col gap-4 text-slate-800 dark:text-slate-100 font-sans"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Content form editor"
+    <AdminPageLayout
+      title="IELTS Content Manager"
+      description="Quản lý kho học liệu, các bài thi thử Mock Tests, đề thi IELTS Reading/Listening."
+      icon={BookOpen}
+    >
+      {/* Skill Tabs */}
+      <nav aria-label="Skill Tabs" className="flex gap-1 border-b border-border/60 pb-px">
+        {tabs.map(tab => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => setActiveTab(tab.value as any)}
+            className={cn(
+              "px-4 py-2 text-xs font-semibold border-b-2 transition-colors relative -mb-px",
+              activeTab === tab.value 
+                ? 'border-primary text-foreground' 
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
           >
-            <button 
-              type="button" 
-              onClick={() => setShowFormModal(false)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-650"
-              aria-label="Close"
-            >
-              ✕
-            </button>
+            {tab.label}
+          </button>
+        ))}
+      </nav>
 
-            <header>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                {editingItem ? 'Cập nhật nội dung' : 'Tạo mới nội dung bài thi'}
-              </h3>
-            </header>
+      <AdminDataTable
+        data={filteredItems}
+        columns={columns}
+        isLoading={isLoading}
+        error={error}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Tìm theo tiêu đề bài thi..."
+        rightActions={rightActions}
+        emptyTitle="Không tìm thấy bài thi nào"
+        emptyDescription="Thử thay đổi bộ lọc hoặc thêm bài thi mới."
+      />
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs font-semibold">
-              <label className="block space-y-1">
-                <span className="text-slate-500">Tiêu đề bài thi</span>
-                <input 
-                  type="text" 
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="e.g. IELTS Reading Mock Test 2"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-xs focus:outline-none focus:border-red-400"
-                  required
+      {/* Create / Edit Form Dialog */}
+      <Dialog open={showFormModal} onOpenChange={setShowFormModal}>
+        <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-semibold">
+              {editingItem ? 'Cập nhật nội dung' : 'Tạo mới nội dung bài thi'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSave} className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label className="text-xs font-semibold text-muted-foreground">Tiêu đề bài thi</Label>
+              <Input 
+                value={formData.title} 
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="e.g. IELTS Reading Mock Test 2"
+                className="h-10 rounded-[10px]"
+                required
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label className="text-xs font-semibold text-muted-foreground">Slug (Path)</Label>
+              <Input 
+                value={formData.slug} 
+                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                placeholder="e.g. ielts-reading-mock-test-2"
+                className="h-10 rounded-[10px]"
+                required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label className="text-xs font-semibold text-muted-foreground">Mô tả chi tiết</Label>
+              <Textarea 
+                value={formData.description} 
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Nội dung tóm tắt..."
+                className="min-h-[80px] rounded-[10px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="text-xs font-semibold text-muted-foreground">Dạng bài</Label>
+                <Select value={formData.content_type} onValueChange={(val) => setFormData(prev => ({ ...prev, content_type: val }))}>
+                  <SelectTrigger className="h-10 rounded-[10px]"><SelectValue placeholder="Dạng bài" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="practice">Luyện tập (Practice)</SelectItem>
+                    <SelectItem value="mock_test">Thi thử (Mock Test)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="text-xs font-semibold text-muted-foreground">Trình độ</Label>
+                <Select value={formData.level} onValueChange={(val) => setFormData(prev => ({ ...prev, level: val }))}>
+                  <SelectTrigger className="h-10 rounded-[10px]"><SelectValue placeholder="Trình độ" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="academic">Academic</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="B2">Level B2</SelectItem>
+                    <SelectItem value="C1">Level C1</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="text-xs font-semibold text-muted-foreground">Trạng thái</Label>
+                <Select value={formData.status} onValueChange={(val) => setFormData(prev => ({ ...prev, status: val }))}>
+                  <SelectTrigger className="h-10 rounded-[10px]"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Bản nháp</SelectItem>
+                    <SelectItem value="published">Đã đăng</SelectItem>
+                    <SelectItem value="archived">Lưu trữ</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label className="text-xs font-semibold text-muted-foreground">Thời lượng (giây)</Label>
+                <Input 
+                  type="number" 
+                  value={formData.duration_seconds} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, duration_seconds: Number(e.target.value) }))}
+                  className="h-10 rounded-[10px]"
                 />
-              </label>
-
-              <label className="block space-y-1">
-                <span className="text-slate-500">Slug (Path)</span>
-                <input 
-                  type="text" 
-                  value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  placeholder="e.g. ielts-reading-mock-test-2"
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-xs focus:outline-none focus:border-red-400"
-                  required
-                />
-              </label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <label className="block space-y-1">
-                  <span className="text-slate-500">Loại bài thi</span>
-                  <select 
-                    value={formData.content_type}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content_type: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 px-3 py-2.5 focus:outline-none"
-                  >
-                    <option value="practice">Luyện tập (Practice)</option>
-                    <option value="mock_test">Thi thử (Mock Test)</option>
-                  </select>
-                </label>
-
-                <label className="block space-y-1">
-                  <span className="text-slate-500">Học phần (Skill)</span>
-                  <select 
-                    value={formData.skill}
-                    onChange={(e: any) => setFormData(prev => ({ ...prev, skill: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-855 bg-white dark:bg-slate-900 px-3 py-2.5 focus:outline-none"
-                  >
-                    <option value="reading">Đọc (Reading)</option>
-                    <option value="listening">Nghe (Listening)</option>
-                    <option value="writing">Viết (Writing)</option>
-                    <option value="speaking">Nói (Speaking)</option>
-                  </select>
-                </label>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <label className="block space-y-1">
-                  <span className="text-slate-500">Trình độ</span>
-                  <select 
-                    value={formData.level}
-                    onChange={(e) => setFormData(prev => ({ ...prev, level: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-855 bg-white dark:bg-slate-900 px-3 py-2.5 focus:outline-none"
-                  >
-                    <option value="academic">Academic</option>
-                    <option value="general">General</option>
-                    <option value="B2">B2 Intermediate</option>
-                    <option value="C1">C1 Advanced</option>
-                  </select>
-                </label>
-
-                <label className="block space-y-1">
-                  <span className="text-slate-500">Trạng thái</span>
-                  <select 
-                    value={formData.status}
-                    onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-855 bg-white dark:bg-slate-900 px-3 py-2.5 focus:outline-none"
-                  >
-                    <option value="draft">Bản nháp (Draft)</option>
-                    <option value="published">Đăng bán (Published)</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block space-y-1">
-                  <span className="text-slate-500">Thumbnail URL</span>
-                  <input 
-                    type="url" 
-                    value={formData.thumbnail_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, thumbnail_url: e.target.value }))}
-                    placeholder="https://example.com/thumbnail.png"
-                    className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 focus:outline-none"
-                  />
-                </label>
-
-                {formData.skill === 'listening' && (
-                  <label className="block space-y-1">
-                    <span className="text-slate-500">Audio File URL</span>
-                    <input 
-                      type="url" 
-                      value={formData.audio_url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, audio_url: e.target.value }))}
-                      placeholder="https://example.com/listening.mp3"
-                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 focus:outline-none"
-                    />
-                  </label>
-                )}
-
-                {formData.skill === 'reading' && (
-                  <label className="block space-y-1">
-                    <span className="text-slate-500">Document PDF URL</span>
-                    <input 
-                      type="url" 
-                      value={formData.pdf_url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pdf_url: e.target.value }))}
-                      placeholder="https://example.com/reading-material.pdf"
-                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 focus:outline-none"
-                    />
-                  </label>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-3.5 transition flex items-center justify-center gap-2"
-              >
-                {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
-                <span>{editingItem ? 'Cập nhật' : 'Tạo mới nội dung'}</span>
-              </button>
-            </form>
-          </article>
-        </div>
-      )}
-    </main>
+            <DialogFooter className="gap-2 sm:gap-0 mt-4">
+              <Button type="button" variant="outline" onClick={() => setShowFormModal(false)} className="h-10 rounded-[10px] text-sm font-semibold">Hủy</Button>
+              <Button type="submit" className="h-10 rounded-[10px] text-sm font-semibold">Lưu lại</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </AdminPageLayout>
   );
 }
+
+export default AdminContentPage;

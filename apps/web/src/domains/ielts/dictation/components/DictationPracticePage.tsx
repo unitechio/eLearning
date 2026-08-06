@@ -91,6 +91,7 @@ export function DictationPracticePage() {
 
   useEffect(() => {
     startSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, difficulty]);
 
   // Audio control hooks

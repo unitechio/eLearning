@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var DB *gorm.DB
+
 
 func InitDatabases(cfg config.DatabaseConfig) (*gorm.DB, error) {
 	dsn := buildDSN(cfg.Host, cfg.User, cfg.Password, cfg.Port, cfg.Database, cfg.SSLMode)
@@ -52,31 +52,6 @@ func InitDatabases(cfg config.DatabaseConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
-func Close() error {
-	if DB != nil {
-		sqlDB, err := DB.DB()
-		if err != nil {
-			return err
-		}
-		return sqlDB.Close()
-	}
-	return nil
-}
-
-func GetDB() *gorm.DB {
-	return DB
-}
-
-// Transaction executes a function within a database transaction
-func Transaction(fn func(*gorm.DB) error) error {
-	return DB.Transaction(fn)
-}
-
-// WithContext returns a new DB instance with context
-func WithContext(db *gorm.DB) *gorm.DB {
-	return db.Session(&gorm.Session{})
-}
-
 // Paginate is a GORM scope for pagination
 func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
@@ -89,32 +64,6 @@ func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
 
 		offset := (page - 1) * pageSize
 		return db.Offset(offset).Limit(pageSize)
-	}
-}
-
-// CursorPaginate is a GORM scope for cursor-based pagination
-func CursorPaginate(cursorID uint, cursorTime time.Time, limit int, direction string) func(db *gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB {
-		if limit <= 0 {
-			limit = 20
-		}
-
-		// Add one extra to check if there are more results
-		db = db.Limit(limit + 1)
-
-		if cursorID > 0 {
-			if direction == "prev" {
-				db = db.Where("(created_at > ? OR (created_at = ? AND id > ?))", cursorTime, cursorTime, cursorID)
-				db = db.Order("created_at ASC, id ASC")
-			} else {
-				db = db.Where("(created_at < ? OR (created_at = ? AND id < ?))", cursorTime, cursorTime, cursorID)
-				db = db.Order("created_at DESC, id DESC")
-			}
-		} else {
-			db = db.Order("created_at DESC, id DESC")
-		}
-
-		return db
 	}
 }
 

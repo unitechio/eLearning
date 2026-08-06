@@ -25,7 +25,7 @@ func (h *SupportHandler) Create(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.CreateTicket(userID, req)
+	item, err := h.svc.CreateTicket(requestContext(c), userID, req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -43,7 +43,7 @@ func (h *SupportHandler) MyTickets(c *gin.Context) {
 	if !ok {
 		return
 	}
-	res, err := h.svc.ListMyTickets(userID, query)
+	res, err := h.svc.ListMyTickets(requestContext(c), userID, query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -56,7 +56,7 @@ func (h *SupportHandler) Get(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.GetTicket(userID, c.Param("id"), false)
+	item, err := h.svc.GetTicket(requestContext(c), userID, c.Param("id"), false)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -74,7 +74,7 @@ func (h *SupportHandler) AdminTickets(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	res, err := h.svc.ListAdminTickets(query)
+	res, err := h.svc.ListAdminTickets(requestContext(c), query)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -87,7 +87,7 @@ func (h *SupportHandler) AdminGet(c *gin.Context) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.GetTicket(userID, c.Param("id"), true)
+	item, err := h.svc.GetTicket(requestContext(c), userID, c.Param("id"), true)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -105,7 +105,7 @@ func (h *SupportHandler) Assign(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.AssignTicket(c.Param("id"), req)
+	item, err := h.svc.AssignTicket(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -119,7 +119,7 @@ func (h *SupportHandler) UpdateStatus(c *gin.Context) {
 		response.Fail(c, 400, err.Error())
 		return
 	}
-	item, err := h.svc.UpdateTicketStatus(c.Param("id"), req)
+	item, err := h.svc.UpdateTicketStatus(requestContext(c), c.Param("id"), req)
 	if err != nil {
 		_ = c.Error(err)
 		return
@@ -137,7 +137,7 @@ func (h *SupportHandler) comment(c *gin.Context, staff bool) {
 	if !ok {
 		return
 	}
-	item, err := h.svc.AddComment(userID, c.Param("id"), staff, req)
+	item, err := h.svc.AddComment(requestContext(c), userID, c.Param("id"), staff, req)
 	if err != nil {
 		_ = c.Error(err)
 		return

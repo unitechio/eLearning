@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, MessageSquareText, Send, UserCheck } from 'lucide-react';
+import { Loader2, MessageSquareText, Send, UserCheck, LifeBuoy } from 'lucide-react';
 import {
   useAddAdminSupportTicketComment,
   useAdminSupportTicket,
@@ -8,7 +8,18 @@ import {
   useUpdateSupportTicketStatus,
 } from '@/domains/support/api/hooks';
 import { useAdminUsers } from '@/domains/admin/api/users';
-import { HeaderLoadingBar } from '@/shared/components';
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminCardHeader,
+  AdminCardTitle,
+  AdminCardDescription,
+  AdminCardContent,
+  AdminStatusBadge
+} from '@/shared/components/admin';
+import { Button } from '@/shared/components/ui/button';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { cn } from '@/shared/lib/utils';
 
 const STATUS_OPTIONS = ['open', 'in_progress', 'resolved', 'closed'];
 
@@ -26,7 +37,6 @@ export function AdminSupportTicketsPage() {
   const commentMutation = useAddAdminSupportTicketComment(selectedTicketId);
 
   const selectedTicket = detailQuery.data?.ticket ?? ticketsQuery.data?.items.find((item) => item.id === selectedTicketId) ?? ticketsQuery.data?.items[0];
-  const isBusy = ticketsQuery.isLoading || detailQuery.isLoading || assignMutation.isPending || statusMutation.isPending || commentMutation.isPending;
 
   useEffect(() => {
     const firstTicket = ticketsQuery.data?.items[0];
@@ -40,92 +50,208 @@ export function AdminSupportTicketsPage() {
   const effectiveTicketId = selectedTicket?.id ?? selectedTicketId;
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 p-6">
-      {isBusy ? <HeaderLoadingBar /> : null}
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-600">Support</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Ticket assignment</h1>
-        <p className="mt-2 text-sm text-slate-500">Quản trị ticket lỗi thanh toán, bài học, tài khoản và assign cho nhân sự xử lý.</p>
-      </section>
+    <div className="space-y-6 sm:space-y-8">
+      <AdminPageHeader
+        title="Support Tickets"
+        description="Monitor system reports, assign support handlers, and track operational issues to resolution."
+        icon={LifeBuoy}
+      />
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="px-2 text-lg font-black text-slate-950">Tickets</h2>
-          <div className="mt-4 space-y-3">
-            {(ticketsQuery.data?.items ?? []).map((ticket) => (
-              <button
-                key={ticket.id}
-                className={`w-full rounded-2xl border p-4 text-left transition ${selectedTicket?.id === ticket.id ? 'border-red-300 bg-red-50' : 'border-slate-100 hover:border-slate-300'}`}
-                onClick={() => {
-                  setSelectedTicketId(ticket.id);
-                  setStatus(ticket.status);
-                  setAssigneeId(ticket.assignee_id ?? '');
-                }}
-                type="button"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-black text-slate-950">{ticket.subject}</p>
-                    <p className="mt-1 text-xs text-slate-500">{ticket.category || 'general'} • {ticket.priority}</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-700">{ticket.status}</span>
-                </div>
-                <p className="mt-3 line-clamp-2 text-sm text-slate-600">{ticket.description}</p>
-              </button>
-            ))}
-          </div>
+      <div className="grid gap-6 lg:gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        {/* Ticket List Panel */}
+        <section aria-label="Support Tickets List">
+          <AdminCard>
+            <AdminCardHeader>
+              <AdminCardTitle>Tickets Queue</AdminCardTitle>
+              <AdminCardDescription>Live incoming customer support requests.</AdminCardDescription>
+            </AdminCardHeader>
+            <AdminCardContent className="space-y-3 max-h-[700px] overflow-y-auto pr-2">
+              {ticketsQuery.isLoading ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="h-24 w-full rounded-xl bg-muted animate-pulse" />
+                ))
+              ) : (ticketsQuery.data?.items ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No tickets active.</p>
+              ) : (
+                (ticketsQuery.data?.items ?? []).map((ticket) => {
+                  const active = selectedTicket?.id === ticket.id;
+                  return (
+                    <button
+                      key={ticket.id}
+                      className={cn(
+                        "relative w-full rounded-xl border p-4 text-left transition-all flex flex-col gap-2.5",
+                        active
+                          ? "border-primary bg-primary/[0.04] pl-5"
+                          : "border-border hover:bg-muted/10"
+                      )}
+                      onClick={() => {
+                        setSelectedTicketId(ticket.id);
+                        setStatus(ticket.status);
+                        setAssigneeId(ticket.assignee_id ?? '');
+                      }}
+                      type="button"
+                    >
+                      {active && (
+                        <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r bg-primary" />
+                      )}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-sm text-foreground">{ticket.subject}</p>
+                          <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                            {ticket.category || 'general'} · {ticket.priority}
+                          </p>
+                        </div>
+                        <AdminStatusBadge state={ticket.status} label={ticket.status} className="shrink-0" />
+                      </div>
+                      <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+                        {ticket.description}
+                      </p>
+                    </button>
+                  );
+                })
+              )}
+            </AdminCardContent>
+          </AdminCard>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          {selectedTicket ? (
-            <div className="space-y-6">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">{selectedTicket.status}</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{selectedTicket.priority}</span>
+        {/* Selected Ticket Detail Panel */}
+        <section aria-label="Ticket Conversation and Assignment">
+          <AdminCard>
+            {selectedTicket ? (
+              <AdminCardContent className="space-y-6 pt-6">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <AdminStatusBadge state={selectedTicket.status} label={selectedTicket.status} />
+                    <span className="rounded-full bg-muted border border-border px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                      {selectedTicket.priority}
+                    </span>
+                  </div>
+                  <h2 className="mt-3 text-lg sm:text-xl font-bold text-foreground leading-snug">
+                    {selectedTicket.subject}
+                  </h2>
+                  <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground bg-muted/20 p-3.5 rounded-xl border border-border/50">
+                    {selectedTicket.description}
+                  </p>
                 </div>
-                <h2 className="mt-3 text-2xl font-black text-slate-950">{selectedTicket.subject}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{selectedTicket.description}</p>
-              </div>
 
-              <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                <select className="rounded-2xl border border-slate-200 px-4 py-3 text-sm" value={assigneeId} onChange={(event) => setAssigneeId(event.target.value)}>
-                  <option value="">Select assignee</option>
-                  {(usersQuery.data?.items ?? []).map((user) => <option key={user.id} value={user.id}>{user.email}</option>)}
-                </select>
-                <select className="rounded-2xl border border-slate-200 px-4 py-3 text-sm" value={status || selectedTicket.status} onChange={(event) => setStatus(event.target.value)}>
-                  {STATUS_OPTIONS.map((item) => <option key={item} value={item}>{item}</option>)}
-                </select>
-                <div className="flex gap-2">
-                  <button className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white disabled:opacity-50" disabled={!assigneeId || !effectiveTicketId} onClick={() => void assignMutation.mutateAsync({ id: effectiveTicketId, assigneeId })} type="button">
-                    <UserCheck className="h-4 w-4" /> Assign
-                  </button>
-                  <button className="rounded-2xl bg-red-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-50" disabled={!effectiveTicketId} onClick={() => void statusMutation.mutateAsync({ id: effectiveTicketId, status: status || selectedTicket.status })} type="button">Save</button>
+                {/* Assignment Controls */}
+                <div className="grid gap-3 sm:grid-cols-[1.2fr_1fr_auto_auto] items-end border-t border-border/50 pt-4">
+                  <div className="space-y-1">
+                    <label htmlFor="assignee-select" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assignee</label>
+                    <select
+                      id="assignee-select"
+                      className="w-full rounded-lg border border-input bg-card px-3 py-2 text-xs font-semibold h-10 focus:outline-none"
+                      value={assigneeId}
+                      onChange={(event) => setAssigneeId(event.target.value)}
+                    >
+                      <option value="">Select assignee</option>
+                      {(usersQuery.data?.items ?? []).map((user) => (
+                        <option key={user.id} value={user.id}>{user.email}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="status-select" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
+                    <select
+                      id="status-select"
+                      className="w-full rounded-lg border border-input bg-card px-3 py-2 text-xs font-semibold h-10 focus:outline-none"
+                      value={status || selectedTicket.status}
+                      onChange={(event) => setStatus(event.target.value)}
+                    >
+                      {STATUS_OPTIONS.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!assigneeId || !effectiveTicketId || assignMutation.isPending}
+                    onClick={() => void assignMutation.mutateAsync({ id: effectiveTicketId, assigneeId })}
+                    className="h-10 text-xs font-bold gap-2"
+                  >
+                    <UserCheck className="h-4 w-4" />
+                    <span>Assign</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    disabled={!effectiveTicketId || statusMutation.isPending}
+                    onClick={() => void statusMutation.mutateAsync({ id: effectiveTicketId, status: status || selectedTicket.status })}
+                    className="h-10 text-xs font-bold"
+                  >
+                    <span>Save</span>
+                  </Button>
                 </div>
-              </div>
 
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 font-black text-slate-950"><MessageSquareText className="h-4 w-4" /> Conversation</div>
-                <div className="mt-4 space-y-3">
-                  {(detailQuery.data?.comments ?? []).map((item) => (
-                    <div key={item.id} className={`rounded-2xl p-3 text-sm ${item.is_staff ? 'bg-red-50 text-red-950' : 'bg-white text-slate-700'}`}>
-                      <p>{item.body}</p>
-                      <p className="mt-2 text-[11px] font-bold uppercase text-slate-400">{item.is_staff ? 'Staff' : 'User'} • {new Date(item.created_at).toLocaleString()}</p>
-                    </div>
-                  ))}
+                {/* Conversation replies thread */}
+                <div className="rounded-xl border border-border bg-muted/10 p-4 space-y-4">
+                  <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                    <MessageSquareText className="h-4.5 w-4.5 text-primary" />
+                    <span>Conversation Thread</span>
+                  </div>
+
+                  <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                    {detailQuery.isLoading ? (
+                      <div className="space-y-2">
+                        <div className="h-12 w-3/4 rounded-lg bg-muted animate-pulse" />
+                        <div className="h-12 w-1/2 rounded-lg bg-muted animate-pulse self-end" />
+                      </div>
+                    ) : (detailQuery.data?.comments ?? []).length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-4">No conversation comments yet.</p>
+                    ) : (
+                      (detailQuery.data?.comments ?? []).map((item) => {
+                        const isStaff = item.is_staff;
+                        return (
+                          <div
+                            key={item.id}
+                            className={cn(
+                              "rounded-xl p-3 text-xs leading-relaxed max-w-[90%] border",
+                              isStaff
+                                ? "bg-primary/[0.04] border-primary/20 text-foreground ml-auto"
+                                : "bg-card border-border text-foreground/90"
+                            )}
+                          >
+                            <p>{item.body}</p>
+                            <p className="mt-2 text-[9px] font-mono text-muted-foreground">
+                              {isStaff ? 'Staff Handler' : 'Customer'} · {new Date(item.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* Reply text area */}
+                  <div className="grid gap-3 pt-2 border-t border-border/40">
+                    <Textarea
+                      placeholder="Compose a response..."
+                      value={comment}
+                      onChange={(event) => setComment(event.target.value)}
+                      className="min-h-20 bg-card"
+                      aria-label="Reply to ticket"
+                    />
+                    <Button
+                      type="button"
+                      disabled={!comment.trim() || !effectiveTicketId || commentMutation.isPending}
+                      onClick={() => void commentMutation.mutateAsync(comment).then(() => setComment(''))}
+                      className="h-10 text-xs font-bold gap-2 justify-self-end w-fit px-4"
+                    >
+                      {commentMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      <span>Send Reply</span>
+                    </Button>
+                  </div>
                 </div>
-                <div className="mt-4 grid gap-2 md:grid-cols-[1fr_auto]">
-                  <textarea className="min-h-24 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm" placeholder="Reply to ticket" value={comment} onChange={(event) => setComment(event.target.value)} />
-                  <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-50" disabled={!comment.trim() || !effectiveTicketId} onClick={() => void commentMutation.mutateAsync(comment).then(() => setComment(''))} type="button">
-                    {commentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Reply
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-slate-500">No support tickets found.</p>
-          )}
+              </AdminCardContent>
+            ) : (
+              <AdminCardContent className="py-16 text-center text-muted-foreground text-sm font-semibold">
+                No support tickets loaded.
+              </AdminCardContent>
+            )}
+          </AdminCard>
         </section>
       </div>
     </div>

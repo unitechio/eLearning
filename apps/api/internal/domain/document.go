@@ -36,10 +36,10 @@ type Document struct {
 type DocumentPermission struct {
 	ID              uint      `json:"id" gorm:"primaryKey;autoIncrement"`
 	DocumentID      uint      `json:"document_id" gorm:"not null;index"`
-	UserID          uuid.UUID `json:"user_id" gorm:"type:char(36);not null;index"` // If null, applies to a role
-	JobTitle        string    `json:"job_title" gorm:"index"`                      // If null, applies to a specific user
+	UserID          uuid.UUID `json:"user_id" gorm:"type:uuid;not null;index"` // If null, applies to a role
+	JobTitle        string    `json:"job_title" gorm:"index"`                  // If null, applies to a specific user
 	PermissionLevel string    `json:"permission_level" gorm:"size:20;not null"`    // view, edit, comment, owner
-	CreatedBy       uuid.UUID `json:"created_by" gorm:"type:char(36);not null;index"`
+	CreatedBy       uuid.UUID `json:"created_by" gorm:"type:uuid;not null;index"`
 	CreatedAt       time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt       time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 
@@ -53,7 +53,7 @@ type DocumentPermission struct {
 type DocumentComment struct {
 	ID         uint       `json:"id" gorm:"primaryKey;autoIncrement"`
 	DocumentID uint       `json:"document_id" gorm:"not null;index"`
-	UserID     uuid.UUID  `json:"user_id" gorm:"type:char(36);not null;index"` // If null, applies to a role
+	UserID     uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;index"` // If null, applies to a role
 	Comment    string     `json:"comment" gorm:"type:text;not null"`
 	CreatedAt  time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt  time.Time  `json:"updated_at" gorm:"autoUpdateTime"`

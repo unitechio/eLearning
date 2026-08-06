@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -23,6 +25,7 @@ import (
 	"github.com/unitechio/eLearning/apps/api/internal/usecase"
 	svcimpl "github.com/unitechio/eLearning/apps/api/internal/usecase/impl"
 	"github.com/unitechio/eLearning/apps/api/pkg/ai"
+	ratelimit "github.com/unitechio/eLearning/apps/api/pkg/ratelimit"
 	"github.com/unitechio/eLearning/apps/api/pkg/tts"
 )
 
@@ -52,6 +55,15 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		logger.Warn("minio unavailable; ielts asset upload disabled", slog.String("error", err.Error()))
 	} else {
 		assetStorage = minioStorage
+	}
+
+	// Build rate limiter — use Redis-backed limiter when available, fall back to
+	// NoopLimiter so a Redis outage does not block API startup.
+	var rateLimiter ratelimit.Limiter
+	if client := cache.GetClient(); client != nil {
+		rateLimiter = cache.NewRedisRateLimiter(client)
+	} else {
+		rateLimiter = ratelimit.NoopLimiter{}
 	}
 
 	userRepo := repoimpl.NewUserRepository(dbInstance)
@@ -84,6 +96,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	emailRepo := repoimpl.NewEmailRepository(dbInstance)
 	emailTemplateRepo := repoimpl.NewTemplateRepository(dbInstance)
 	userSettingsRepo := repository.NewUserSettingsRepository(dbInstance)
+	integrationRepo := repoimpl.NewIntegrationRepository(dbInstance)
 
 	llmSvc := ai.NewLLMService()
 	sttSvc := ai.NewSTTService()
@@ -100,7 +113,11 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	billingSvc := svcimpl.NewBillingService(billingRepo, userRepo)
 	engagementSvc := svcimpl.NewEngagementService(engagementRepo, progressRepo, activityRepo, billingRepo)
 	practiceSvc := svcimpl.NewPracticeService(practiceRepo, vocabularyRepo, llmSvc)
-	ieltsSvc := svcimpl.NewIELTSServiceWithDependencies(ieltsRepo, cache.GetClient(), assetStorage)
+	ieltsSvc := svcimpl.NewIELTSService(svcimpl.IELTSServiceDeps{
+		Repo:         ieltsRepo,
+		Cache:        cache.GetClient(),
+		AssetStorage: assetStorage,
+	})
 	lmsSvc := svcimpl.NewLMSService(lmsRepo, authorizationSvc)
 	postSvc := svcimpl.NewPostService(postRepo)
 	supportSvc := svcimpl.NewSupportService(supportRepo)
@@ -113,6 +130,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	academyAISvc := svcimpl.NewAIService(llmSvc)
 	vocabularySvc := svcimpl.NewVocabularyService(vocabularyRepo)
 	userSvc := svcimpl.NewUserService(userRepo)
+	integrationSvc := svcimpl.NewIntegrationService(integrationRepo)
 	emailProvider := mailProvider(cfg)
 	emailRenderer := mailinfra.NewRenderer(emailTemplateRepo, mailBaseContext(cfg))
 	defaultFrom := cfg.Email.FromEmail
@@ -124,7 +142,8 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	}
 	emailSvc := svcimpl.NewMailUsecase(emailRepo, emailTemplateRepo, emailProvider, emailRenderer, defaultFrom)
 	svcimpl.SetMailer(emailSvc)
-	authSvc := svcimpl.NewAuthService(userRepo, authRepo, sessionRepo, loginAttemptRepo, &cfg.JWT)
+	rateLimiter = cache.NewRedisRateLimiter(cache.GetClient())
+	authSvc := svcimpl.NewAuthService(userRepo, authRepo, sessionRepo, loginAttemptRepo, rateLimiter, emailSvc, &cfg.JWT)
 	environmentSvc := svcimpl.NewEnvironmentUsecase(environmentRepo)
 	featureFlagSvc := svcimpl.NewFeatureFlagUsecase(featureFlagRepo)
 	systemSettingSvc := usecase.NewSystemSettingUsecase(systemSettingRepo)
@@ -173,13 +192,14 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Media:            handler.NewMediaHandler(assetStorage),
 		TTS:              handler.NewTTSHandler(ttsSvc),
 		Document:         handler.NewDocumentHandler(assetStorage),
+		Integration:      handler.NewIntegrationHandler(integrationSvc),
 	}
 
 	router := newRouter(cfg, logger, handlers, route.Guards{
 		Admin:      middleware.RequireRoles(authorizationSvc, "admin", "super_admin"),
 		Instructor: middleware.RequireRoles(authorizationSvc, "instructor", "admin", "super_admin"),
 		Premium:    middleware.RequireFeature(authorizationSvc, "premium"),
-	})
+	}, rateLimiter)
 	server := &http.Server{
 		Addr:         resolveAddress(cfg),
 		Handler:      router,
@@ -192,29 +212,50 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 }
 
 func newLogger(cfg *config.Config) *slog.Logger {
+	var level slog.Level
+	switch strings.ToLower(cfg.Log.Level) {
+	case "debug":
+		level = slog.LevelDebug
+	case "warn", "warning":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+	opts := &slog.HandlerOptions{
+		Level: level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey && len(groups) == 0 {
+				return slog.String(slog.TimeKey, a.Value.Time().Format("2006-01-02 15:04:05"))
+			}
+			return a
+		},
+	}
 	var handler slog.Handler
 	if cfg.Log.Format == "json" {
-		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
+		handler = slog.NewJSONHandler(os.Stdout, opts)
 	} else {
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
+		handler = slog.NewTextHandler(os.Stdout, opts)
 	}
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
 	return logger
 }
 
-func newRouter(cfg *config.Config, logger *slog.Logger, handlers route.Handlers, guards route.Guards) *gin.Engine {
+func newRouter(cfg *config.Config, logger *slog.Logger, handlers route.Handlers, guards route.Guards, limiter ratelimit.Limiter) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	r.Use(middleware.RequestID())
+	r.Use(middleware.TimeoutMiddleware(30 * time.Second))
 	r.Use(middleware.Logger(logger))
 	r.Use(middleware.ErrorHandler(logger))
 	r.Use(gin.Recovery())
 	r.Use(middleware.SecurityHeaders())
 	r.Use(middleware.CorsMiddleware(cfg.CORS))
 	if cfg.RateLimit.Enabled {
-		r.Use(middleware.RateLimit(cfg.RateLimit.RequestsPerMin))
+		r.Use(middleware.RateLimit(limiter, cfg.RateLimit.RequestsPerMin))
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -214,7 +214,7 @@ func (s *AuthorizationUsecase) CanManageActivity(ctx context.Context, userID uui
 }
 
 func (s *AuthorizationUsecase) hasPremium(ctx context.Context, userID uuid.UUID) (bool, error) {
-	subscription, err := s.billingRepo.FindActiveSubscriptionByUserID(userID)
+	subscription, err := s.billingRepo.FindActiveSubscriptionByUserID(ctx, userID)
 	if err != nil {
 		if isNotFoundErr(err) {
 			return false, nil
@@ -245,9 +245,9 @@ func (s *AuthorizationUsecase) loadActorAccess(ctx context.Context, userID uuid.
 	if err != nil {
 		return nil, uuid.Nil, err
 	}
-	tenantID, err := s.GetTenantID(ctx, userID)
+	tenantID, err := uuid.Parse(profile.TenantID)
 	if err != nil {
-		return nil, uuid.Nil, err
+		return nil, uuid.Nil, apperr.Internal(err)
 	}
 	return profile, tenantID, nil
 }

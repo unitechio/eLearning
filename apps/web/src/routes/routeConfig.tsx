@@ -1,7 +1,7 @@
 import React, { lazy } from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
-import { RequireAdmin, RequireAuth, RequireGuest } from './guards';
-import { LoginPage, ProfilePage, RegisterPage } from '@/domains/auth';
+import { RequireAdmin, RequireAuth, RequireGuest } from '../guards';
+import { LoginPage, ProfilePage, RegisterPage, NotStudentPage } from '@/domains/auth';
 import {
   AdminAccessPage,
   AdminAuditLogsPage,
@@ -19,6 +19,25 @@ import {
   AdminContentPage,
   AdminMockTestPage,
   AdminVouchersPage,
+  AdminIntegrationsPage,
+  AdminBlueprintLibraryPage,
+  AdminInvoiceCategoriesPage,
+  AdminAgentConsolePage,
+  AdminQRCodePage,
+  AdminBioPagesPage,
+  AdminCallHistoryPage,
+  AdminSignerFlowPage,
+  AdminDeliveryTrackerPage,
+  AdminCalendarPage,
+  AdminReferralsPage,
+  AdminDownloadsPage,
+  AdminAuthClientsPage,
+  AdminSSOProvidersPage,
+  AdminLoginChannelsPage,
+  AdminSecurityPoliciesPage,
+  AdminReferenceOptionsPage,
+  AdminAuthHistoryPage,
+  AdminDevicesPage,
 } from '@/domains/admin';
 import {
   CustomerManagementPage,
@@ -95,6 +114,7 @@ export const routes: RouteObject[] = [
           { path: '/login', element: <LoginPage /> },
           { path: '/register', element: <RegisterPage /> },
           { path: '/lms/login', element: <LmsLoginPage /> },
+          { path: '/not-student', element: <NotStudentPage /> },
         ],
       },
     ],
@@ -108,7 +128,17 @@ export const routes: RouteObject[] = [
         element: <AdminLayout />,
         children: [
           { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/calendar', element: <AdminCalendarPage /> },
+          { path: '/admin/referrals', element: <AdminReferralsPage /> },
+          { path: '/admin/downloads', element: <AdminDownloadsPage /> },
           { path: '/admin/access', element: <AdminAccessPage /> },
+          { path: '/admin/ams/auth-clients', element: <AdminAuthClientsPage /> },
+          { path: '/admin/ams/sso-providers', element: <AdminSSOProvidersPage /> },
+          { path: '/admin/ams/login-channels', element: <AdminLoginChannelsPage /> },
+          { path: '/admin/ams/security-policies', element: <AdminSecurityPoliciesPage /> },
+          { path: '/admin/ams/reference-options', element: <AdminReferenceOptionsPage /> },
+          { path: '/admin/ams/auth-history', element: <AdminAuthHistoryPage /> },
+          { path: '/admin/ams/devices', element: <AdminDevicesPage /> },
           { path: '/admin/platform-settings', element: <AdminPlatformSettingsPage /> },
           { path: '/admin/feature-flags', element: <AdminFeatureFlagsPage /> },
           { path: '/admin/audit-logs', element: <AdminAuditLogsPage /> },
@@ -123,6 +153,15 @@ export const routes: RouteObject[] = [
           { path: '/admin/content', element: <AdminContentPage /> },
           { path: '/admin/mock-tests', element: <AdminMockTestPage /> },
           { path: '/admin/vouchers', element: <AdminVouchersPage /> },
+          { path: '/admin/integrations', element: <AdminIntegrationsPage /> },
+          { path: '/admin/blueprints', element: <AdminBlueprintLibraryPage /> },
+          { path: '/admin/invoice-categories', element: <AdminInvoiceCategoriesPage /> },
+          { path: '/admin/agent-console', element: <AdminAgentConsolePage /> },
+          { path: '/admin/qr-generator', element: <AdminQRCodePage /> },
+          { path: '/admin/bio-pages', element: <AdminBioPagesPage /> },
+          { path: '/admin/call-history', element: <AdminCallHistoryPage /> },
+          { path: '/admin/signer-flow', element: <AdminSignerFlowPage /> },
+          { path: '/admin/delivery-tracker', element: <AdminDeliveryTrackerPage /> },
           { path: '/admin/user-access', element: <UserPage /> },
           { path: '/admin/user-access/users', element: <CustomerManagementPage /> },
           { path: '/admin/user-access/roles', element: <RoleManagementPage /> },
