@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api';
-import { ApiResponse } from '@/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api';
 
 export interface SpeakingAnalysisResponse {
   transcript: string;

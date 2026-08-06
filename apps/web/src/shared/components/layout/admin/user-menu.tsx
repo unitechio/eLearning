@@ -284,7 +284,7 @@ export function UserMenu() {
           {/* Update Status */}
           <DropdownMenuItem
             onClick={() => setActiveModal("status")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer"
             role="menuitem"
           >
             <Smile className="mr-2 h-4 w-4 text-muted-foreground/75" />
@@ -296,7 +296,7 @@ export function UserMenu() {
           {/* Your Profile */}
           <DropdownMenuItem
             onClick={() => setActiveModal("profile")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -309,7 +309,7 @@ export function UserMenu() {
           {/* Appearance */}
           <DropdownMenuItem
             onClick={() => setActiveModal("appearance")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -322,7 +322,7 @@ export function UserMenu() {
           {/* Settings - route link */}
           <DropdownMenuItem
             onClick={() => navigate("/admin/platform-settings")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -335,7 +335,7 @@ export function UserMenu() {
           {/* Notifications config */}
           <DropdownMenuItem
             onClick={() => setActiveModal("notifications")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -350,7 +350,7 @@ export function UserMenu() {
           {/* Upgrade promo */}
           <DropdownMenuItem
             onClick={() => navigate("/admin/billing")}
-            className="rounded-lg py-1.5 px-2 text-xs font-semibold cursor-pointer text-amber-600 dark:text-amber-400 hover:text-amber-700 flex justify-between items-center bg-amber-500/5 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/10"
+            className="rounded-lg py-1.5 px-2 text-sm font-semibold cursor-pointer text-amber-600 dark:text-amber-400 hover:text-amber-700 flex justify-between items-center bg-amber-500/5 hover:bg-amber-500/10 border border-transparent hover:border-amber-500/10"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -363,7 +363,7 @@ export function UserMenu() {
           {/* Referrals */}
           <DropdownMenuItem
             onClick={() => navigate("/admin/referrals")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer"
             role="menuitem"
           >
             <Heart className="mr-2 h-4 w-4 text-muted-foreground/75" />
@@ -375,7 +375,7 @@ export function UserMenu() {
           {/* Download App */}
           <DropdownMenuItem
             onClick={() => navigate("/admin/downloads")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -389,7 +389,7 @@ export function UserMenu() {
             onClick={() => {
               window.open("https://eenglish.org/changelog", "_blank");
             }}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -402,7 +402,7 @@ export function UserMenu() {
           {/* Get Help */}
           <DropdownMenuItem
             onClick={() => setActiveModal("help")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -417,7 +417,7 @@ export function UserMenu() {
           {/* Switch Account */}
           <DropdownMenuItem
             onClick={() => setActiveModal("account")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -430,7 +430,7 @@ export function UserMenu() {
           {/* Switch space */}
           <DropdownMenuItem
             onClick={() => setActiveModal("space")}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer flex justify-between items-center"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer flex justify-between items-center"
             role="menuitem"
           >
             <div className="flex items-center">
@@ -445,7 +445,7 @@ export function UserMenu() {
           {/* Log out */}
           <DropdownMenuItem
             onClick={() => logout.mutate()}
-            className="rounded-lg py-1.5 px-2 text-xs font-medium cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5 hover:bg-destructive/5 transition-colors"
+            className="rounded-lg py-1.5 px-2 text-sm font-medium cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5 hover:bg-destructive/5 transition-colors"
             role="menuitem"
           >
             <LogOut className="mr-2 h-4 w-4 text-destructive/80" /> Log out

@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/shared/types/api.types';
+import type { ApiResponse } from '@/shared/types/api';
 
 export function unwrapApiData<T>(response: { data: ApiResponse<T> }): T {
   return response.data.data;

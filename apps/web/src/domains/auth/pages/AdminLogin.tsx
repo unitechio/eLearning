@@ -47,7 +47,6 @@ export function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    // For demo/dev purposes, log in using default credential
     setEmail("admin@eenglish.com");
     setPassword("AdminPass123!");
     setShowEmailForm(true);

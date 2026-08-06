@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/api';
-import { ApiResponse } from '@/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api';
 import { AccessProfile, AuthPayload, LoginInput, RegisterInput, UpdateProfileInput, User } from '../types';
 
 const unwrap = <T>(response: { data: ApiResponse<T> }): T => response.data.data;

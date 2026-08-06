@@ -19,7 +19,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 43% 11%;
 
-    --primary: 239 56% 51%;
+    --primary: 0 74% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 260 60% 52%;
@@ -267,5 +267,3 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
-
-

@@ -69,11 +69,11 @@ import { UniDictionaryPage } from '@/domains/ecosystem/UniDictionaryPage';
 import { IeltsKnowledgePage } from '@/domains/ecosystem/IeltsKnowledgePage';
 
 // ─── Lazy Layouts ──────────────────────────────────────────────────────────────
-const MarketingLayout = lazy(() => import('./layouts/MarketingLayout').then((m) => ({ default: m.MarketingLayout })));
-const AuthLayout      = lazy(() => import('./layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
-const DashboardLayout = lazy(() => import('./layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })));
-const AdminLayout     = lazy(() => import('./layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })));
-const LmsLayout       = lazy(() => import('./layouts/LmsLayout').then((m) => ({ default: m.LmsLayout })));
+const MarketingLayout = lazy(() => import('../layouts/MarketingLayout').then((m) => ({ default: m.MarketingLayout })));
+const AuthLayout      = lazy(() => import('../layouts/AuthLayout').then((m) => ({ default: m.AuthLayout })));
+const DashboardLayout = lazy(() => import('../layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })));
+const AdminLayout     = lazy(() => import('../layouts/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
+const LmsLayout       = lazy(() => import('../layouts/LmsLayout').then((m) => ({ default: m.LmsLayout })));
 
 export const routes: RouteObject[] = [
   // ─── Public fullscreen pages (no layout) ─────────────────────────────────

@@ -45,13 +45,16 @@ export function CommandPalette() {
                 key={item.path}
                 value={`${item.title} ${item.path}`}
                 onSelect={() => handleSelect(item.path)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2.5"
               >
-                <item.icon className="h-4 w-4 text-muted-foreground" />
-                <span>{item.title}</span>
+                <item.icon className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                <span className="text-sm font-medium text-slate-700">
+                    {item.title}
+                </span>
                 {item.soon && (
-                  <span className="ml-auto text-xs text-muted-foreground">Soon</span>
-                )}
+                  <span className="ml-auto rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                    Soon
+                  </span>                )}
               </CommandItem>
             ))}
           </CommandGroup>

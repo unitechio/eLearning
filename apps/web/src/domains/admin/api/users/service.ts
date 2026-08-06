@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/api';
-import { ApiResponse } from '@/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api';
 import { toQueryString } from '../utils';
 
 export interface AdminUser {

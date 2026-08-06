@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/api';
 import { LearningPlan, LearningStats } from '../types';
-import { ApiResponse } from '@/shared/types/api.types';
+import { ApiResponse } from '@/shared/types/api';
 
 interface PlannerResponse {
   focus_area: string;
