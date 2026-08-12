@@ -349,6 +349,91 @@ func (h *CourseHandler) DeleteLesson(c *gin.Context) {
 	response.NoContent(c)
 }
 
+func (h *CourseHandler) GetAdminCourseDetail(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	item, err := h.svc.GetAdminCourseDetail(requestContext(c), userID, c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "admin course detail fetched", item)
+}
+
+func (h *CourseHandler) ListResources(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	items, err := h.svc.ListResources(requestContext(c), userID, c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "course resources fetched", items)
+}
+
+func (h *CourseHandler) CreateResource(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.CreateCourseResourceRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	item, err := h.svc.CreateResource(requestContext(c), userID, c.Param("id"), req.Name, req.StorageKey, req.MimeType, req.SizeBytes)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "course resource created", item)
+}
+
+func (h *CourseHandler) DeleteResource(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.DeleteResource(requestContext(c), userID, c.Param("resourceId")); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "course resource deleted", gin.H{"id": c.Param("resourceId"), "deleted": true})
+}
+
+func (h *CourseHandler) ListReviews(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	items, err := h.svc.ListReviews(requestContext(c), userID, c.Param("id"))
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "course reviews fetched", items)
+}
+
+func (h *CourseHandler) CreateReview(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	var req dto.CreateCourseReviewRequest
+	if !bindJSONOrAbort(c, &req) {
+		return
+	}
+	item, err := h.svc.CreateReview(requestContext(c), userID, c.Param("id"), req.Rating, req.Comment)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.Created(c, "course review created", item)
+}
+
 // GetActivity godoc
 // @Summary      Get activity by id
 // @Tags         activities

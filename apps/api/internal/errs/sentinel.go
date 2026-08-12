@@ -112,3 +112,20 @@ var (
 	ErrAuditLogNotFound        = errors.New("audit log not found")
 	ErrDepartmentNotFound       = errors.New("department not found")
 )
+
+// ─────────────────────────────────────────────
+// Document Library errors
+// ─────────────────────────────────────────────
+
+var (
+	ErrDocumentNotFound        = errors.New("document not found")
+	ErrDocumentVersionNotFound = errors.New("document version not found")
+	ErrDocumentFolderNotFound  = errors.New("document folder not found")
+	ErrDocumentUnauthorized    = errors.New("unauthorized: permission denied")
+	ErrDocumentForbidden       = errors.New("unauthorized: permission denied for this operation")
+	ErrDocumentFileTypeInvalid = errors.New("unsupported document file type")
+	ErrDocumentFileTooLarge    = errors.New("document file exceeds maximum allowed size")
+	ErrDocumentStorageFailed   = errors.New("document storage operation failed")
+	ErrDocumentAlreadyDeleted  = errors.New("document has already been deleted")
+	ErrDocumentHasNoAsset      = errors.New("document has no physical file asset")
+)

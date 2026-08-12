@@ -28,4 +28,5 @@ type PlannerService interface {
 type NotificationService interface {
 	ListNotifications(ctx context.Context, userID uuid.UUID, query dto.NotificationListQuery) (*dto.PageResult[dto.NotificationItem], error)
 	MarkAsRead(ctx context.Context, userID uuid.UUID, id string) error
+	MarkAllAsRead(ctx context.Context, userID uuid.UUID) error
 }

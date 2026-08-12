@@ -48,6 +48,9 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.UserVocabularyProgress{},
 		&domain.WritingSubmission{},
 		&domain.Course{},
+		&domain.CourseCategory{},
+		&domain.CourseResource{},
+		&domain.CourseReview{},
 		&domain.Unit{},
 		&domain.Lesson{},
 		&domain.Voucher{},
@@ -115,7 +118,7 @@ func AutoMigrate(db *gorm.DB) error {
 		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
-	// System related tables
+	// System non-document tables
 	if err := safeAutoMigrate(db,
 		&domain.AuditLog{},
 		&domain.SystemSetting{},
@@ -124,12 +127,47 @@ func AutoMigrate(db *gorm.DB) error {
 		&domain.EmailTemplate{},
 		&domain.EmailLog{},
 		&domain.UserSettings{},
-		&domain.Document{},
-		&domain.DocumentPermission{},
-		&domain.DocumentComment{},
-		&domain.DocumentVersion{},
 	); err != nil {
 		slog.Error("Failed to migrate system tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
+	}
+
+	// Document Library tables.
+	// All associations in these structs carry constraint:false so GORM will NOT attempt
+	// to CREATE FK constraints during AutoMigrate — eliminating circular-dependency panics.
+	//
+	// Drop document tables when the live schema has drifted from the current domain struct
+	// (e.g. stale NOT NULL columns like document_name from an older AutoMigrate run).
+	if err := dropStaleDocumentTables(db); err != nil {
+		slog.Warn("Could not verify/clean document table schema, attempting migration anyway",
+			slog.String("error", err.Error()))
+	}
+
+	if err := safeAutoMigrate(db, &domain.Folder{}); err != nil {
+		slog.Error("Failed to migrate folders table", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
+	}
+
+	// Pass 1: documents (no outbound FK constraints emitted)
+	if err := safeAutoMigrate(db, &domain.Document{}); err != nil {
+		slog.Error("Failed to migrate documents table", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
+	}
+
+	// Pass 2: file_assets and document_versions (reference documents, safe now)
+	if err := safeAutoMigrate(db, &domain.FileAsset{}, &domain.DocumentVersion{}); err != nil {
+		slog.Error("Failed to migrate file_assets/document_versions tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
+		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
+	}
+
+	// Pass 3: child tables
+	if err := safeAutoMigrate(db,
+		&domain.DocumentPermission{},
+		&domain.DocumentComment{},
+		&domain.DocumentActivity{},
+		&domain.DocumentLMSAttachment{},
+	); err != nil {
+		slog.Error("Failed to migrate document child tables", slog.String("op", errs.OpAutoMigrate), slog.String("error", err.Error()))
 		return fmt.Errorf("%s: %w", errs.OpAutoMigrate, err)
 	}
 
@@ -222,6 +260,93 @@ func dropAndRecreateUserTables(db *gorm.DB) error {
 	return nil
 }
 
+// dropStaleDocumentTables checks whether the live `documents` table has columns that no longer
+// exist in the current domain.Document struct (schema drift from older AutoMigrate runs).
+// If drift is detected, all document-related tables are dropped with CASCADE so that the
+// subsequent AutoMigrate call recreates them from scratch with the correct schema.
+//
+// expectedDocumentColumns is the canonical set of column names emitted by the current
+// domain.Document GORM struct. Update this list whenever the struct changes.
+var expectedDocumentColumns = map[string]struct{}{
+	"id":                 {},
+	"document_code":      {},
+	"title":              {},
+	"description":        {},
+	"owner_id":           {},
+	"folder_id":          {},
+	"status":             {},
+	"visibility":         {},
+	"current_version_id": {},
+	"is_favorite":        {},
+	"created_at":         {},
+	"updated_at":         {},
+	"deleted_at":         {},
+}
+
+func dropStaleDocumentTables(db *gorm.DB) error {
+	// Check whether the documents table exists at all.
+	var tableExists bool
+	if err := db.Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.tables
+			WHERE table_schema = 'public' AND table_name = 'documents'
+		)
+	`).Scan(&tableExists).Error; err != nil || !tableExists {
+		// Table doesn't exist yet — nothing to clean.
+		return nil
+	}
+
+	// Fetch all column names for the live documents table.
+	var liveColumns []string
+	if err := db.Raw(`
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_schema = 'public' AND table_name = 'documents'
+	`).Scan(&liveColumns).Error; err != nil {
+		return fmt.Errorf("could not list documents columns: %w", err)
+	}
+
+	// Detect stale columns: present in DB but absent from the current domain struct.
+	var stale []string
+	for _, col := range liveColumns {
+		if _, ok := expectedDocumentColumns[col]; !ok {
+			stale = append(stale, col)
+		}
+	}
+
+	if len(stale) == 0 {
+		// Schema matches — nothing to do.
+		return nil
+	}
+
+	slog.Warn("documents table has stale columns from an older schema — dropping document tables for clean recreation",
+		slog.Any("stale_columns", stale),
+	)
+
+	// Drop in dependency order (children first, then parents).
+	documentTables := []string{
+		"document_lms_attachments",
+		"document_activities",
+		"document_comments",
+		"document_permissions",
+		"document_versions",
+		"file_assets",
+		"documents",
+		"folders",
+	}
+	for _, tbl := range documentTables {
+		if err := db.Exec(fmt.Sprintf(`DROP TABLE IF EXISTS "%s" CASCADE`, tbl)).Error; err != nil {
+			slog.Warn("Failed to drop stale document table",
+				slog.String("table", tbl),
+				slog.String("error", err.Error()),
+			)
+		}
+	}
+
+	slog.Info("Stale document tables dropped — AutoMigrate will recreate them with the current schema")
+	return nil
+}
+
 func SeedData(db *gorm.DB) error {
 	slog.Info("Seeding initial data...")
 
@@ -229,6 +354,7 @@ func SeedData(db *gorm.DB) error {
 	if err := seedModules(db); err != nil {
 		return err
 	}
+
 
 	// Seed Departments
 	if err := seedDepartments(db); err != nil {

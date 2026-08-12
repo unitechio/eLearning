@@ -38,6 +38,12 @@ import {
   AdminReferenceOptionsPage,
   AdminAuthHistoryPage,
   AdminDevicesPage,
+  AdminCourseManagerPage,
+  AdminCourseFormPage,
+  AdminDashboardPage,
+  AdminLeadsPage,
+  AdminNotificationsPage,
+  AdminSettingsPage,
 } from '@/domains/admin';
 import {
   CustomerManagementPage,
@@ -127,7 +133,14 @@ export const routes: RouteObject[] = [
       {
         element: <AdminLayout />,
         children: [
+          { path: '/admin/dashboard', element: <AdminDashboardPage /> },
+          { path: '/admin/leads', element: <AdminLeadsPage /> },
+          { path: '/admin/notifications', element: <AdminNotificationsPage /> },
+          { path: '/admin/settings', element: <AdminSettingsPage /> },
           { path: '/admin/users', element: <AdminUsersPage /> },
+          { path: '/admin/courses', element: <AdminCourseManagerPage /> },
+          { path: '/admin/courses/create', element: <AdminCourseFormPage /> },
+          { path: '/admin/courses/:id/edit', element: <AdminCourseFormPage /> },
           { path: '/admin/calendar', element: <AdminCalendarPage /> },
           { path: '/admin/referrals', element: <AdminReferralsPage /> },
           { path: '/admin/downloads', element: <AdminDownloadsPage /> },

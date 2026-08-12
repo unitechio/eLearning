@@ -51,6 +51,7 @@ type Handlers struct {
 	TTS              *handler.TTSHandler
 	Document         *handler.DocumentHandler
 	Integration      *handler.IntegrationHandler
+	CourseCategory   *handler.CourseCategoryHandler
 }
 
 type Guards struct {
@@ -246,6 +247,7 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 			{
 				notifications.GET("", h.Notification.List)
 				notifications.PUT("/:id/read", h.Notification.Read)
+				notifications.PUT("/read-all", h.Notification.ReadAll)
 			}
 
 			authorization := protected.Group("/authorization")
@@ -360,6 +362,19 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				admin.POST("/courses", h.Admin.CreateCourse)
 				admin.PUT("/courses/:id", h.Admin.UpdateCourse)
 				admin.DELETE("/courses/:id", h.Admin.DeleteCourse)
+				admin.GET("/courses/:id", h.Course.GetAdminCourseDetail)
+				admin.GET("/courses/:id/resources", h.Course.ListResources)
+				admin.POST("/courses/:id/resources", h.Course.CreateResource)
+				admin.DELETE("/courses/resources/:resourceId", h.Course.DeleteResource)
+				admin.GET("/courses/:id/reviews", h.Course.ListReviews)
+				admin.POST("/courses/:id/reviews", h.Course.CreateReview)
+
+				// Course Categories
+				admin.GET("/categories", h.CourseCategory.ListCategories)
+				admin.POST("/categories", h.CourseCategory.CreateCategory)
+				admin.PUT("/categories/:id", h.CourseCategory.UpdateCategory)
+				admin.DELETE("/categories/:id", h.CourseCategory.DeleteCategory)
+
 				admin.GET("/analytics", h.Admin.Analytics)
 				admin.GET("/ai-usage", h.Admin.AIUsage)
 				admin.GET("/billing/plans", h.Billing.AdminPlans)
@@ -447,6 +462,31 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config, h Handlers, guards Guards) {
 				{
 					adminDocs.POST("/upload", h.Document.Upload)
 					adminDocs.POST("/upload-public", h.Document.UploadPublicAsset)
+					adminDocs.GET("", h.Document.List)
+					adminDocs.POST("", h.Document.Create)
+					adminDocs.GET("/stats", h.Document.GetStats)
+					adminDocs.GET("/export", h.Document.Export)
+					adminDocs.GET("/folders", h.Document.ListFolders)
+					adminDocs.POST("/folders", h.Document.CreateFolder)
+					adminDocs.PATCH("/folders/:id", h.Document.UpdateFolder)
+					adminDocs.DELETE("/folders/:id", h.Document.DeleteFolder)
+					adminDocs.GET("/:id", h.Document.GetByID)
+					adminDocs.PATCH("/:id", h.Document.Update)
+					adminDocs.DELETE("/:id", h.Document.Delete)
+					adminDocs.POST("/:id/restore", h.Document.Restore)
+					adminDocs.DELETE("/:id/permanent", h.Document.PermanentDelete)
+					adminDocs.GET("/:id/versions", h.Document.GetVersions)
+					adminDocs.POST("/:id/versions", h.Document.CreateVersion)
+					adminDocs.GET("/:id/permissions", h.Document.GetPermissions)
+					adminDocs.POST("/:id/share", h.Document.Share)
+					adminDocs.DELETE("/:id/permissions/:permissionId", h.Document.RevokeAccess)
+					adminDocs.POST("/:id/favorite", h.Document.Favorite)
+					adminDocs.DELETE("/:id/favorite", h.Document.Unfavorite)
+					adminDocs.GET("/:id/activity", h.Document.GetActivities)
+					adminDocs.GET("/:id/download", h.Document.Download)
+					adminDocs.GET("/:id/preview", h.Document.Preview)
+					adminDocs.POST("/:id/attachments", h.Document.Attach)
+					adminDocs.DELETE("/:id/attachments", h.Document.Detach)
 				}
 				adminIntegrations := admin.Group("/integrations")
 				{

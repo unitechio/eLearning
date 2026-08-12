@@ -12,4 +12,5 @@ type NotificationRepository interface {
 	ListByUserID(ctx context.Context, userID uuid.UUID, filter dto.NotificationListFilter) ([]domain.Notification, int64, error)
 	FindByIDForUser(ctx context.Context, id uint, userID uuid.UUID) (*domain.Notification, error)
 	Save(ctx context.Context, notification *domain.Notification) error
+	MarkAllAsRead(ctx context.Context, userID uuid.UUID) error
 }

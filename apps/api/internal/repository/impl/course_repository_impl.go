@@ -18,7 +18,7 @@ func NewCourseRepository(db *gorm.DB) *CourseRepository { return &CourseReposito
 func (r *CourseRepository) ListCourses(ctx context.Context, filter dto.CourseListFilter) ([]domain.Course, int64, error) {
 	var items []domain.Course
 	var total int64
-	q := r.db.WithContext(ctx).Model(&domain.Course{})
+	q := r.db.WithContext(ctx).Model(&domain.Course{}).Preload("Category")
 	if filter.TenantID != uuid.Nil {
 		q = q.Where("tenant_id = ?", filter.TenantID)
 	}
@@ -35,6 +35,16 @@ func (r *CourseRepository) ListCourses(ctx context.Context, filter dto.CourseLis
 	if filter.Status != "" {
 		q = q.Where("status = ?", filter.Status)
 	}
+	if filter.CategoryID != "" {
+		if catID, err := uuid.Parse(filter.CategoryID); err == nil {
+			q = q.Where("category_id = ?", catID)
+		}
+	}
+	if filter.AuthorID != "" {
+		if authID, err := uuid.Parse(filter.AuthorID); err == nil {
+			q = q.Where("created_by = ? or instructor_id = ?", authID, authID)
+		}
+	}
 	if err := q.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
@@ -48,7 +58,7 @@ func (r *CourseRepository) CreateCourse(ctx context.Context, course *domain.Cour
 }
 func (r *CourseRepository) FindCourseByID(ctx context.Context, id uuid.UUID) (*domain.Course, error) {
 	var item domain.Course
-	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Category").First(&item, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &item, nil
@@ -124,4 +134,69 @@ func (r *CourseRepository) UpdateLesson(ctx context.Context, lesson *domain.Less
 }
 func (r *CourseRepository) DeleteLesson(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.Lesson{}, "id = ?", id).Error
+}
+
+// Course Categories
+func (r *CourseRepository) ListCategories(ctx context.Context, tenantID uuid.UUID) ([]domain.CourseCategory, error) {
+	var items []domain.CourseCategory
+	q := r.db.WithContext(ctx).Model(&domain.CourseCategory{})
+	if tenantID != uuid.Nil {
+		q = q.Where("tenant_id = ?", tenantID)
+	}
+	err := q.Order("name asc").Find(&items).Error
+	return items, err
+}
+
+func (r *CourseRepository) CreateCategory(ctx context.Context, category *domain.CourseCategory) error {
+	return r.db.WithContext(ctx).Create(category).Error
+}
+
+func (r *CourseRepository) FindCategoryByID(ctx context.Context, id uuid.UUID) (*domain.CourseCategory, error) {
+	var item domain.CourseCategory
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *CourseRepository) UpdateCategory(ctx context.Context, category *domain.CourseCategory) error {
+	return r.db.WithContext(ctx).Save(category).Error
+}
+
+func (r *CourseRepository) DeleteCategory(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.CourseCategory{}, "id = ?", id).Error
+}
+
+// Course Resources
+func (r *CourseRepository) ListResourcesByCourse(ctx context.Context, courseID uuid.UUID) ([]domain.CourseResource, error) {
+	var items []domain.CourseResource
+	err := r.db.WithContext(ctx).Where("course_id = ?", courseID).Order("created_at desc").Find(&items).Error
+	return items, err
+}
+
+func (r *CourseRepository) CreateResource(ctx context.Context, resource *domain.CourseResource) error {
+	return r.db.WithContext(ctx).Create(resource).Error
+}
+
+func (r *CourseRepository) FindResourceByID(ctx context.Context, id uuid.UUID) (*domain.CourseResource, error) {
+	var item domain.CourseResource
+	if err := r.db.WithContext(ctx).First(&item, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (r *CourseRepository) DeleteResource(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.CourseResource{}, "id = ?", id).Error
+}
+
+// Course Reviews
+func (r *CourseRepository) ListReviewsByCourse(ctx context.Context, courseID uuid.UUID) ([]domain.CourseReview, error) {
+	var items []domain.CourseReview
+	err := r.db.WithContext(ctx).Preload("User").Where("course_id = ?", courseID).Order("created_at desc").Find(&items).Error
+	return items, err
+}
+
+func (r *CourseRepository) CreateReview(ctx context.Context, review *domain.CourseReview) error {
+	return r.db.WithContext(ctx).Create(review).Error
 }

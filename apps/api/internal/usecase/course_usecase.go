@@ -21,4 +21,22 @@ type CourseService interface {
 	CreateLesson(ctx context.Context, actorID uuid.UUID, req dto.UpsertLessonRequest) (*dto.Lesson, error)
 	UpdateLesson(ctx context.Context, actorID uuid.UUID, id string, req dto.UpsertLessonRequest) (*dto.Lesson, error)
 	DeleteLesson(ctx context.Context, actorID uuid.UUID, id string) error
+
+	// Admin preview detail
+	GetAdminCourseDetail(ctx context.Context, userID uuid.UUID, id string) (*dto.AdminCourseDetail, error)
+
+	// Course Categories
+	ListCategories(ctx context.Context, userID uuid.UUID) ([]dto.CourseCategory, error)
+	CreateCategory(ctx context.Context, userID uuid.UUID, req dto.CourseCategoryPayload) (*dto.CourseCategory, error)
+	UpdateCategory(ctx context.Context, userID uuid.UUID, id string, req dto.CourseCategoryPayload) (*dto.CourseCategory, error)
+	DeleteCategory(ctx context.Context, userID uuid.UUID, id string) error
+
+	// Course Resources
+	ListResources(ctx context.Context, userID uuid.UUID, courseID string) ([]dto.CourseResource, error)
+	CreateResource(ctx context.Context, userID uuid.UUID, courseID string, name string, storageKey string, mimeType string, sizeBytes int64) (*dto.CourseResource, error)
+	DeleteResource(ctx context.Context, userID uuid.UUID, resourceID string) error
+
+	// Course Reviews
+	ListReviews(ctx context.Context, userID uuid.UUID, courseID string) ([]dto.CourseReview, error)
+	CreateReview(ctx context.Context, userID uuid.UUID, courseID string, rating int, comment string) (*dto.CourseReview, error)
 }

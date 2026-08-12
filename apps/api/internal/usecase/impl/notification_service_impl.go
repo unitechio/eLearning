@@ -61,3 +61,10 @@ func (s *NotificationUsecase) MarkAsRead(ctx context.Context, userID uuid.UUID, 
 	}
 	return nil
 }
+
+func (s *NotificationUsecase) MarkAllAsRead(ctx context.Context, userID uuid.UUID) error {
+	if err := s.repo.MarkAllAsRead(ctx, userID); err != nil {
+		return apperr.Internal(err)
+	}
+	return nil
+}

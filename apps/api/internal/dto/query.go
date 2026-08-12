@@ -9,11 +9,13 @@ type Pagination struct {
 
 type CourseListFilter struct {
 	Pagination
-	TenantID uuid.UUID
-	Search   string
-	Domain   string
-	Level    string
-	Status   string
+	TenantID   uuid.UUID
+	Search     string
+	Domain     string
+	Level      string
+	Status     string
+	CategoryID string
+	AuthorID   string
 }
 
 type UnitListFilter struct {

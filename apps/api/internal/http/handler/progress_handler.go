@@ -207,3 +207,22 @@ func (h *NotificationHandler) Read(c *gin.Context) {
 	}
 	response.OK(c, "notification marked as read", gin.H{"id": c.Param("id"), "read": true})
 }
+
+// ReadAll godoc
+// @Summary      Mark all notifications as read
+// @Tags         notifications
+// @Security     BearerAuth
+// @Produce      json
+// @Success      200  {object}  response.Envelope
+// @Router       /notifications/read-all [put]
+func (h *NotificationHandler) ReadAll(c *gin.Context) {
+	userID, ok := currentUserIDOrAbort(c)
+	if !ok {
+		return
+	}
+	if err := h.svc.MarkAllAsRead(requestContext(c), userID); err != nil {
+		_ = c.Error(err)
+		return
+	}
+	response.OK(c, "all notifications marked as read", gin.H{"success": true})
+}

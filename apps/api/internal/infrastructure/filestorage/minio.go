@@ -16,6 +16,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/unitechio/eLearning/apps/api/internal/config"
+	"github.com/unitechio/eLearning/apps/api/internal/domain"
 	imgProc "github.com/unitechio/eLearning/apps/api/pkg/image"
 )
 
@@ -423,75 +424,14 @@ func (s *MinioStorage) GetPresignedUploadURL(ctx context.Context, objectName str
 }
 
 // IsAllowedFileType checks if the file type is allowed
+// IsAllowedFileType reports whether the file extension of filename is in the
+// canonical allowed-document-extension list defined in domain.AllowedDocumentExtensions.
 func (s *MinioStorage) IsAllowedFileType(filename string) bool {
 	if filename == "" {
 		return false
 	}
-
 	ext := strings.ToLower(filepath.Ext(filename))
-	allowedTypes := map[string]bool{
-		// Documents
-		".pdf":  true,
-		".doc":  true,
-		".docx": true,
-		".txt":  true,
-		".rtf":  true,
-		".odt":  true,
-
-		// Spreadsheets
-		".xls":  true,
-		".xlsx": true,
-		".csv":  true,
-		".ods":  true,
-
-		// Presentations
-		".ppt":  true,
-		".pptx": true,
-		".odp":  true,
-
-		// Text/Code files
-		".md":   true,
-		".json": true,
-		".xml":  true,
-		".log":  true,
-		".yaml": true,
-		".yml":  true,
-		".html": true,
-		".htm":  true,
-		".css":  true,
-		".js":   true,
-		".ts":   true,
-
-		// Images
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".bmp":  true,
-		".webp": true,
-		".svg":  true,
-		".ico":  true,
-
-		// Archives
-		".zip": true,
-		".rar": true,
-		".7z":  true,
-		".tar": true,
-		".gz":  true,
-
-		// Audio/Video
-		".mp3":  true,
-		".mp4":  true,
-		".avi":  true,
-		".mov":  true,
-		".wmv":  true,
-		".flv":  true,
-		".wav":  true,
-		".m4a":  true,
-		".webm": true,
-	}
-
-	return allowedTypes[ext]
+	return domain.AllowedDocumentExtensions[ext]
 }
 
 // generateObjectName creates a unique object name with proper structure

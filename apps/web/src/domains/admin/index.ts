@@ -37,3 +37,10 @@ export * from './api/users';
 export * from './api/billing';
 export * from './api/platform';
 export * from './api/ams';
+export { AdminCourseManagerPage, AdminCourseFormPage } from './course-manager';
+export { AdminDashboardPage } from './pages/AdminDashboardPage';
+export { AdminLeadsPage } from './pages/AdminLeadsPage';
+export { AdminNotificationsPage } from './pages/AdminNotificationsPage';
+export { AdminSettingsPage } from './pages/AdminSettingsPage';
+
+

@@ -240,7 +240,7 @@ export function UserMenu() {
             aria-label="User menu dropdown"
           >
             <Avatar className="h-6 w-6 border border-border/80">
-              <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold">
+              <AvatarFallback className="text-[10px] bg-gradient-to-br from-rose-500 to-red-600 text-white font-bold">
                 {initials(user?.first_name, user?.last_name, user?.email)}
               </AvatarFallback>
             </Avatar>
@@ -259,7 +259,7 @@ export function UserMenu() {
           <DropdownMenuLabel className="px-2.5 py-2 font-normal">
             <div className="flex items-center gap-2.5">
               <Avatar className="h-8 w-8 border border-border/80">
-                <AvatarFallback className="text-[10px] bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold">
+                <AvatarFallback className="text-[10px] bg-gradient-to-br from-rose-500 to-red-600 text-white font-bold">
                   {initials(user?.first_name, user?.last_name, user?.email)}
                 </AvatarFallback>
               </Avatar>

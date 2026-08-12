@@ -97,6 +97,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	emailTemplateRepo := repoimpl.NewTemplateRepository(dbInstance)
 	userSettingsRepo := repository.NewUserSettingsRepository(dbInstance)
 	integrationRepo := repoimpl.NewIntegrationRepository(dbInstance)
+	documentRepo := repoimpl.NewDocumentRepository(dbInstance)
 
 	llmSvc := ai.NewLLMService()
 	sttSvc := ai.NewSTTService()
@@ -131,6 +132,7 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 	vocabularySvc := svcimpl.NewVocabularyService(vocabularyRepo)
 	userSvc := svcimpl.NewUserService(userRepo)
 	integrationSvc := svcimpl.NewIntegrationService(integrationRepo)
+	documentSvc := svcimpl.NewDocumentUsecase(documentRepo, assetStorage, userRepo)
 	emailProvider := mailProvider(cfg)
 	emailRenderer := mailinfra.NewRenderer(emailTemplateRepo, mailBaseContext(cfg))
 	defaultFrom := cfg.Email.FromEmail
@@ -191,8 +193,9 @@ func BuildApplication(cfg *config.Config) (*Application, error) {
 		Realtime:         handler.NewRealtimeHandler(),
 		Media:            handler.NewMediaHandler(assetStorage),
 		TTS:              handler.NewTTSHandler(ttsSvc),
-		Document:         handler.NewDocumentHandler(assetStorage),
+		Document:         handler.NewDocumentHandler(assetStorage, documentSvc, logger),
 		Integration:      handler.NewIntegrationHandler(integrationSvc),
+		CourseCategory:   handler.NewCourseCategoryHandler(courseSvc),
 	}
 
 	router := newRouter(cfg, logger, handlers, route.Guards{

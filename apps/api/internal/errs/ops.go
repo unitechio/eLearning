@@ -77,4 +77,23 @@ const (
 	OpListAuditLogs   = "list audit logs"
 	OpGetAuditLog     = "get audit log"
 	OpExportAuditLogs = "export audit logs"
+
+	// ─── Document Library operations ───────────────────────────
+	OpCreateDocument          = "create document"
+	OpUpdateDocument          = "update document"
+	OpDeleteDocument          = "delete document"
+	OpPermanentDeleteDocument = "permanent delete document"
+	OpRestoreDocument         = "restore document"
+	OpGetDocument             = "get document"
+	OpListDocuments           = "list documents"
+	OpCreateDocumentVersion   = "create document version"
+	OpGetDocumentVersions     = "get document versions"
+	OpShareDocument           = "share document"
+	OpRevokeDocumentAccess    = "revoke document access"
+	OpUploadDocumentFile      = "upload document file"
+	OpGenerateDownloadURL     = "generate download url"
+	OpCreateFolder            = "create folder"
+	OpUpdateFolder            = "update folder"
+	OpDeleteFolder            = "delete folder"
+	OpListFolders             = "list folders"
 )

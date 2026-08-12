@@ -51,3 +51,7 @@ func (r *NotificationRepository) FindByIDForUser(ctx context.Context, id uint, u
 func (r *NotificationRepository) Save(ctx context.Context, notification *domain.Notification) error {
 	return r.db.WithContext(ctx).Save(notification).Error
 }
+
+func (r *NotificationRepository) MarkAllAsRead(ctx context.Context, userID uuid.UUID) error {
+	return r.db.WithContext(ctx).Model(&domain.Notification{}).Where("user_id = ? or user_id is null", userID).Update("is_read", true).Error
+}

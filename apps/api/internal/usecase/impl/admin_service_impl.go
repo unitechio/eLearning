@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/google/uuid"
@@ -97,7 +98,45 @@ func (s *AdminUsecase) ListCourses(ctx context.Context, query dto.CourseListQuer
 }
 
 func (s *AdminUsecase) CreateCourse(ctx context.Context, req dto.UpsertCourseRequest) (*dto.Course, error) {
-	item := &domain.Course{TenantID: uuid.Nil, CreatedBy: uuid.Nil, Title: req.Title, Description: req.Description, Domain: req.Domain, Level: req.Level, Status: fallback(req.Status, "draft"), Visibility: fallback(req.Visibility, "public")}
+	var catID *uuid.UUID
+	if req.CategoryID != nil && *req.CategoryID != "" {
+		id, err := uuid.Parse(*req.CategoryID)
+		if err == nil {
+			catID = &id
+		}
+	}
+	var instID *uuid.UUID
+	if req.InstructorID != nil && *req.InstructorID != "" {
+		id, err := uuid.Parse(*req.InstructorID)
+		if err == nil {
+			instID = &id
+		}
+	}
+	var whatYouLearnJSON []byte
+	if len(req.WhatYouLearn) > 0 {
+		whatYouLearnJSON, _ = json.Marshal(req.WhatYouLearn)
+	}
+	item := &domain.Course{
+		TenantID:        uuid.Nil,
+		CreatedBy:       uuid.Nil,
+		Title:           req.Title,
+		Subtitle:        req.Subtitle,
+		Description:     req.Description,
+		Domain:          req.Domain,
+		Level:           req.Level,
+		Status:          fallback(req.Status, "draft"),
+		Visibility:      fallback(req.Visibility, "public"),
+		Price:           req.Price,
+		OriginalPrice:   req.OriginalPrice,
+		Currency:        fallback(req.Currency, "USD"),
+		ThumbnailURL:    req.ThumbnailURL,
+		CategoryID:      catID,
+		InstructorID:    instID,
+		VideoPreviewURL: req.VideoPreviewURL,
+		WhatYouLearn:    whatYouLearnJSON,
+		ToolsUsed:       req.ToolsUsed,
+		HasCertificate:  req.HasCertificate,
+	}
 	if err := s.courseRepo.CreateCourse(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}
@@ -117,8 +156,41 @@ func (s *AdminUsecase) UpdateCourse(ctx context.Context, id string, req dto.Upse
 		}
 		return nil, apperr.Internal(err)
 	}
-	item.Title, item.Description, item.Domain = req.Title, req.Description, req.Domain
-	item.Level, item.Status, item.Visibility = req.Level, fallback(req.Status, item.Status), fallback(req.Visibility, item.Visibility)
+	var catID *uuid.UUID
+	if req.CategoryID != nil && *req.CategoryID != "" {
+		id, err := uuid.Parse(*req.CategoryID)
+		if err == nil {
+			catID = &id
+		}
+	}
+	var instID *uuid.UUID
+	if req.InstructorID != nil && *req.InstructorID != "" {
+		id, err := uuid.Parse(*req.InstructorID)
+		if err == nil {
+			instID = &id
+		}
+	}
+	var whatYouLearnJSON []byte
+	if len(req.WhatYouLearn) > 0 {
+		whatYouLearnJSON, _ = json.Marshal(req.WhatYouLearn)
+	}
+	item.Title = req.Title
+	item.Subtitle = req.Subtitle
+	item.Description = req.Description
+	item.Domain = req.Domain
+	item.Level = req.Level
+	item.Status = fallback(req.Status, item.Status)
+	item.Visibility = fallback(req.Visibility, item.Visibility)
+	item.Price = req.Price
+	item.OriginalPrice = req.OriginalPrice
+	item.Currency = fallback(req.Currency, item.Currency)
+	item.ThumbnailURL = req.ThumbnailURL
+	item.CategoryID = catID
+	item.InstructorID = instID
+	item.VideoPreviewURL = req.VideoPreviewURL
+	item.WhatYouLearn = whatYouLearnJSON
+	item.ToolsUsed = req.ToolsUsed
+	item.HasCertificate = req.HasCertificate
 	if err := s.courseRepo.UpdateCourse(ctx, item); err != nil {
 		return nil, apperr.Internal(err)
 	}

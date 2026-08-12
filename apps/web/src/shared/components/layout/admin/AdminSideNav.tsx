@@ -64,7 +64,7 @@ interface SidebarGroup {
 const sidebarGroups: SidebarGroup[] = [
   {
     items: [
-      { title: "Home", path: "/dashboard", icon: LayoutDashboard },
+      { title: "Home", path: "/admin/dashboard", icon: LayoutDashboard },
       { title: "Calendar", path: "/admin/calendar", icon: Calendar },
       { title: "Downloads", path: "/admin/downloads", icon: Download },
       { title: "Referrals", path: "/admin/referrals", icon: Heart },
@@ -100,6 +100,7 @@ const sidebarGroups: SidebarGroup[] = [
         icon: FileText,
         subItems: [
           { title: "Content Manager", path: "/admin/content" },
+          { title: "Courses", path: "/admin/courses" },
           { title: "Mock Tests", path: "/admin/mock-tests" },
           { title: "IELTS Content", path: "/admin/ielts" },
           { title: "Documents", path: "/admin/documents" },
@@ -124,6 +125,8 @@ const sidebarGroups: SidebarGroup[] = [
         subItems: [
           { title: "Support Tickets", path: "/admin/support" },
           { title: "Email Logs", path: "/admin/email-logs" },
+          { title: "Contact Leads", path: "/admin/leads" },
+          { title: "Notifications", path: "/admin/notifications" },
           { title: "Agent Console", path: "/admin/agent-console", badge: "AI" },
           { title: "Integrations Hub", path: "/admin/integrations" },
         ],
@@ -133,6 +136,7 @@ const sidebarGroups: SidebarGroup[] = [
         icon: Settings,
         subItems: [
           { title: "Platform Settings", path: "/admin/platform-settings" },
+          { title: "Settings", path: "/admin/settings" },
           { title: "Feature Flags", path: "/admin/feature-flags" },
         ],
       },
@@ -483,7 +487,7 @@ export function AdminSideNav({ collapsed, toggle, onNavigate }: AdminSideNavProp
             {!collapsed ? (
               <>
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-500 to-red-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
                     {displayName.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -509,7 +513,7 @@ export function AdminSideNav({ collapsed, toggle, onNavigate }: AdminSideNavProp
               <div className="flex flex-col items-center gap-2.5 w-full">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold text-[10px] flex items-center justify-center cursor-pointer">
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-rose-500 to-red-600 text-white font-bold text-[10px] flex items-center justify-center cursor-pointer">
                       {displayName.slice(0, 2).toUpperCase()}
                     </div>
                   </TooltipTrigger>
